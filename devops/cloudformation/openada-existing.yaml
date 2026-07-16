@@ -1,0 +1,361 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: OpenADA UI, API, and public scan directory on an existing ECS cluster and ALB.
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: openada
+    Description: Prefix used for OpenADA task, service, log, and target group names.
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: Existing application VPC.
+  Cluster:
+    Type: String
+    Description: Existing ECS cluster name or ARN.
+  LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: Security group attached to the existing public ALB.
+  ListenerArn:
+    Type: String
+    Description: Existing HTTP or HTTPS listener ARN.
+  ServiceSubnets:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Existing private ECS service subnets with NAT access for image pulls.
+  HostHeader:
+    Type: String
+    Description: Dedicated hostname for OpenADA, for example ada.example.com.
+    AllowedPattern: '[A-Za-z0-9][A-Za-z0-9.-]*[A-Za-z0-9]'
+  UiImage:
+    Type: String
+    Description: OpenADA UI image URI, for example Docker Hub or ECR.
+  ApiImage:
+    Type: String
+    Description: OpenADA API image URI, for example Docker Hub or ECR.
+  DesiredCount:
+    Type: Number
+    Default: 1
+    MinValue: 1
+  AssignPublicIp:
+    Type: String
+    Default: DISABLED
+    AllowedValues: [ENABLED, DISABLED]
+  ApiKeys:
+    Type: String
+    Default: ''
+    NoEcho: true
+    Description: Optional comma-separated API keys. Prefer a secret-backed deployment for production credentials.
+  LanguageToolUpstreamUrl:
+    Type: String
+    Default: ''
+    Description: Optional managed LanguageTool-compatible upstream URL.
+  CorsAllowedOrigins:
+    Type: String
+    Default: '*'
+  UiListenerPriority:
+    Type: Number
+    Default: 100
+    MinValue: 1
+    MaxValue: 49999
+    Description: Unused priority for the OpenADA UI host rule.
+  ApiListenerPriority:
+    Type: Number
+    Default: 101
+    MinValue: 1
+    MaxValue: 49999
+    Description: Unused priority for the OpenADA API host and path rule.
+
+Resources:
+  ServiceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: OpenADA ECS task traffic from the existing ALB.
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-services'
+
+  UiIngressFromAlb:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref ServiceSecurityGroup
+      IpProtocol: tcp
+      FromPort: 3000
+      ToPort: 3000
+      SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
+
+  ApiIngressFromAlb:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref ServiceSecurityGroup
+      IpProtocol: tcp
+      FromPort: 3001
+      ToPort: 3001
+      SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
+
+  ExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+  TaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: openada-directory-data
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:Scan
+                  - dynamodb:UpdateItem
+                Resource:
+                  - !GetAtt SitesTable.Arn
+                  - !GetAtt PagesTable.Arn
+                  - !GetAtt ScansTable.Arn
+
+  SitesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${EnvironmentName}-sites'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  PagesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${EnvironmentName}-pages'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  ScansTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${EnvironmentName}-scans'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  UiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/ecs/${EnvironmentName}/ui'
+      RetentionInDays: 30
+
+  ApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/ecs/${EnvironmentName}/api'
+      RetentionInDays: 30
+
+  UiTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub '${EnvironmentName}-ui'
+      Port: 3000
+      Protocol: HTTP
+      TargetType: ip
+      VpcId: !Ref VpcId
+      HealthCheckPath: /
+      HealthCheckPort: '3000'
+      Matcher:
+        HttpCode: '200-399'
+
+  ApiTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub '${EnvironmentName}-api'
+      Port: 3001
+      Protocol: HTTP
+      TargetType: ip
+      VpcId: !Ref VpcId
+      HealthCheckPath: /api/health
+      HealthCheckPort: '3001'
+      Matcher:
+        HttpCode: '200'
+
+  UiTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub '${EnvironmentName}-ui'
+      Cpu: '256'
+      Memory: '512'
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      ExecutionRoleArn: !GetAtt ExecutionRole.Arn
+      TaskRoleArn: !GetAtt TaskRole.Arn
+      ContainerDefinitions:
+        - Name: ui
+          Image: !Ref UiImage
+          Essential: true
+          PortMappings:
+            - ContainerPort: 3000
+              Protocol: tcp
+          Environment:
+            - Name: PORT
+              Value: '3000'
+            - Name: NODE_ENV
+              Value: production
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref UiLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ui
+
+  ApiTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub '${EnvironmentName}-api'
+      Cpu: '512'
+      Memory: '1024'
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      ExecutionRoleArn: !GetAtt ExecutionRole.Arn
+      TaskRoleArn: !GetAtt TaskRole.Arn
+      ContainerDefinitions:
+        - Name: api
+          Image: !Ref ApiImage
+          Essential: true
+          PortMappings:
+            - ContainerPort: 3001
+              Protocol: tcp
+          Environment:
+            - Name: PORT
+              Value: '3001'
+            - Name: NODE_ENV
+              Value: production
+            - Name: OPENADA_API_KEYS
+              Value: !Ref ApiKeys
+            - Name: OPENADA_CORS_ORIGINS
+              Value: !Ref CorsAllowedOrigins
+            - Name: LANGUAGETOOL_UPSTREAM_URL
+              Value: !Ref LanguageToolUpstreamUrl
+            - Name: OPENADA_SITES_TABLE
+              Value: !Ref SitesTable
+            - Name: OPENADA_PAGES_TABLE
+              Value: !Ref PagesTable
+            - Name: OPENADA_SCANS_TABLE
+              Value: !Ref ScansTable
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref ApiLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: api
+
+  UiService:
+    Type: AWS::ECS::Service
+    DependsOn: UiListenerRule
+    Properties:
+      ServiceName: !Sub '${EnvironmentName}-ui'
+      Cluster: !Ref Cluster
+      TaskDefinition: !Ref UiTaskDefinition
+      DesiredCount: !Ref DesiredCount
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: !Ref AssignPublicIp
+          SecurityGroups: [!Ref ServiceSecurityGroup]
+          Subnets: !Ref ServiceSubnets
+      LoadBalancers:
+        - ContainerName: ui
+          ContainerPort: 3000
+          TargetGroupArn: !Ref UiTargetGroup
+
+  ApiService:
+    Type: AWS::ECS::Service
+    DependsOn: ApiListenerRule
+    Properties:
+      ServiceName: !Sub '${EnvironmentName}-api'
+      Cluster: !Ref Cluster
+      TaskDefinition: !Ref ApiTaskDefinition
+      DesiredCount: !Ref DesiredCount
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: !Ref AssignPublicIp
+          SecurityGroups: [!Ref ServiceSecurityGroup]
+          Subnets: !Ref ServiceSubnets
+      LoadBalancers:
+        - ContainerName: api
+          ContainerPort: 3001
+          TargetGroupArn: !Ref ApiTargetGroup
+
+  UiListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref ListenerArn
+      Priority: !Ref UiListenerPriority
+      Conditions:
+        - Field: host-header
+          HostHeaderConfig:
+            Values: [!Ref HostHeader]
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref UiTargetGroup
+
+  ApiListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref ListenerArn
+      Priority: !Ref ApiListenerPriority
+      Conditions:
+        - Field: host-header
+          HostHeaderConfig:
+            Values: [!Ref HostHeader]
+        - Field: path-pattern
+          PathPatternConfig:
+            Values: [/api/*]
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref ApiTargetGroup
+
+Outputs:
+  WebsiteUrl:
+    Description: OpenADA hostname routed through the existing ALB.
+    Value: !Sub 'https://${HostHeader}'
+  ApiBaseUrl:
+    Description: OpenADA API base URL for CMS provider integrations.
+    Value: !Sub 'https://${HostHeader}/api'
+  UiServiceName:
+    Value: !Ref UiService
+  ApiServiceName:
+    Value: !Ref ApiService

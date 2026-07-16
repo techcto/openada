@@ -1,0 +1,49 @@
+name: OpenADA CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            api/package-lock.json
+
+      - name: Install UI dependencies
+        run: npm ci
+
+      - name: Install API dependencies
+        working-directory: api
+        run: npm ci
+
+      - name: Install cfn-lint
+        run: python3 -m pip install --user cfn-lint
+
+      - name: Add user Python tools to PATH
+        run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Test scripts and CloudFormation
+        run: ./cmd.sh cft test && bash -n cmd.sh git.sh cft.sh
+
+      - name: Build UI
+        run: npm run build
+
+      - name: Build API
+        working-directory: api
+        run: npm run build

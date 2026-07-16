@@ -1,0 +1,56 @@
+services:
+  app:
+    init: true
+    build:
+      context: .
+      target: ${APP_ENV:-dev}
+      dockerfile: ./devops/docker/Dockerfile.app
+      args:
+        APP_ENV: ${APP_ENV:-dev}
+    environment:
+      API_HOST: api
+      API_PORT: 3001
+      PORT: 3000
+      NODE_ENV: development
+      CHOKIDAR_USEPOLLING: 'true'
+      WATCHPACK_POLLING: 'true'
+    volumes:
+      - ./next.config.ts:/app/next.config.ts
+      - ./src:/app/src
+    ports:
+      - '${APP_PORT:-3000}:3000'
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    depends_on:
+      api:
+        condition: service_healthy
+
+  api:
+    init: true
+    build:
+      context: .
+      target: ${APP_ENV:-dev}
+      dockerfile: ./devops/docker/Dockerfile.api
+    environment:
+      PORT: 3001
+      NODE_ENV: development
+      OPENADA_CORS_ORIGINS: ${OPENADA_CORS_ORIGINS:-http://localhost:3000}
+      OPENADA_API_KEYS: ${OPENADA_API_KEYS:-}
+      LANGUAGETOOL_UPSTREAM_URL: ${LANGUAGETOOL_UPSTREAM_URL:-}
+      CHOKIDAR_USEPOLLING: 'true'
+      WATCHPACK_POLLING: 'true'
+    volumes:
+      - ./api/lib:/app/lib
+      - ./api/pages:/app/pages
+    ports:
+      - '${API_PORT:-3001}:3001'
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/api/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s

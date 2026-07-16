@@ -1,0 +1,23 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PublishOpenADACftFiles",
+      "Effect": "Allow",
+      "Action": [
+        "s3:AbortMultipartUpload",
+        "s3:PutObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::openada/cloudformation/*",
+        "arn:aws:s3:::openada/widgets/*"
+      ]
+    },
+    {
+      "Sid": "ReadOpenADACftBucketLocation",
+      "Effect": "Allow",
+      "Action": "s3:GetBucketLocation",
+      "Resource": "arn:aws:s3:::openada"
+    }
+  ]
+}

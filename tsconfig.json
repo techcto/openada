@@ -1,0 +1,101 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "es2022"
+    ],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
+    "paths": {
+      "@spacemade/ui": [
+        "."
+      ],
+      "@spacemade/ui/*": [
+        "./*"
+      ],
+      "@spacemade/ui/src/*": [
+        "./src/*"
+      ],
+      "@spacemade/api": [
+        "./api"
+      ],
+      "@spacemade/api/*": [
+        "./api/*"
+      ],
+      "@static/*": [
+        "./public/*"
+      ],
+      "@components/*": [
+        "./src/components/*"
+      ],
+      "@data/*": [
+        "./src/data/*"
+      ],
+      "@helpers/*": [
+        "./src/helpers/*"
+      ],
+      "@hooks/*": [
+        "./src/hooks/*"
+      ],
+      "@hooks": [
+        "./src/hooks/"
+      ],
+      "@store/*": [
+        "./src/store/*"
+      ],
+      "@context/*": [
+        "./src/context/*"
+      ],
+      "@context": [
+        "./src/context/"
+      ],
+      "@enum/*": [
+        "./src/enum/*"
+      ],
+      "@config/*": [
+        "./src/config/*"
+      ],
+      "@config": [
+        "./src/config"
+      ],
+      "@types/*": [
+        "./src/types/*"
+      ],
+      "@lib/*": [
+        "./src/lib/*"
+      ],
+      "@/*": [
+        "./src/*"
+      ]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "src/pages/index.openada.tsx",
+    "src/pages/_app.openada.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "api"
+  ]
+}

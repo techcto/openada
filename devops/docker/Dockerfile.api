@@ -1,0 +1,41 @@
+FROM node:24-bookworm-slim AS base
+
+WORKDIR /app
+
+COPY api/package.json ./package.json
+COPY api/package-lock.json ./package-lock.json
+RUN npm ci
+
+COPY api/tsconfig.json ./tsconfig.json
+COPY api/next.config.js ./next.config.js
+COPY api/next-env.d.ts ./next-env.d.ts
+COPY api/lib/openada/*.ts ./lib/openada/
+COPY api/pages/api/health.openada.ts ./pages/api/
+COPY api/pages/api/openapi.openada.ts ./pages/api/
+COPY api/pages/api/v1/*.openada.ts ./pages/api/v1/
+COPY api/pages/api/v1/ada/*.openada.ts ./pages/api/v1/ada/
+COPY api/pages/api/v1/language/*.openada.ts ./pages/api/v1/language/
+COPY api/pages/api/v2/*.openada.ts ./pages/api/v2/
+
+COPY ./devops/docker/entrypoint/api-docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+FROM base AS dev
+EXPOSE 3001
+CMD ["/usr/local/bin/docker-entrypoint.sh", "dev"]
+
+FROM base AS builder
+RUN npm run build
+
+FROM node:24-bookworm-slim AS prod
+ENV NODE_ENV=production
+WORKDIR /app
+
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/next.config.js ./next.config.js
+COPY --from=base /usr/local/bin/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+
+EXPOSE 3001
+CMD ["/usr/local/bin/docker-entrypoint.sh", "prod"]
