@@ -6,22 +6,13 @@
       "Action": [
         "acm:DescribeCertificate",
         "route53:ListHostedZones", "route53:ListResourceRecordSets", "route53:ChangeResourceRecordSets", "route53:GetChange",
-        "cloudformation:*", "ecs:*", "elasticloadbalancing:*", "logs:*",
-        "dynamodb:CreateTable", "dynamodb:DeleteTable", "dynamodb:DescribeTable", "dynamodb:UpdateTable", "dynamodb:DescribeContinuousBackups", "dynamodb:UpdateContinuousBackups", "dynamodb:ListTagsOfResource", "dynamodb:TagResource", "dynamodb:UntagResource",
+        "cloudformation:*", "ecs:*", "elasticloadbalancing:*", "logs:*", "dynamodb:*",
         "ec2:CreateSecurityGroup", "ec2:DeleteSecurityGroup", "ec2:AuthorizeSecurityGroupIngress", "ec2:RevokeSecurityGroupIngress", "ec2:CreateTags", "ec2:Describe*",
         "iam:CreateRole", "iam:DeleteRole", "iam:GetRole", "iam:GetRolePolicy", "iam:PutRolePolicy", "iam:DeleteRolePolicy", "iam:PassRole", "iam:TagRole", "iam:CreateServiceLinkedRole"
       ],
       "Resource": "*"
     },
-    {
-      "Effect": "Allow",
-      "Action": "s3:GetBucketLocation",
-      "Resource": "arn:aws:s3:::openada"
-    },
-    {
-      "Effect": "Allow",
-      "Action": ["s3:PutObject", "s3:AbortMultipartUpload"],
-      "Resource": ["arn:aws:s3:::openada/cloudformation/*", "arn:aws:s3:::openada/widgets/*"]
-    }
+    { "Effect": "Allow", "Action": "s3:GetBucketLocation", "Resource": "arn:aws:s3:::openada" },
+    { "Effect": "Allow", "Action": ["s3:PutObject", "s3:AbortMultipartUpload"], "Resource": ["arn:aws:s3:::openada/cloudformation/*", "arn:aws:s3:::openada/widgets/*"] }
   ]
 }
