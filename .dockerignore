@@ -71,6 +71,8 @@ tmp
 /api/pages/api/webhook
 /api/pages/healthcheck.tsx
 /src/components
+!/src/components/
+!/src/components/OpenAdaShell.tsx
 /src/config
 /src/context
 /src/data
