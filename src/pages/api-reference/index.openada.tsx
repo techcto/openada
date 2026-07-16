@@ -40,7 +40,7 @@ const ApiReferencePage: NextPage = () => {
             <div><Code2 size={20} aria-hidden /><h2>Widget</h2><p>Add the hosted widget to a public page to submit its URL and show a small score badge. The widget never receives private page content.</p></div>
           </section>
         </div>
-        <style jsx>{`
+        <style jsx global>{`
           .api-shell { min-height: 100vh; background: #f6f8fb; color: #172033; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
           .api-page { width: min(1040px, 100%); margin: 0 auto; padding: 28px; }
           .site-nav { min-height: 54px; display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 62px; }
