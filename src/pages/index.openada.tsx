@@ -122,8 +122,25 @@ const HomePage: NextPage = () => {
           </div>
         </div>
 
+        <div className="url-band">
+          <div className="url-field">
+            <label htmlFor="page-url"><Globe2 size={16} aria-hidden /> Page URL</label>
+            <input
+              id="page-url"
+              form="checker-form"
+              type="url"
+              value={url}
+              onChange={(event) => setUrl(event.target.value)}
+              placeholder="https://example.com/page"
+              inputMode="url"
+              autoComplete="url"
+            />
+            <p>OpenADA fetches public HTML pages. A URL takes priority over the editor content.</p>
+          </div>
+        </div>
+
         <div className="work-grid">
-          <form className="editor-pane" onSubmit={handleSubmit}>
+          <form id="checker-form" className="editor-pane" onSubmit={handleSubmit}>
             <div className="pane-header">
               <div>
                 <h2>HTML input</h2>
@@ -133,20 +150,6 @@ const HomePage: NextPage = () => {
                 <Play size={16} aria-hidden />
                 <span>{isChecking ? 'Checking' : 'Run check'}</span>
               </button>
-            </div>
-
-            <div className="url-field">
-              <label htmlFor="page-url"><Globe2 size={16} aria-hidden /> Page URL</label>
-              <input
-                id="page-url"
-                type="url"
-                value={url}
-                onChange={(event) => setUrl(event.target.value)}
-                placeholder="https://example.com/page"
-                inputMode="url"
-                autoComplete="url"
-              />
-              <p>OpenADA fetches public HTML pages. A URL takes priority over the editor content.</p>
             </div>
 
             <textarea
@@ -376,6 +379,54 @@ const HomePage: NextPage = () => {
           grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
           gap: 18px;
           align-items: stretch;
+        }
+
+        .url-band {
+          margin-bottom: 18px;
+          border: 1px solid #dce3ea;
+          border-radius: 8px;
+          background: #ffffff;
+          box-shadow: 0 10px 24px rgba(23, 32, 51, 0.05);
+        }
+
+        .url-field {
+          display: grid;
+          grid-template-columns: auto minmax(0, 1fr);
+          align-items: center;
+          gap: 8px 14px;
+          padding: 15px 18px;
+        }
+
+        .url-field label {
+          grid-row: 1 / span 2;
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          color: #172033;
+          font-weight: 850;
+          white-space: nowrap;
+        }
+
+        .url-field input {
+          width: 100%;
+          min-height: 38px;
+          border: 1px solid #cbd5e1;
+          border-radius: 6px;
+          outline: none;
+          padding: 0 11px;
+          color: #172033;
+          background: #fbfcfe;
+          font: inherit;
+        }
+
+        .url-field input:focus {
+          border-color: #25635f;
+          box-shadow: 0 0 0 3px rgba(37, 99, 95, 0.14);
+        }
+
+        .url-field p {
+          color: #64748b;
+          font-size: 0.84rem;
         }
 
         .editor-pane,
@@ -666,6 +717,17 @@ const HomePage: NextPage = () => {
 
           .masthead {
             display: grid;
+          }
+
+          .url-field {
+            grid-template-columns: 1fr;
+          }
+
+          .url-field label,
+          .url-field input,
+          .url-field p {
+            grid-column: 1;
+            grid-row: auto;
           }
 
           .editor-pane,
