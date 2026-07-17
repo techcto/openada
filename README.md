@@ -133,6 +133,22 @@ Every ADA result includes a letter grade derived from the numeric score: `A+` (9
 
 Set `OPENADA_API_KEYS` to a comma-separated list to require `Authorization: Bearer <key>` or `X-API-Key: <key>`. Set `OPENADA_CORS_ORIGINS` to a comma-separated allowlist in production.
 
+## OpenADA For ChatGPT, Codex, And Claude
+
+OpenADA also speaks [Model Context Protocol (MCP)](https://modelcontextprotocol.io/). This makes the public accessibility archive available inside AI coding tools instead of trapping it in a dashboard. Connect the Streamable HTTP endpoint:
+
+```text
+https://openada.us/mcp
+```
+
+The MCP server exposes four tools: check one public page, queue a same-host site scan, read durable scan progress, and browse the public directory. A scan returns a job ID immediately, so an agent can keep the user informed while the worker checks pages.
+
+- **ChatGPT:** add the remote MCP URL from the Apps or Connectors flow, or submit it as the server URL in the [OpenAI Apps submission guide](https://learn.chatgpt.com/docs/submit-plugins).
+- **Codex:** add the URL from MCP settings, or put `[mcp_servers.openada]` with `url = "https://openada.us/mcp"` in `~/.codex/config.toml`, then run `codex mcp list`.
+- **Claude Code:** run `claude mcp add --transport http openada https://openada.us/mcp`, then verify with `claude mcp list` or `/mcp`.
+
+See the full [MCP connection and submission guide](devops/mcp/README.md) and the public [MCP documentation](https://openada.us/docs#mcp). The anonymous public demo is limited to public URLs; production deployments can require `OPENADA_API_KEYS`. Automated results are engineering guidance, not legal advice or a compliance certification.
+
 ## Website Integration
 
 Any website, application, publishing workflow, or build pipeline can post editor text or rendered page content to OpenADA. Point the integration at the OpenADA API base URL, for example:
@@ -178,24 +194,6 @@ export OPENADA_API_IMAGE=123456789012.dkr.ecr.us-east-1.amazonaws.com/openada/ap
 ```
 
 `./cft.sh test` performs offline structure checks and runs `cfn-lint` when installed. `./cft.sh validate` additionally calls AWS CloudFormation, so it requires AWS credentials and network access. Service subnets need NAT access to pull from ECR and send logs unless `AssignPublicIp=ENABLED` is used. Pass an ACM certificate ARN with `OPENADA_CERTIFICATE_ARN` for HTTPS; the stack redirects HTTP to HTTPS and emits the HTTPS endpoint.
-
-## GitHub Container Publishing
-
-`.github/workflows/publish-containers.yml` publishes both images to ECR on pushes to `main`/`master` and on `v*` tags. Configure:
-
-- GitHub Actions secret `AWS_ROLE_TO_ASSUME`, an IAM role trusted by GitHub's OIDC provider
-- Optional repository variables `AWS_REGION`, `OPENADA_UI_REPOSITORY`, and `OPENADA_API_REPOSITORY`
-
-The role needs ECR repository, image upload, and CloudFormation deployment permissions only if you extend the workflow to deploy the stack. The current workflow publishes images; deployment remains an explicit `./cft.sh deploy` step.
-
-`.github/workflows/publish-dockerhub.yml` publishes public images on `v*` tags or manual dispatch:
-
-```text
-docker.io/techcto/openada-ui:<version>
-docker.io/techcto/openada-api:<version>
-```
-
-Configure GitHub secrets `DOCKERHUB_USERNAME=techcto` and `DOCKERHUB_TOKEN` with a Docker Hub access token. Use ECR images for the AWS stack when possible; Docker Hub images remain useful for public discovery and local testing.
 
 ## Contest Note
 

@@ -1,0 +1,23 @@
+{
+  "name": "OpenADA",
+  "tagline": "Scan public websites for accessibility and language findings.",
+  "description": "OpenADA helps web developers, public agencies, and civic teams find accessibility and language issues across public web pages. Check one page, queue a same-host crawl, follow durable progress, and compare public scan history over time. OpenADA combines axe-core accessibility checks with LanguageTool-compatible language analysis and publishes a browsable public archive.",
+  "category": "Developer tools",
+  "website": "https://openada.us",
+  "supportUrl": "https://openada.us/api-reference",
+  "privacyPolicyUrl": "https://openada.us/docs/privacy",
+  "termsUrl": "https://openada.us/docs/terms",
+  "mcpServerUrl": "https://openada.us/mcp",
+  "tools": [
+    "openada_check_page",
+    "openada_scan_site",
+    "openada_get_scan_status",
+    "openada_directory"
+  ],
+  "starterPrompts": [
+    "Check this public page for accessibility and language issues: https://example.com",
+    "Start a 5-page accessibility scan for https://example.com and report the grade when it finishes.",
+    "Show the latest public accessibility scan for www.example.com."
+  ],
+  "notes": "The URLs above are submission metadata and must be verified before submitting. Automated findings are not a legal determination."
+}

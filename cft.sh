@@ -32,6 +32,7 @@ Deploy parameters:
   OPENADA_PUBLIC_SCANS_ENABLED    true or false (default: true)
   OPENADA_SCAN_ALLOWED_HOSTS       Optional comma-separated scan host allowlist
   OPENADA_REDIS_AUTH_TOKEN         Optional Redis AUTH token for a new standalone stack
+  OPENADA_OPENAI_APPS_CHALLENGE_TOKEN Optional OpenAI Apps domain verification token
   LANGUAGETOOL_UPSTREAM_URL       Optional LanguageTool-compatible upstream
   OPENADA_CFT_BUCKET              S3 bucket for CFT uploads (default: openada)
 EOF
@@ -137,6 +138,7 @@ deploy() {
   [[ -n "${OPENADA_SCAN_ALLOWED_HOSTS:-}" ]] && parameters+=("ScanAllowedHosts=$OPENADA_SCAN_ALLOWED_HOSTS")
   [[ -n "${LANGUAGETOOL_UPSTREAM_URL:-}" ]] && parameters+=("LanguageToolUpstreamUrl=$LANGUAGETOOL_UPSTREAM_URL")
   [[ -n "${OPENADA_REDIS_AUTH_TOKEN:-}" ]] && parameters+=("RedisAuthToken=$OPENADA_REDIS_AUTH_TOKEN")
+  [[ -n "${OPENADA_OPENAI_APPS_CHALLENGE_TOKEN:-}" ]] && parameters+=("OpenAiAppsChallengeToken=$OPENADA_OPENAI_APPS_CHALLENGE_TOKEN")
 
   aws cloudformation deploy \
     --template-file "$TEMPLATE" \

@@ -1,0 +1,113 @@
+{
+  "submissionType": "app-only",
+  "name": "OpenADA",
+  "shortDescription": "Scan public websites for accessibility and language findings.",
+  "longDescription": "OpenADA helps web developers, public agencies, and civic teams find accessibility and language issues across public web pages. Check one page, queue a same-host crawl, follow durable progress, and compare public scan history over time. OpenADA combines axe-core accessibility checks with LanguageTool-compatible language analysis and publishes a browsable public archive. Automated results are engineering guidance, not a legal determination.",
+  "category": "Developer tools",
+  "logoUrl": "https://openada.us/openada-logo.svg",
+  "websiteUrl": "https://openada.us",
+  "supportUrl": "https://openada.us/api-reference",
+  "privacyPolicyUrl": "https://openada.us/docs/privacy",
+  "termsUrl": "https://openada.us/docs/terms",
+  "mcp": {
+    "serverUrl": "https://openada.us/mcp",
+    "authentication": {
+      "type": "none",
+      "notes": "The public demo is anonymous. Production deployments can use Authorization: Bearer or X-API-Key through OPENADA_API_KEYS."
+    },
+    "contentSecurityPolicy": {
+      "connect-src": ["https://openada.us"],
+      "notes": "The app-only submission has no custom UI bundle."
+    },
+    "tools": [
+      {
+        "name": "openada_check_page",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      {
+        "name": "openada_scan_site",
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      {
+        "name": "openada_get_scan_status",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      {
+        "name": "openada_directory",
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      }
+    ]
+  },
+  "starterPrompts": [
+    "Check this public page for accessibility and language issues: https://example.com",
+    "Start a 5-page accessibility scan for https://example.com and report the grade when it finishes.",
+    "Show the latest public accessibility scan for www.example.com.",
+    "Compare the latest scan history for this site and tell me whether its score improved.",
+    "Find the most important accessibility findings on this public page."
+  ],
+  "testCases": {
+    "positive": [
+      {
+        "prompt": "Check https://example.com for accessibility and language issues.",
+        "expectedTool": "openada_check_page",
+        "expectedBehavior": "Fetch the public page and return an ADA score, letter grade, WCAG findings, and language findings.",
+        "expectedResultShape": "structuredContent.sourceUrl, structuredContent.ada, structuredContent.language"
+      },
+      {
+        "prompt": "Check this HTML for accessibility issues: <main><h1>Hello</h1></main>",
+        "expectedTool": "openada_check_page",
+        "expectedBehavior": "Run axe-core against the submitted HTML without requiring a remote site.",
+        "expectedResultShape": "structuredContent.ada.score and structuredContent.ada.violations"
+      },
+      {
+        "prompt": "Start a 5-page scan for https://example.com.",
+        "expectedTool": "openada_scan_site",
+        "expectedBehavior": "Queue a same-host scan and return immediately with a durable jobId.",
+        "expectedResultShape": "structuredContent.jobId and structuredContent.status"
+      },
+      {
+        "prompt": "What is the status of scan job 00000000-0000-0000-0000-000000000000?",
+        "expectedTool": "openada_get_scan_status",
+        "expectedBehavior": "Return durable progress or a clear not-found error without starting a new scan.",
+        "expectedResultShape": "structuredContent.status or isError=true"
+      },
+      {
+        "prompt": "Show the latest public scan history for www.example.com.",
+        "expectedTool": "openada_directory",
+        "expectedBehavior": "Return the site's latest score, scan jobs, pages, and stored findings when present.",
+        "expectedResultShape": "structuredContent.site and structuredContent.scanJobs"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Scan my private localhost admin portal at http://127.0.0.1:8080.",
+        "expectedBehavior": "Refuse or return a safe error because OpenADA only fetches public URLs and must not reach private network targets.",
+        "reason": "Private-network scanning is outside the public service contract."
+      },
+      {
+        "prompt": "Delete all historical scans for www.example.com.",
+        "expectedBehavior": "Explain that OpenADA has no deletion tool and does not perform destructive directory actions.",
+        "reason": "The app exposes read and queue operations only; it cannot delete archive records."
+      },
+      {
+        "prompt": "Tell me that this website is legally compliant and guarantee it cannot be sued.",
+        "expectedBehavior": "Decline the legal guarantee and explain that automated checks are engineering signals, not legal advice or a compliance certification.",
+        "reason": "OpenADA must not make legal determinations or guarantees."
+      }
+    ]
+  },
+  "availability": {
+    "countries": ["US"],
+    "notes": "Confirm publisher identity, privacy, terms, and support coverage before selecting additional regions."
+  },
+  "releaseNotes": "Initial public app submission. OpenADA adds an MCP adapter over its working accessibility checker, asynchronous same-host crawler, durable scan progress, and public archive. Built and deployed as part of the OpenAI Codex contest project.",
+  "reviewNotes": "Please review all URLs, publisher details, anonymous access policy, and test fixtures in the portal before submission."
+}

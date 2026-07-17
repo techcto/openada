@@ -8,9 +8,9 @@ import {
   readStringParam,
   requirePost,
 } from '@lib/openada/http'
-import { createScanJob, listScanJobs } from '@lib/openada/scan-jobs'
-import { getScanQueue } from '@lib/openada/scan-queue'
+import { listScanJobs } from '@lib/openada/scan-jobs'
 import { runSiteScan } from '@lib/openada/site-scan'
+import { startQueuedScan } from '@lib/openada/scan-service'
 
 export const config = {
   api: {
@@ -93,16 +93,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     if (crawl) {
-      const job = await createScanJob({ url: options.url, maxPages: options.maxPages })
-      try {
-        await getScanQueue().add('site-scan', { ...options, url: job.url, jobId: job.id }, { jobId: job.id })
-      } catch (queueError) {
-        await import('@lib/openada/scan-jobs').then(({ updateScanJob }) => updateScanJob(job.id, {
-          status: 'failed',
-          errorMessage: queueError instanceof Error ? queueError.message : 'The scan queue is unavailable.',
-        }))
-        throw new Error('The site scan queue is unavailable. Please try again shortly.')
-      }
+      const job = await startQueuedScan(options)
 
       res.status(202).json({
         jobId: job.id,

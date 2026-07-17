@@ -27,7 +27,7 @@ export function OpenAdaShell({ children, current }: { children: ReactNode; curre
           <div className="footer-link-grid">
             <div><strong className="footer-heading">Explore</strong><a href="/">Checker</a><a href="/directory">Directory</a><a href="/scan">Site scans</a></div>
             <div><strong className="footer-heading">Build</strong><a href="/api-reference">Public API</a><a href="/api/openapi">OpenAPI JSON</a><a href="/docs">ADA guidance</a></div>
-            <div><strong className="footer-heading">Standards</strong><a href="https://www.ada.gov/law-and-regs/" target="_blank" rel="noreferrer">ADA.gov <ExternalLink size={12} aria-hidden /></a><a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noreferrer">WCAG <ExternalLink size={12} aria-hidden /></a><a href="https://github.com/techcto/openada" target="_blank" rel="noreferrer"><Github size={13} aria-hidden /> Source <ExternalLink size={12} aria-hidden /></a></div>
+            <div><strong className="footer-heading">Standards</strong><a href="https://www.ada.gov/law-and-regs/" target="_blank" rel="noreferrer">ADA.gov <ExternalLink size={12} aria-hidden /></a><a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noreferrer">WCAG <ExternalLink size={12} aria-hidden /></a><a href="/docs/privacy">Privacy</a><a href="/docs/terms">Terms</a><a href="https://github.com/techcto/openada" target="_blank" rel="noreferrer"><Github size={13} aria-hidden /> Source <ExternalLink size={12} aria-hidden /></a></div>
           </div>
         </div>
       </footer>

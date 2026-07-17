@@ -120,6 +120,7 @@ deploy() {
   [[ -n "${LANGUAGETOOL_UPSTREAM_URL:-}" ]] && parameters+=("LanguageToolUpstreamUrl=$LANGUAGETOOL_UPSTREAM_URL")
   [[ -n "${OPENADA_CORS_ORIGINS:-}" ]] && parameters+=("CorsAllowedOrigins=$OPENADA_CORS_ORIGINS")
   [[ -n "${OPENADA_PUBLIC_SCANS_ENABLED:-}" ]] && parameters+=("PublicScansEnabled=$OPENADA_PUBLIC_SCANS_ENABLED")
+  [[ -n "${OPENADA_OPENAI_APPS_CHALLENGE_TOKEN:-}" ]] && parameters+=("OpenAiAppsChallengeToken=$OPENADA_OPENAI_APPS_CHALLENGE_TOKEN")
   [[ -n "${OPENADA_SCAN_ALLOWED_HOSTS:-}" ]] && parameters+=("ScanAllowedHosts=$OPENADA_SCAN_ALLOWED_HOSTS")
   [[ -n "${OPENADA_UI_LISTENER_PRIORITY:-}" ]] && parameters+=("UiListenerPriority=$OPENADA_UI_LISTENER_PRIORITY")
   [[ -n "${OPENADA_API_LISTENER_PRIORITY:-}" ]] && parameters+=("ApiListenerPriority=$OPENADA_API_LISTENER_PRIORITY")

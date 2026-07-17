@@ -105,3 +105,5 @@ tmp
 /src/sass/layout
 /src/sass/utilities
 /public
+!/public/
+!/public/openada-logo.svg

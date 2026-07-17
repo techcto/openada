@@ -38,6 +38,11 @@ Parameters:
     Type: String
     Default: ''
     NoEcho: true
+  OpenAiAppsChallengeToken:
+    Type: String
+    Default: ''
+    NoEcho: true
+    Description: Optional token returned at /.well-known/openai-apps-challenge during app submission domain verification.
   LanguageToolUpstreamUrl:
     Type: String
     Default: ''
@@ -182,6 +187,25 @@ Resources:
           - Type: forward
             TargetGroupArn: !Ref ApiTargetGroup
 
+  McpListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref HttpListener
+      Priority: 9
+      Conditions:
+        - Field: path-pattern
+          Values: [/mcp, /mcp/*]
+      Actions:
+        - !If
+          - HasCertificate
+          - Type: redirect
+            RedirectConfig:
+              Protocol: HTTPS
+              Port: '443'
+              StatusCode: HTTP_301
+          - Type: forward
+            TargetGroupArn: !Ref ApiTargetGroup
+
   HttpsListener:
     Condition: HasCertificate
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -204,6 +228,19 @@ Resources:
       Conditions:
         - Field: path-pattern
           Values: [/api/*]
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref ApiTargetGroup
+
+  HttpsMcpListenerRule:
+    Condition: HasCertificate
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref HttpsListener
+      Priority: 9
+      Conditions:
+        - Field: path-pattern
+          Values: [/mcp, /mcp/*]
       Actions:
         - Type: forward
           TargetGroupArn: !Ref ApiTargetGroup
@@ -385,6 +422,8 @@ Resources:
               Value: '3001'
             - Name: OPENADA_API_KEYS
               Value: !Ref ApiKeys
+            - Name: OPENAI_APPS_CHALLENGE_TOKEN
+              Value: !Ref OpenAiAppsChallengeToken
             - Name: OPENADA_CORS_ORIGINS
               Value: !Ref CorsAllowedOrigins
             - Name: LANGUAGETOOL_UPSTREAM_URL

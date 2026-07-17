@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import {
   AlertCircle,
   ArrowLeft,
+  Bot,
   BookOpen,
   CheckCircle2,
   ExternalLink,
@@ -62,6 +63,7 @@ const DocsPage: NextPage = () => {
             <a href="#exceptions">Exceptions, not shortcuts</a>
             <a href="#test-and-improve">Test and improve</a>
             <a href="#openada-workflow">The OpenADA workflow</a>
+            <a href="#mcp">AI agents with MCP</a>
             <a href="#law-library">Federal law map</a>
             <a href="#official-sources">Official sources</a>
           </aside>
@@ -167,6 +169,22 @@ const DocsPage: NextPage = () => {
               <a className="primary-link" href="/"><SearchCheck size={17} aria-hidden /><span>Try the live checker</span></a>
             </section>
 
+            <section id="mcp" className="docs-section workflow-section mcp-section">
+              <div className="section-kicker"><Bot size={17} aria-hidden /> OpenADA for AI agents</div>
+              <h2>Give your AI coding partner an accessibility archive</h2>
+              <p>OpenADA is a remote Model Context Protocol server. Connect an MCP-capable assistant to the live endpoint and ask it to check a public page, start a bounded site scan, follow scan progress, or inspect the public history of a website.</p>
+              <div className="notice notice-neutral"><Bot size={20} aria-hidden /><p><strong>One connection, four useful tools.</strong> The same service powers ChatGPT, Codex, Claude, and other MCP clients. Site scans return immediately with a job ID, then the agent polls durable progress while the worker checks pages in the background.</p></div>
+              <div className="mcp-grid">
+                <div className="mcp-card"><h3>1. ChatGPT</h3><p>Open the Apps or Connectors developer flow available in your ChatGPT workspace, add a remote MCP server, and enter:</p><code className="mcp-code">https://openada.us/mcp</code><p>For a public app submission, use the same URL in the OpenAI Apps submission form. OpenADA is an app-only integration, so it does not require a custom ChatGPT UI to be useful.</p><a className="text-link" href="https://learn.chatgpt.com/docs/submit-plugins" target="_blank" rel="noreferrer">Open the ChatGPT submission guide <ExternalLink size={14} aria-hidden /></a></div>
+                <div className="mcp-card"><h3>2. Codex CLI or IDE</h3><p>Add a Streamable HTTP server from the MCP settings in Codex, or add this table to <code>~/.codex/config.toml</code>:</p><pre className="mcp-code-block"><code>{`[mcp_servers.openada]\nurl = "https://openada.us/mcp"\ndefault_tools_approval_mode = "writes"`}</code></pre><p>Run <code>codex mcp list</code>, restart the client, then ask Codex to check a URL. The <code>writes</code> approval mode keeps the queued scan tool visible for confirmation.</p><a className="text-link" href="https://developers.openai.com/codex/mcp" target="_blank" rel="noreferrer">Read the Codex MCP guide <ExternalLink size={14} aria-hidden /></a></div>
+                <div className="mcp-card"><h3>3. Claude Code</h3><p>Register the remote server from a project directory:</p><pre className="mcp-code-block"><code>{`claude mcp add --transport http openada https://openada.us/mcp\nclaude mcp list`}</code></pre><p>Then use <code>/mcp</code> inside Claude Code to inspect the connection. If a deployment requires a key, add <code>--header "X-API-Key: $OPENADA_API_KEY"</code>.</p><a className="text-link" href="https://code.claude.com/docs/en/mcp" target="_blank" rel="noreferrer">Read the Claude Code MCP guide <ExternalLink size={14} aria-hidden /></a></div>
+                <div className="mcp-card"><h3>4. Inspect locally</h3><p>Run the MCP Inspector to explore the server and call tools before adding it to an agent:</p><pre className="mcp-code-block"><code>{`npx @modelcontextprotocol/inspector`}</code></pre><p>Choose Streamable HTTP and enter <code>http://localhost:3001/mcp</code> for Docker Compose, or the public URL for the deployed service.</p><a className="text-link" href="https://modelcontextprotocol.io/docs/tools/inspector" target="_blank" rel="noreferrer">Open the MCP Inspector docs <ExternalLink size={14} aria-hidden /></a></div>
+              </div>
+              <h3 className="mcp-prompts-heading">Useful prompts</h3>
+              <div className="prompt-list"><code>Check https://example.gov and summarize the most serious accessibility findings.</code><code>Start a 50-page scan for https://example.gov, report progress, and tell me the final grade.</code><code>Show the latest archived scan for www.example.gov and explain what should improve first.</code></div>
+              <div className="notice notice-important"><AlertCircle size={20} aria-hidden /><p>OpenADA only fetches public URLs and applies bounded same-host crawling. Results are automated engineering signals, not legal advice, a compliance certification, or a guarantee about litigation risk. Pair every report with manual testing and the requirements that apply to the organization.</p></div>
+            </section>
+
             <section id="law-library" className="docs-section">
               <div className="section-kicker"><Scale size={17} aria-hidden /> Federal law map</div>
               <h2>The disability-rights laws around the web</h2>
@@ -263,6 +281,17 @@ const DocsPage: NextPage = () => {
         .endpoint-path { display: block; margin-top: 6px; color: #172033; font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: 0.88rem; overflow-wrap: anywhere; }
         .primary-link { margin-top: 24px; border: 1px solid #25635f; background: #25635f; color: #ffffff; }
         .primary-link:hover, .primary-link:focus-visible { color: #25635f; }
+        .mcp-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 28px; }
+        .mcp-card { display: grid; align-content: start; gap: 12px; border: 1px solid #dce3ea; border-radius: 8px; padding: 18px; background: #ffffff; }
+        .mcp-card p { color: #526176; line-height: 1.58; }
+        .mcp-card code, .mcp-code { overflow-wrap: anywhere; }
+        .mcp-code { display: block; padding: 10px 12px; border: 1px solid #c8d7d3; border-radius: 5px; background: #f0f8f6; color: #172033; font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: .85rem; }
+        .mcp-code-block { margin: 0; overflow-x: auto; border-radius: 6px; padding: 13px; background: #172033; color: #d7f7ec; font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: .78rem; line-height: 1.55; }
+        .text-link { display: inline-flex; align-items: center; gap: 6px; color: #25635f; font-size: .86rem; font-weight: 850; text-decoration: none; }
+        .text-link:hover, .text-link:focus-visible { text-decoration: underline; }
+        .mcp-prompts-heading { margin-top: 30px; }
+        .prompt-list { display: grid; gap: 8px; margin-top: 14px; }
+        .prompt-list code { display: block; border-left: 3px solid #b8e7d9; padding: 10px 12px; background: #eef2f7; color: #405168; font-size: .86rem; line-height: 1.5; }
         .source-row { grid-template-columns: minmax(0, 1fr) auto; gap: 20px; }
         .source-row a { display: inline-flex; align-items: center; gap: 7px; font-weight: 850; text-decoration: none; }
         .source-row p { margin-top: 6px; font-size: 0.92rem; }
@@ -282,6 +311,7 @@ const DocsPage: NextPage = () => {
           .docs-hero-inner { padding: 48px 0 42px; }
           .hero-lede { font-size: 1rem; }
           .two-column, .rule-grid, .test-grid { grid-template-columns: 1fr; }
+          .mcp-grid { grid-template-columns: 1fr; }
           .barrier-item, .practice-item, .endpoint-row, .source-row { grid-template-columns: 1fr; gap: 7px; }
           .source-row > svg { display: none; }
           h2 { font-size: 1.7rem; }

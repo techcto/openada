@@ -20,10 +20,13 @@ COPY src/pages/report.openada.tsx ./src/pages/report.openada.tsx
 COPY src/pages/_app.openada.tsx ./src/pages/_app.openada.tsx
 COPY src/components/OpenAdaShell.tsx ./src/components/OpenAdaShell.tsx
 COPY src/pages/docs/index.openada.tsx ./src/pages/docs/index.openada.tsx
+COPY src/pages/docs/privacy.openada.tsx ./src/pages/docs/privacy.openada.tsx
+COPY src/pages/docs/terms.openada.tsx ./src/pages/docs/terms.openada.tsx
 COPY src/pages/directory/index.openada.tsx ./src/pages/directory/index.openada.tsx
 COPY src/pages/api-reference/index.openada.tsx ./src/pages/api-reference/index.openada.tsx
 COPY src/sass/app.scss ./src/sass/app.scss
 COPY devops/widget/openada-widget.js ./public/openada-widget.js
+COPY public/openada-logo.svg ./public/openada-logo.svg
 
 COPY ./devops/docker/entrypoint/app-docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
