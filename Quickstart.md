@@ -26,13 +26,23 @@ Open the UI at `http://localhost:3000` and the API at
 
 ## Deploy OpenADA Private
 
-[Subscribe to OpenADA Private in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e), then choose one of the public CloudFormation launch paths:
+OpenADA Private is the customer-deployed ECS product. Use the same AWS account
+for the Marketplace subscription and the CloudFormation launch.
 
-- [New ECS environment](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada.yaml)
-- [Existing ECS environment](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-existing.yaml)
+1. [Subscribe to OpenADA Private in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e).
+2. Stay in `us-east-1`, then choose the deployment that matches your account:
+   - [Launch a new ECS environment](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada.yaml)
+   - [Add OpenADA to an existing ECS environment](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-existing.yaml)
+3. Keep the prefilled Marketplace image defaults. Do not replace them with Docker
+   Hub images or local image names.
+4. Complete the required VPC, subnet, load balancer, cluster, and Redis fields
+   shown by the selected template, then acknowledge IAM resource creation and
+   create the stack.
+5. Open the `WebsiteUrl` output after the ECS services report healthy.
 
-Use the [OpenADA Private CloudFormation Quickstart](devops/cloudformation/README.md)
-for VPC, subnet, Redis, HTTPS, API-key, and existing-cluster requirements.
+The [OpenADA Private CloudFormation Quickstart](devops/cloudformation/README.md)
+lists the exact fields for both deployment modes, HTTPS, API keys, scan limits,
+and post-launch checks.
 
 The standalone product includes the UI, API, asynchronous scan worker, Redis
 queue, DynamoDB directory archive, CloudWatch logs, and an Application Load

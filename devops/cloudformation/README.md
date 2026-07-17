@@ -4,7 +4,7 @@ Deploy OpenADA Private from AWS Marketplace as a complete web-accessibility
 service with a UI, API, asynchronous scan worker, Redis queue, and durable
 DynamoDB scan history.
 
-[Subscribe to OpenADA Private in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e), then choose the deployment mode that matches your AWS environment:
+[Subscribe to OpenADA Private in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e) in the same AWS account that will own the CloudFormation stack. Launch in `us-east-1`, where the current Marketplace delivery options and public templates are published.
 
 OpenADA stores public directory metadata and asynchronous scan history in four on-demand DynamoDB tables: sites, pages, immutable scan summaries, and scan jobs. Site scans use BullMQ over Redis so the API returns immediately and the UI can reconnect to progress after a task restart.
 
@@ -15,30 +15,38 @@ OpenADA stores public directory metadata and asynchronous scan history in four o
 
 The standalone mode is implemented by `openada.yaml`. The existing-environment mode is implemented by `openada-existing.yaml`. The standalone template creates a small Redis queue; the existing-environment template expects a reachable Redis endpoint.
 
+## Customer Launch Checklist
+
+Use the public CloudFormation launch links from the [root Quickstart](../../Quickstart.md):
+
+- **New ECS environment:** provide `VpcId`, at least two public subnets for the
+  ALB, and service subnets with NAT access to pull the Marketplace images and
+  write CloudWatch logs.
+- **Existing ECS environment:** provide `VpcId`, `Cluster`,
+  `LoadBalancerSecurityGroup`, `ListenerArn`, `ServiceSubnets`, `HostHeader`,
+  and a reachable `RedisHost`.
+- Keep the `UiImage`, `ApiImage`, and `WorkerImage` defaults supplied by the
+  launch template. They point to the subscribed Marketplace delivery.
+- Set `CertificateArn` for HTTPS on a new environment. The certificate must be
+  in the same region and cover the hostname you will use.
+- Set `ApiKeys` to a long random value before enabling access beyond a trusted
+  test. The parameter is hidden by CloudFormation and protects both REST and
+  MCP requests.
+- Leave `PublicScansEnabled` enabled for the public-directory experience, or
+  set it to `false` and use `ScanAllowedHosts` for a restricted private service.
+
+After creation, wait for the UI, API, and worker services to become healthy,
+then open the `WebsiteUrl` stack output. Verify the API with
+`<WebsiteUrl>/api/health`. If ECS cannot pull an image, confirm that the
+Marketplace subscription was completed in the same account, the service
+subnets have NAT or public IP egress, and the task execution role includes the
+standard ECS task execution policy.
+
 ## OpenADA MCP AgentCore
 
 The separate `OpenADA MCP AgentCore` product is a stateless ARM64 gateway for Amazon Bedrock AgentCore Runtime. It forwards MCP requests to the OpenADA MCP endpoint supplied at launch and does not replace the ECS UI, API, worker, Redis, or DynamoDB services.
 
 Use `devops/cloudformation/openada-agentcore-runtime.yaml` after the AgentCore container image has been published. Set `OpenAdaMcpUrl` to the private OpenADA MCP URL and `OpenAdaApiKey` to the same random value configured as `ApiKeys` on the private OpenADA stack. Select `NetworkMode=VPC` with private subnets and security groups when the OpenADA endpoint is internal to a VPC. AgentCore invocation uses AWS IAM/SigV4; the gateway does not need AWS access keys.
-
-## Publish test images to AWS ECR
-
-For a manual ECR image push, authenticate to the target registry and use a new
-version tag. Marketplace repositories commonly use immutable tags, so do not
-reuse a published version:
-
-```bash
-export AWS_REGION=us-east-1
-export MP_AWS_ECR=709825985650.dkr.ecr.us-east-1.amazonaws.com
-export OPENADA_UI_REPOSITORY=solodev/openada-ui
-export OPENADA_API_REPOSITORY=solodev/openada-api
-export OPENADA_WORKER_REPOSITORY=solodev/openada-worker
-./cmd.sh docker push 0.1.10
-```
-
-The command builds and pushes the three `linux/amd64` images to AWS ECR. Normal
-release tags use the GitHub Actions release workflow and publish the versioned
-Marketplace images automatically.
 
 ## Publish CloudFormation files
 
@@ -81,9 +89,9 @@ export OPENADA_EXISTING_ALB_SG=sg-...
 export OPENADA_EXISTING_LISTENER_ARN=arn:aws:elasticloadbalancing:...
 export OPENADA_EXISTING_SUBNETS=subnet-...,subnet-...
 export OPENADA_HOST_HEADER=ada.example.com
-export OPENADA_UI_IMAGE=709825985650.dkr.ecr.us-east-1.amazonaws.com/solodev/openada-ui:1.0.0
-export OPENADA_API_IMAGE=709825985650.dkr.ecr.us-east-1.amazonaws.com/solodev/openada-api:1.0.0
-export OPENADA_WORKER_IMAGE=709825985650.dkr.ecr.us-east-1.amazonaws.com/solodev/openada-worker:1.0.0
+export OPENADA_UI_IMAGE=709825985650.dkr.ecr.us-east-1.amazonaws.com/solodev/openada-ui:<release-version>
+export OPENADA_API_IMAGE=709825985650.dkr.ecr.us-east-1.amazonaws.com/solodev/openada-api:<release-version>
+export OPENADA_WORKER_IMAGE=709825985650.dkr.ecr.us-east-1.amazonaws.com/solodev/openada-worker:<release-version>
 export OPENADA_REDIS_HOST=redis.internal.example
 ```
 

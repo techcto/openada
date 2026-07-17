@@ -265,7 +265,7 @@ service while keeping the public demo and private deployment on the same codebas
 
 ### Subscribe And Deploy On AWS
 
-[Subscribe to Private OpenADA on AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e) before launching the ECS stack. AWS Marketplace handles the subscription and billing relationship; OpenADA then deploys as three ECS services using the versioned UI, API, and scan-worker images.
+[Subscribe to Private OpenADA on AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e) in the customer AWS account before launching the ECS stack. Stay in `us-east-1`, use one of the public CloudFormation launch links below, and keep the prefilled Marketplace image defaults. AWS Marketplace handles the subscription and billing relationship; OpenADA then deploys as three ECS services using the versioned UI, API, and scan-worker images.
 
 Choose a deployment path:
 
