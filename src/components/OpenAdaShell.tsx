@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { BookOpen, Code2, Globe2, Star } from 'lucide-react'
+import { BookOpen, Code2, ExternalLink, Globe2, Github, Star } from 'lucide-react'
 
 type CurrentPage = 'home' | 'directory' | 'api' | 'docs' | 'scan' | 'report'
 
@@ -22,9 +22,12 @@ export function OpenAdaShell({ children, current }: { children: ReactNode; curre
       {children}
       <footer className="global-footer">
         <div className="global-footer-inner">
-          <div><strong>OpenADA</strong><span>Open accessibility checks for the web.</span></div>
-          <nav aria-label="Footer navigation"><a href="/api-reference">API</a><a href="/directory">Directory</a><a href="/docs">Guidance</a><a href="https://www.ada.gov/" target="_blank" rel="noreferrer">ADA.gov</a></nav>
-          <small>Automated results are a starting point, not a legal determination.</small>
+          <div className="footer-intro"><a className="footer-brand" href="/"><span className="footer-brand-mark"><Star size={16} fill="currentColor" aria-hidden /></span><strong>OpenADA</strong></a><p>Open accessibility and language checks for the public web.</p><small>Automated results are a starting point, not a legal determination.</small></div>
+          <div className="footer-link-grid">
+            <div><strong className="footer-heading">Explore</strong><a href="/">Checker</a><a href="/directory">Directory</a><a href="/scan">Site scans</a></div>
+            <div><strong className="footer-heading">Build</strong><a href="/api-reference">Public API</a><a href="/api/openapi">OpenAPI JSON</a><a href="/docs">ADA guidance</a></div>
+            <div><strong className="footer-heading">Standards</strong><a href="https://www.ada.gov/law-and-regs/" target="_blank" rel="noreferrer">ADA.gov <ExternalLink size={12} aria-hidden /></a><a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noreferrer">WCAG <ExternalLink size={12} aria-hidden /></a><a href="https://github.com/techcto/openada" target="_blank" rel="noreferrer"><Github size={13} aria-hidden /> Source <ExternalLink size={12} aria-hidden /></a></div>
+          </div>
         </div>
       </footer>
       <style jsx global>{`
@@ -37,17 +40,20 @@ export function OpenAdaShell({ children, current }: { children: ReactNode; curre
         .global-nav { display: flex; align-items: center; justify-content: flex-end; gap: 7px; flex-wrap: wrap; }
         .global-nav-link { min-height: 38px; display: inline-flex; align-items: center; gap: 7px; border: 1px solid transparent; border-radius: 6px; color: #334155; padding: 0 11px; font-size: .9rem; font-weight: 800; text-decoration: none; }
         .global-nav-link:hover, .global-nav-link:focus-visible, .global-nav-link.current { border-color: #c8d7d3; background: #f0f8f6; color: #25635f; }
-        .global-footer { border-top: 1px solid #dce3ea; background: #172033; color: #dce7ef; }
-        .global-footer-inner { min-height: 150px; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 14px 28px; padding: 28px 0; }
-        .global-footer strong, .global-footer span { display: block; }
-        .global-footer strong { color: #fff; font-size: 1rem; }
-        .global-footer span, .global-footer small { color: #a9b8c7; }
-        .global-footer span { margin-top: 6px; font-size: .9rem; }
-        .global-footer nav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 14px; }
-        .global-footer nav a { color: #d7f7ec; font-size: .88rem; font-weight: 800; text-decoration: none; }
-        .global-footer nav a:hover, .global-footer nav a:focus-visible { color: #fff; text-decoration: underline; }
-        .global-footer small { grid-column: 1 / -1; font-size: .78rem; }
-        @media (max-width: 680px) { .global-header-inner, .global-footer-inner { width: min(100% - 36px, 1440px); } .global-header-inner { min-height: 66px; align-items: flex-start; padding: 14px 0; } .global-nav { justify-content: flex-start; } .global-nav-link { min-height: 32px; padding: 0 7px; font-size: .82rem; } .global-footer-inner { grid-template-columns: 1fr; } .global-footer nav { justify-content: flex-start; } }
+        .global-footer { border-top: 1px solid #2d3a50; background: #172033; color: #dce7ef; }
+        .global-footer-inner { display: grid; grid-template-columns: minmax(220px, .9fr) minmax(0, 1.6fr); gap: 34px; padding: 34px 0 28px; }
+        .footer-intro { display: grid; align-content: start; gap: 9px; }
+        .footer-brand { display: inline-flex; align-items: center; gap: 9px; width: fit-content; color: #fff; text-decoration: none; }
+        .footer-brand-mark { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #b8e7d9; border-radius: 8px 8px 8px 3px; background: #b8e7d9; color: #172033; }
+        .footer-brand strong { font-size: 1rem; }
+        .footer-intro p { max-width: 250px; color: #a9b8c7; font-size: .88rem; line-height: 1.5; }
+        .footer-intro small { color: #8393a6; font-size: .76rem; line-height: 1.45; }
+        .footer-link-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+        .footer-link-grid > div { display: grid; align-content: start; justify-items: start; gap: 9px; }
+        .footer-heading { color: #b8e7d9; font-size: .76rem; letter-spacing: .08em; text-transform: uppercase; }
+        .footer-link-grid a { display: inline-flex; align-items: center; gap: 5px; color: #d7f7ec; font-size: .86rem; font-weight: 750; text-decoration: none; }
+        .footer-link-grid a:hover, .footer-link-grid a:focus-visible { color: #fff; text-decoration: underline; }
+        @media (max-width: 680px) { .global-header-inner, .global-footer-inner { width: min(100% - 36px, 1440px); } .global-header-inner { min-height: 66px; align-items: flex-start; padding: 14px 0; } .global-nav { justify-content: flex-start; } .global-nav-link { min-height: 32px; padding: 0 7px; font-size: .82rem; } .global-footer-inner { grid-template-columns: 1fr; gap: 26px; } .footer-link-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
       `}</style>
     </div>
   )

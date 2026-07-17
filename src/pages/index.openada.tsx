@@ -91,6 +91,22 @@ const HomePage: NextPage = () => {
   const violations = result?.ada?.violations || []
   const canCheck = useMemo(() => (html.trim().length > 0 || url.trim().length > 0) && !isChecking, [html, url, isChecking])
 
+  const handleSiteScan = () => {
+    const submittedUrl = url.trim()
+    if (!submittedUrl) {
+      setError('Enter a public page URL to scan the site.')
+      return
+    }
+    try {
+      const parsed = new URL(submittedUrl)
+      if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error()
+    } catch {
+      setError('Enter a valid public http:// or https:// URL.')
+      return
+    }
+    window.location.assign(`/scan?url=${encodeURIComponent(submittedUrl)}&maxPages=${scanLimit}`)
+  }
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!canCheck) return
@@ -185,7 +201,7 @@ const HomePage: NextPage = () => {
                 <option value="50">50 pages</option>
                 <option value="100">100 pages</option>
               </select>
-              <button className="url-submit" type="submit" form="checker-form" value="site" disabled={!url.trim() || isChecking} aria-label="Scan this site">
+              <button className="url-submit" type="button" onClick={handleSiteScan} disabled={!url.trim() || isChecking} aria-label="Scan this site">
                 <ScanSearch size={16} aria-hidden />
                 <span>{isChecking ? 'Scanning' : 'Scan site'}</span>
               </button>

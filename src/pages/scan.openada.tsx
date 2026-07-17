@@ -141,13 +141,13 @@ const ScanPage: NextPage = () => {
           </section>
         </main>
       </OpenAdaShell>
-      <style jsx>{`
+      <style jsx global>{`
         .scan-shell { min-height: calc(100vh - 222px); display: grid; align-content: start; width: min(1080px, calc(100% - 56px)); margin: 0 auto; padding: 38px 0 80px; color: #172033; }
         .scan-back { display: inline-flex; align-items: center; gap: 7px; color: #25635f; font-weight: 850; text-decoration: none; }
         .scan-card { width: min(720px, 100%); margin: 70px auto 0; padding: 58px 44px; border: 1px solid #dce3ea; border-radius: 10px; background: #fff; box-shadow: 0 22px 50px rgba(23,32,51,.09); text-align: center; }
         .scan-card > svg { color: #25635f; }
         .scan-card > svg:first-child { margin-bottom: 22px; }
-        .scan-icon { animation: openada-spin .9s linear infinite; }
+        .scan-icon { animation: openada-scan-spin .9s linear infinite; transform-origin: center; }
         .eyebrow { color: #25635f; font-size: .78rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
         h1 { margin: 10px 0 0; font-size: clamp(2rem, 5vw, 3.6rem); line-height: 1; letter-spacing: 0; }
         .scan-url { margin: 16px auto 0; color: #64748b; overflow-wrap: anywhere; }
@@ -159,7 +159,7 @@ const ScanPage: NextPage = () => {
         .progress-meta span { margin-left: 8px; }
         .scan-note, .scan-error { margin-top: 20px; color: #9f1239; font-weight: 750; }
         .scan-retry { display: inline-flex; margin-top: 28px; color: #25635f; font-weight: 850; }
-        @keyframes openada-spin { to { transform: rotate(360deg); } }
+        @keyframes openada-scan-spin { to { transform: rotate(360deg); } }
         @media (max-width: 680px) { .scan-shell { width: min(100% - 36px, 1080px); padding-top: 24px; } .scan-card { margin-top: 42px; padding: 40px 20px; } .progress-meta { flex-wrap: wrap; } }
       `}</style>
     </>
