@@ -12,6 +12,8 @@
 [![CI](https://github.com/techcto/openada/actions/workflows/ci.yml/badge.svg)](https://github.com/techcto/openada/actions/workflows/ci.yml)
 [![Open in GitHub](https://img.shields.io/badge/Open%20in-GitHub-181717?logo=github)](https://github.com/techcto/openada)
 
+Start with the [OpenADA Quickstart](Quickstart.md) for local testing, AWS Marketplace deployment, and AgentCore setup.
+
 OpenADA is a hosted accessibility and language-quality service for the web. It gives web developers, agencies, public entities, and site owners one stable API for WCAG audits and LanguageTool-compatible spelling and grammar checks, then turns public site scans into a transparent, date-based archive anyone can browse.
 
 ## The Problem

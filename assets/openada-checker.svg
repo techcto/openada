@@ -2,7 +2,7 @@
   <title id="title">OpenADA public page checker</title>
   <desc id="desc">A URL field with a page count picker and Scan site button.</desc>
   <rect width="1040" height="247" fill="#f6f8fb"/>
-  <text x="520" y="55" fill="#172033" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="800" text-anchor="middle">Accessibility and language checks as an API</text>
+  <text x="520" y="55" fill="#172033" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="800" text-anchor="middle">OpenADA Accessibility and Language API</text>
   <rect x="12" y="79" width="1016" height="168" rx="8" fill="#ffffff" stroke="#dce3ea"/>
   <text x="520" y="114" fill="#25635f" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="800" letter-spacing="1" text-anchor="middle">CHECK A PUBLIC PAGE OR WEBSITE</text>
   <text x="520" y="136" fill="#64748b" font-family="Arial, Helvetica, sans-serif" font-size="13" text-anchor="middle">Paste a URL to see accessibility and language findings.</text>
