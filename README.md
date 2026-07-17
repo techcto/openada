@@ -171,30 +171,18 @@ Use `https://openada.example.com/api/v2/check` for LanguageTool-compatible check
 - Redis-backed scan queue and four on-demand DynamoDB tables for sites, pages, immutable scan records, and scan jobs
 - Optional ACM HTTPS listener
 
-Version tags publish rendered standalone and existing-cluster CFTs to `s3://openada-us/cloudformation/` with Marketplace image defaults for that release. The public template URLs are `https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada.yaml` and `https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-existing.yaml`. The source templates use `{RELEASE_VERSION}` replacement tokens; local deployments can still override the image parameters. The template does not install Java LanguageTool, MySQL, or a local LanguageTool service. Redis is used only for asynchronous scan delivery; DynamoDB stores public directory metadata, page findings, immutable scan records, and durable job progress. OpenSearch remains an optional future search layer, not a requirement for the free service.
+Version tags publish rendered standalone and existing-cluster CFTs to `s3://openada-us/cloudformation/` with Marketplace image defaults for that release. The source templates use `{RELEASE_VERSION}` replacement tokens; local deployments can still override the image parameters. The template does not install Java LanguageTool, MySQL, or a local LanguageTool service. Redis is used only for asynchronous scan delivery; DynamoDB stores public directory metadata, page findings, immutable scan records, and durable job progress. OpenSearch remains an optional future search layer, not a requirement for the free service.
 
-The widget is published to `s3://openada-us/widgets/openada-widget.js` by `./cmd.sh cft-new publish`. Add it to a public page:
+### Subscribe And Deploy On AWS
 
-```html
-<script src="https://openada-us.s3.us-east-1.amazonaws.com/widgets/openada-widget.js"></script>
-```
+[Find OpenADA on AWS Marketplace](https://aws.amazon.com/marketplace/search/results?searchTerms=OpenADA) and subscribe to the OpenADA container product before launching the stack. AWS Marketplace handles the subscription and billing relationship; OpenADA then deploys as three ECS services using the versioned UI, API, and scan-worker images.
 
-The repository helpers cover the repeatable workflow:
+Choose a deployment path:
 
-```bash
-./cmd.sh test
-./cft.sh validate
+- [Launch a new OpenADA ECS stack](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada.yaml) creates the ECS cluster, ALB, Redis queue, services, and directory tables.
+- [Add OpenADA to an existing ECS environment](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-existing.yaml) reuses an existing ECS cluster, ALB, VPC, subnets, and reachable Redis endpoint.
 
-export OPENADA_VPC_ID=vpc-0123456789abcdef0
-export OPENADA_PUBLIC_SUBNETS=subnet-public-a,subnet-public-b
-export OPENADA_SERVICE_SUBNETS=subnet-private-a,subnet-private-b
-export OPENADA_UI_IMAGE=709825985650.dkr.ecr.us-east-1.amazonaws.com/solodev/openada-ui:TAG
-export OPENADA_API_IMAGE=709825985650.dkr.ecr.us-east-1.amazonaws.com/solodev/openada-api:TAG
-export OPENADA_WORKER_IMAGE=709825985650.dkr.ecr.us-east-1.amazonaws.com/solodev/openada-worker:TAG
-./cft.sh deploy
-```
-
-`./cft.sh test` performs offline structure checks and runs `cfn-lint` when installed. `./cft.sh validate` additionally calls AWS CloudFormation, so it requires AWS credentials and network access. Service subnets need NAT access to pull from ECR and send logs unless `AssignPublicIp=ENABLED` is used. Pass an ACM certificate ARN with `OPENADA_CERTIFICATE_ARN` for HTTPS; the stack redirects HTTP to HTTPS and emits the HTTPS endpoint.
+The CloudFormation launch form supplies the Marketplace image defaults for the latest published release. Provide the VPC, public and service subnets, Redis settings when using the existing-environment template, and an ACM certificate ARN when HTTPS is required. Service subnets need NAT access to pull the private ECR images and send logs unless public IP assignment is enabled. The public templates remain available at [`openada.yaml`](https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada.yaml) and [`openada-existing.yaml`](https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-existing.yaml).
 
 ## Contest Note
 
