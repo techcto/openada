@@ -28,7 +28,7 @@ DETAILS_JSON=$(cat <<JSON
           "CompatibleServices": ["Bedrock-AgentCore"],
           "AgenticType": ["MCP_SERVER"],
           "Description": "Deploy OpenADA MCP AgentCore as a container image on Amazon Bedrock AgentCore Runtime",
-          "UsageInstructions": "Configure OPENADA_MCP_URL with the hosted or private OpenADA MCP endpoint. Set OPENADA_API_KEY when the endpoint requires an OpenADA API key. See https://github.com/techcto/openada/tree/main/devops/agentcore/README.md",
+          "UsageInstructions": "Configure OPENADA_MCP_URL with the hosted or private OpenADA MCP endpoint. Set OPENADA_API_KEY when the endpoint requires an OpenADA API key. See https://github.com/techcto/openada/blob/main/devops/agentcore/README.md",
           "EnvironmentVariables": [
             {
               "Name": "OPENADA_MCP_URL",

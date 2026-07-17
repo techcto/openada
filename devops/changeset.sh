@@ -25,7 +25,7 @@ DETAILS_JSON="$(jq -n \
           ContainerImages: [$ui, $api, $worker],
           CompatibleServices: ["ECS"],
           Description: "OpenADA UI, API, and asynchronous scan worker containers for Amazon ECS.",
-          UsageInstructions: "Deploy the OpenADA containers with the CloudFormation template and instructions at https://github.com/techcto/openada/tree/main/devops/cloudformation"
+          UsageInstructions: "Deploy the OpenADA containers with the CloudFormation template and instructions at https://github.com/techcto/openada/blob/main/devops/cloudformation/README.md"
         }
       }
     }]
