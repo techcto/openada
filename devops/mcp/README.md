@@ -107,7 +107,13 @@ Site scans are asynchronous. The MCP client should call `openada_get_scan_status
 
 ## Authentication
 
-The endpoint accepts `Authorization: Bearer <key>` or `X-API-Key: <key>`. It uses the same comma-separated `OPENADA_API_KEYS` value as the REST API. When that value is empty, the public OpenADA deployment allows anonymous tools so the directory can be demonstrated; production deployments should set an API key before enabling broad crawl access.
+### Hosted public demo
+
+The public endpoint at `https://openada.us/mcp` is intentionally anonymous so people can try OpenADA from ChatGPT, Codex, Claude, or another MCP client. Choose **None** or **No authentication** when the client offers that option. Do not add an API key to the hosted demo connection.
+
+### Self-hosted or protected deployments
+
+Set `OPENADA_API_KEYS` to a comma-separated list before exposing a deployment beyond a trusted test environment. The endpoint then accepts either `Authorization: Bearer <key>` or `X-API-Key: <key>`, using the same key list as the REST API. Keep keys in environment-backed secret storage and never commit them to the repository.
 
 ## Local smoke test
 

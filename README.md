@@ -143,11 +143,11 @@ https://openada.us/mcp
 
 The MCP server exposes four tools: check one public page, queue a same-host site scan, read durable scan progress, and browse the public directory. A scan returns a job ID immediately, so an agent can keep the user informed while the worker checks pages.
 
-- **ChatGPT:** add the remote MCP URL from the Apps or Connectors flow, or submit it as the server URL in the [OpenAI Apps submission guide](https://learn.chatgpt.com/docs/submit-plugins).
+- **ChatGPT:** enable Developer mode, create a New Plugin or custom app, and enter `https://openada.us/mcp` as the Server URL. The [MCP connection and submission guide](https://openada.us/docs/mcp) has the full flow.
 - **Codex:** add the URL from MCP settings, or put `[mcp_servers.openada]` with `url = "https://openada.us/mcp"` in `~/.codex/config.toml`, then run `codex mcp list`.
-- **Claude Code:** run `claude mcp add --transport http openada https://openada.us/mcp`, then verify with `claude mcp list` or `/mcp`.
+- **Claude:** add OpenADA from Settings > Connectors > Add custom connector, then enter `https://openada.us/mcp` as the Remote MCP server URL.
 
-See the full [MCP connection and submission guide](devops/mcp/README.md) and the public [MCP documentation](https://openada.us/docs#mcp). The anonymous public demo is limited to public URLs; production deployments can require `OPENADA_API_KEYS`. Automated results are engineering guidance, not legal advice or a compliance certification.
+See the full [MCP connection and submission guide](devops/mcp/README.md) and the public [MCP documentation](https://openada.us/docs/mcp). The anonymous public demo is limited to public URLs; protected deployments can require `OPENADA_API_KEYS`. Automated results are engineering guidance, not legal advice or a compliance certification.
 
 ## Website Integration
 
