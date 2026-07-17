@@ -149,6 +149,29 @@ The MCP server exposes four tools: check one public page, queue a same-host site
 
 See the full [MCP connection and submission guide](devops/mcp/README.md) and the public [MCP documentation](https://openada.us/docs/mcp). The anonymous public demo is limited to public URLs; protected deployments can require `OPENADA_API_KEYS`. Automated results are engineering guidance, not legal advice or a compliance certification.
 
+## GitHub Actions Publishing
+
+The container workflows publish to AWS ECR on `main`, `master`, and `v*` tag pushes. They publish public Docker Hub images on `v*` tag pushes or manual dispatch.
+
+Set these GitHub repository secrets:
+
+- `MP_AWS_ACCESS_KEY_ID`: access key ID for the Marketplace publishing IAM user.
+- `MP_AWS_SECRET_ACCESS_KEY`: secret access key for that IAM user.
+- `DOCKERHUB_USERNAME`: Docker Hub account used to publish images.
+- `DOCKERHUB_TOKEN`: Docker Hub access token with push permission.
+
+Optional repository variables are `AWS_REGION` (defaults to `us-east-1`), `OPENADA_UI_REPOSITORY`, `OPENADA_API_REPOSITORY`, `OPENADA_WORKER_REPOSITORY`, and `DOCKERHUB_NAMESPACE`.
+
+After the secrets are configured, create a release tag through the repository helper:
+
+```bash
+./git.sh status
+./git.sh audit
+./git.sh tag 0.1.0
+```
+
+That command creates and pushes the annotated `v0.1.0` tag. The tag starts CI, the ECR publish workflow, and the Docker Hub publish workflow. Do not put AWS credentials or Docker Hub tokens in the repository or in `git.sh`.
+
 ## Website Integration
 
 Any website, application, publishing workflow, or build pipeline can post editor text or rendered page content to OpenADA. Point the integration at the OpenADA API base URL, for example:

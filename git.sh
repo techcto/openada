@@ -9,7 +9,7 @@ usage() {
 Usage:
   ./git.sh status                 Show repository state
   ./git.sh audit                  Scan candidate files for secrets/provenance
-  ./git.sh tag <version>          Create and push an annotated v<version> tag
+  ./git.sh tag <version>          Audit, create, and push an annotated v<version> tag
   ./git.sh push [branch]          Push the current branch and set upstream
   ./git.sh fetch                  Fetch remote refs without changing files
 EOF
@@ -52,12 +52,15 @@ tag() {
   local version="${1:-}"
   [[ -n "$version" ]] || die "Usage: ./git.sh tag <version>"
   version="${version#v}"
-  [[ "$version" != */* && "$version" != *[[:space:]]* ]] ||
-    die "Version cannot contain spaces or slashes."
+  [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]] ||
+    die "Version must look like 1.2.3, 1.2.3-rc.1, or 1.2.3.beta."
   git -C "$ROOT_DIR" diff --quiet && git -C "$ROOT_DIR" diff --cached --quiet ||
     die "Commit tracked changes before tagging."
+  git -C "$ROOT_DIR" rev-parse --verify --quiet "refs/tags/v${version}" >/dev/null &&
+    die "Tag v${version} already exists."
+  audit
   git -C "$ROOT_DIR" tag -a "v${version}" -m "OpenADA ${version}"
-  git -C "$ROOT_DIR" push "$REMOTE" "v${version}"
+  git -C "$ROOT_DIR" push "$REMOTE" "refs/tags/v${version}"
 }
 
 push_branch() {

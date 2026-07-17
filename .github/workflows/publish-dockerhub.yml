@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 env:
-  DOCKERHUB_NAMESPACE: techcto
+  DOCKERHUB_NAMESPACE: ${{ vars.DOCKERHUB_NAMESPACE || 'techcto' }}
 
 jobs:
   publish:
@@ -23,6 +23,21 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Validate Docker Hub publishing configuration
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          test -n "$DOCKERHUB_USERNAME" || {
+            echo 'Missing repository secret DOCKERHUB_USERNAME.' >&2
+            exit 1
+          }
+          test -n "$DOCKERHUB_TOKEN" || {
+            echo 'Missing repository secret DOCKERHUB_TOKEN.' >&2
+            echo 'Create a Docker Hub access token with permission to push the three OpenADA repositories.' >&2
+            exit 1
+          }
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
