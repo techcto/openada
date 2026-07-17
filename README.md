@@ -78,14 +78,15 @@ Most accessibility tools produce a private score and stop there. OpenADA combine
 
 ## Local Development
 
-Use Node.js 24 LTS for local development and container parity.
+Install Docker Desktop, then run the full local stack from the repository root:
 
 ```bash
-./cmd.sh install
-./cmd.sh dev
+docker-compose up --build
 ```
 
-For an automated local container smoke test, run `./cmd.sh compose-test`. It builds the application containers, waits for the API health check, verifies the UI, sends a combined ADA/language request, and tears the stack down afterward. Docker Engine and `curl` must be available locally.
+Docker Compose builds the UI, API, worker, Redis, and LanguageTool-compatible services. Stop the stack with `docker-compose down`.
+
+For an automated local container smoke test, run `./cmd.sh compose-test`. It builds the application containers, waits for the API health check, verifies the UI, sends a combined ADA/language request, and tears the stack down afterward.
 
 Open `http://localhost:3000`. The API health check is `http://localhost:3001/api/health`.
 The human-readable ADA guide is available at `http://localhost:3000/docs`.

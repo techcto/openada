@@ -16,6 +16,7 @@ export function OpenAdaShell({ children, current }: { children: ReactNode; curre
             <a className={current === 'directory' ? 'global-nav-link current' : 'global-nav-link'} href="/directory" aria-current={current === 'directory' ? 'page' : undefined}><Globe2 size={16} aria-hidden /> Directory</a>
             <a className={current === 'api' ? 'global-nav-link current' : 'global-nav-link'} href="/api-reference" aria-current={current === 'api' ? 'page' : undefined}><Code2 size={16} aria-hidden /> Public API</a>
             <a className={current === 'docs' ? 'global-nav-link current' : 'global-nav-link'} href="/docs" aria-current={current === 'docs' ? 'page' : undefined}><BookOpen size={16} aria-hidden /> ADA guidance</a>
+            <a className="global-nav-link" href="https://github.com/techcto/openada" target="_blank" rel="noreferrer"><Github size={16} aria-hidden /> GitHub</a>
           </nav>
         </div>
       </header>

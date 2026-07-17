@@ -1118,6 +1118,7 @@ function ContestBanner() {
         <h2 id="contest-banner-heading">Free accessibility infrastructure for every public service.</h2>
         <p>Federal web-accessibility compliance dates have been extended, not erased. OpenADA gives governments and small organizations a free way to scan, prioritize, and track improvements while expensive enterprise tooling remains out of reach.</p>
         <a href="https://www.federalregister.gov/documents/2026/04/20/2026-07663/extension-of-compliance-dates-for-nondiscrimination-on-the-basis-of-disability-accessibility-of-web" target="_blank" rel="noreferrer">Read the Federal Register extension <ExternalLink size={13} aria-hidden /></a>
+        <a href="https://openai.devpost.com" target="_blank" rel="noreferrer">See the Codex contest project <ExternalLink size={13} aria-hidden /></a>
       </div>
       <div className="contest-banner-proof"><strong>Open public utility</strong>Free scans for public agencies today; future enterprise API tokens can help fund continued public access.</div>
     </section>
