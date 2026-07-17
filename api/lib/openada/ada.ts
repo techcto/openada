@@ -9,6 +9,7 @@ export type AdaCheckOptions = {
 
 export type AdaCheckResult = {
   score: number
+  grade: string
   violationsCount: number
   passesCount: number
   incompleteCount: number
@@ -63,6 +64,7 @@ export async function checkAda(options: AdaCheckOptions): Promise<AdaCheckResult
 
   return {
     score,
+    grade: gradeForScore(score),
     violationsCount: violations.length,
     passesCount: results.passes?.length || 0,
     incompleteCount: results.incomplete?.length || 0,
@@ -73,6 +75,15 @@ export async function checkAda(options: AdaCheckOptions): Promise<AdaCheckResult
     incomplete: results.incomplete || [],
     inapplicable: results.inapplicable || [],
   }
+}
+
+export function gradeForScore(score: number): string {
+  if (score >= 97) return 'A+'
+  if (score >= 93) return 'A'
+  if (score >= 85) return 'B'
+  if (score >= 70) return 'C'
+  if (score >= 50) return 'D'
+  return 'F'
 }
 
 export function htmlToText(html: string): string {

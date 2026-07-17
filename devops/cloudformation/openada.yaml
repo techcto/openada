@@ -42,6 +42,15 @@ Parameters:
   CorsAllowedOrigins:
     Type: String
     Default: '*'
+  PublicScansEnabled:
+    Type: String
+    Default: 'true'
+    AllowedValues: ['true', 'false']
+    Description: Enable anonymous URL submissions to the public scan directory.
+  ScanAllowedHosts:
+    Type: String
+    Default: ''
+    Description: Optional comma-separated hostname allowlist for public URL scans.
 
 Conditions:
   HasCertificate: !Not [!Equals [!Ref CertificateArn, '']]
@@ -323,6 +332,10 @@ Resources:
               Value: !Ref PagesTable
             - Name: OPENADA_SCANS_TABLE
               Value: !Ref ScansTable
+            - Name: OPENADA_PUBLIC_SCANS_ENABLED
+              Value: !Ref PublicScansEnabled
+            - Name: OPENADA_SCAN_ALLOWED_HOSTS
+              Value: !Ref ScanAllowedHosts
           LogConfiguration:
             LogDriver: awslogs
             Options:

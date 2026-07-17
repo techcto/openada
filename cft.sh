@@ -28,6 +28,8 @@ Deploy parameters:
   OPENADA_CERTIFICATE_ARN        Optional ACM certificate ARN
   OPENADA_API_KEYS               Optional comma-separated API keys
   OPENADA_CORS_ORIGINS            Optional CORS allowlist
+  OPENADA_PUBLIC_SCANS_ENABLED    true or false (default: true)
+  OPENADA_SCAN_ALLOWED_HOSTS       Optional comma-separated scan host allowlist
   LANGUAGETOOL_UPSTREAM_URL       Optional LanguageTool-compatible upstream
   OPENADA_CFT_BUCKET              S3 bucket for CFT uploads (default: openada)
 EOF
@@ -125,6 +127,8 @@ deploy() {
   [[ -n "${OPENADA_CERTIFICATE_ARN:-}" ]] && parameters+=("CertificateArn=$OPENADA_CERTIFICATE_ARN")
   [[ -n "${OPENADA_API_KEYS:-}" ]] && parameters+=("ApiKeys=$OPENADA_API_KEYS")
   [[ -n "${OPENADA_CORS_ORIGINS:-}" ]] && parameters+=("CorsAllowedOrigins=$OPENADA_CORS_ORIGINS")
+  [[ -n "${OPENADA_PUBLIC_SCANS_ENABLED:-}" ]] && parameters+=("PublicScansEnabled=$OPENADA_PUBLIC_SCANS_ENABLED")
+  [[ -n "${OPENADA_SCAN_ALLOWED_HOSTS:-}" ]] && parameters+=("ScanAllowedHosts=$OPENADA_SCAN_ALLOWED_HOSTS")
   [[ -n "${LANGUAGETOOL_UPSTREAM_URL:-}" ]] && parameters+=("LanguageToolUpstreamUrl=$LANGUAGETOOL_UPSTREAM_URL")
 
   aws cloudformation deploy \

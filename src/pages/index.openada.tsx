@@ -30,6 +30,7 @@ type Issue = {
 type CheckResponse = {
   ada?: {
     score: number
+    grade: string
     violationsCount: number
     passesCount: number
     incompleteCount: number
@@ -172,6 +173,7 @@ const HomePage: NextPage = () => {
                 icon={<ShieldCheck size={18} aria-hidden />}
                 label="ADA score"
                 value={result?.ada ? String(result.ada.score) : '--'}
+                grade={result?.ada?.grade}
                 tone={(result?.ada?.score || 0) >= 90 ? 'good' : 'warn'}
               />
               <Metric
@@ -541,6 +543,14 @@ const HomePage: NextPage = () => {
           font-weight: 900;
         }
 
+        .metric-grade {
+          color: #25635f;
+          font-size: 0.78rem;
+          font-weight: 900;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
         .metric.good .metric-value {
           color: #15803d;
         }
@@ -793,11 +803,13 @@ function Metric({
   icon,
   label,
   value,
+  grade,
   tone,
 }: {
   icon: ReactNode
   label: string
   value: string
+  grade?: string
   tone: 'good' | 'warn' | 'bad'
 }) {
   return (
@@ -807,6 +819,7 @@ function Metric({
         {icon}
       </div>
       <div className="metric-value">{value}</div>
+      {grade && <span className="metric-grade">Grade {grade}</span>}
     </div>
   )
 }

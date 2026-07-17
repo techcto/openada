@@ -8,6 +8,7 @@ export type ScanInput = {
   title?: string
   ada: {
     score: number
+    grade: string
     violationsCount: number
     passesCount: number
     incompleteCount: number
@@ -24,6 +25,7 @@ export type SiteRecord = {
   scanCount: number
   pageCount: number
   latestScore: number | null
+  latestGrade: string | null
   latestViolations: number
   latestLanguageErrors: number
 }
@@ -39,6 +41,7 @@ export type PageRecord = {
   scanCount: number
   latestScanId: string
   latestScore: number | null
+  latestGrade: string | null
 }
 
 export type ScanRecord = ScanInput & {
@@ -66,6 +69,7 @@ export async function recordScan(input: ScanInput): Promise<{ site: SiteRecord; 
   const pageId = `${siteId}:${path}`
   const scanId = randomUUID()
   const score = input.ada?.score ?? null
+  const grade = input.ada?.grade ?? null
   const violations = input.ada?.violationsCount ?? 0
   const existingPage = await client.send(new GetCommand({ TableName: table('OPENADA_PAGES_TABLE'), Key: { id: pageId } }))
   const pageIncrement = existingPage.Item ? 0 : 1
@@ -78,6 +82,7 @@ export async function recordScan(input: ScanInput): Promise<{ site: SiteRecord; 
     scanCount: 1,
     pageCount: 1,
     latestScore: score,
+    latestGrade: grade,
     latestViolations: violations,
     latestLanguageErrors: input.languageErrors,
   }
@@ -92,6 +97,7 @@ export async function recordScan(input: ScanInput): Promise<{ site: SiteRecord; 
     scanCount: 1,
     latestScanId: scanId,
     latestScore: score,
+    latestGrade: grade,
   }
   const scan: ScanRecord = { ...input, id: scanId, siteId, pageId, scannedAt: now }
 
@@ -99,13 +105,14 @@ export async function recordScan(input: ScanInput): Promise<{ site: SiteRecord; 
     client.send(new UpdateCommand({
       TableName: table('OPENADA_SITES_TABLE'),
       Key: { id: siteId },
-      UpdateExpression: 'SET #hostname = :hostname, #displayName = if_not_exists(#displayName, :displayName), #firstSeenAt = if_not_exists(#firstSeenAt, :now), #lastScanAt = :now, #latestScore = :score, #latestViolations = :violations, #latestLanguageErrors = :languageErrors, #pageCount = if_not_exists(#pageCount, :zero) + :pageIncrement ADD #scanCount :one',
+      UpdateExpression: 'SET #hostname = :hostname, #displayName = if_not_exists(#displayName, :displayName), #firstSeenAt = if_not_exists(#firstSeenAt, :now), #lastScanAt = :now, #latestScore = :score, #latestGrade = :grade, #latestViolations = :violations, #latestLanguageErrors = :languageErrors, #pageCount = if_not_exists(#pageCount, :zero) + :pageIncrement ADD #scanCount :one',
       ExpressionAttributeNames: {
         '#hostname': 'hostname',
         '#displayName': 'displayName',
         '#firstSeenAt': 'firstSeenAt',
         '#lastScanAt': 'lastScanAt',
         '#latestScore': 'latestScore',
+        '#latestGrade': 'latestGrade',
         '#latestViolations': 'latestViolations',
         '#latestLanguageErrors': 'latestLanguageErrors',
         '#pageCount': 'pageCount',
@@ -116,6 +123,7 @@ export async function recordScan(input: ScanInput): Promise<{ site: SiteRecord; 
         ':displayName': site.displayName,
         ':now': now,
         ':score': score,
+        ':grade': grade,
         ':violations': violations,
         ':languageErrors': input.languageErrors,
         ':one': 1,
@@ -126,7 +134,7 @@ export async function recordScan(input: ScanInput): Promise<{ site: SiteRecord; 
     client.send(new UpdateCommand({
       TableName: table('OPENADA_PAGES_TABLE'),
       Key: { id: pageId },
-      UpdateExpression: 'SET #siteId = :siteId, #url = :url, #path = :path, #title = if_not_exists(#title, :title), #firstSeenAt = if_not_exists(#firstSeenAt, :now), #lastScanAt = :now, #latestScanId = :scanId, #latestScore = :score ADD #scanCount :one',
+      UpdateExpression: 'SET #siteId = :siteId, #url = :url, #path = :path, #title = if_not_exists(#title, :title), #firstSeenAt = if_not_exists(#firstSeenAt, :now), #lastScanAt = :now, #latestScanId = :scanId, #latestScore = :score, #latestGrade = :grade ADD #scanCount :one',
       ExpressionAttributeNames: {
         '#siteId': 'siteId',
         '#url': 'url',
@@ -136,6 +144,7 @@ export async function recordScan(input: ScanInput): Promise<{ site: SiteRecord; 
         '#lastScanAt': 'lastScanAt',
         '#latestScanId': 'latestScanId',
         '#latestScore': 'latestScore',
+        '#latestGrade': 'latestGrade',
         '#scanCount': 'scanCount',
       },
       ExpressionAttributeValues: {
@@ -146,6 +155,7 @@ export async function recordScan(input: ScanInput): Promise<{ site: SiteRecord; 
         ':now': now,
         ':scanId': scanId,
         ':score': score,
+        ':grade': grade,
         ':one': 1,
       },
     })),
@@ -155,8 +165,8 @@ export async function recordScan(input: ScanInput): Promise<{ site: SiteRecord; 
   const existingSite = await client.send(new GetCommand({ TableName: table('OPENADA_SITES_TABLE'), Key: { id: siteId } }))
   const savedPage = await client.send(new GetCommand({ TableName: table('OPENADA_PAGES_TABLE'), Key: { id: pageId } }))
   return {
-    site: { ...site, ...(existingSite.Item as Partial<SiteRecord>), lastScanAt: now, latestScore: score, latestViolations: violations, latestLanguageErrors: input.languageErrors, scanCount: Number(existingSite.Item?.scanCount || 1), pageCount: Number(existingSite.Item?.pageCount || 1) },
-    page: { ...page, ...(savedPage.Item as Partial<PageRecord>), lastScanAt: now, latestScanId: scanId, latestScore: score, scanCount: Number(savedPage.Item?.scanCount || 1) },
+    site: { ...site, ...(existingSite.Item as Partial<SiteRecord>), lastScanAt: now, latestScore: score, latestGrade: grade, latestViolations: violations, latestLanguageErrors: input.languageErrors, scanCount: Number(existingSite.Item?.scanCount || 1), pageCount: Number(existingSite.Item?.pageCount || 1) },
+    page: { ...page, ...(savedPage.Item as Partial<PageRecord>), lastScanAt: now, latestScanId: scanId, latestScore: score, latestGrade: grade, scanCount: Number(savedPage.Item?.scanCount || 1) },
     scan,
   }
 }

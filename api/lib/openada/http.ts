@@ -83,3 +83,34 @@ export function requirePost(req: NextApiRequest, res: NextApiResponse<ApiError>)
 
   return false
 }
+
+export function publicScansEnabled(): boolean {
+  return String(process.env.OPENADA_PUBLIC_SCANS_ENABLED || 'true').toLowerCase() !== 'false'
+}
+
+export function enforceScanHost(url: string, res: NextApiResponse<ApiError>): boolean {
+  const allowedHosts = String(process.env.OPENADA_SCAN_ALLOWED_HOSTS || '')
+    .split(',')
+    .map((host) => host.trim().toLowerCase())
+    .filter(Boolean)
+
+  if (allowedHosts.length === 0) return true
+
+  let hostname = ''
+  try {
+    hostname = new URL(url).hostname.toLowerCase()
+  } catch {
+    res.status(400).json({ error: { code: 'invalid_url', message: 'The scan URL is invalid.' } })
+    return false
+  }
+
+  if (allowedHosts.includes(hostname)) return true
+
+  res.status(403).json({
+    error: {
+      code: 'host_not_allowed',
+      message: 'This host is not enabled for public OpenADA scans.',
+    },
+  })
+  return false
+}

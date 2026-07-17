@@ -29,15 +29,21 @@ const ApiReferencePage: NextPage = () => {
           <section className="endpoint-list" aria-labelledby="endpoints-heading">
             <div className="section-heading"><h2 id="endpoints-heading">Endpoints</h2><a href="/api/openapi" target="_blank" rel="noreferrer">OpenAPI JSON <ExternalLink size={15} aria-hidden /></a></div>
             <Endpoint method="POST" path="/api/v1/check" title="Combined check" description="Run axe-core accessibility checks and LanguageTool-compatible language checks against HTML, text, or a public URL." example={combinedExample} />
-            <Endpoint method="POST" path="/api/v1/scans" title="Public directory scan" description="Fetch a public page, run both checks, and publish its latest score to the OpenADA directory." example={scanExample} />
+            <Endpoint method="POST" path="/api/v1/scans" title="Public directory scan" description="Fetch a public page, run both checks, and publish its latest numeric score and letter grade to the OpenADA directory." example={scanExample} />
             <Endpoint method="GET" path="/api/v1/directory" title="Browse the directory" description="List public sites. Add ?site=example.com to retrieve its observed pages and scan history." />
             <Endpoint method="POST" path="/api/v1/ada/check" title="ADA only" description="Run axe-core WCAG checks against submitted HTML." />
             <Endpoint method="POST" path="/api/v2/check" title="LanguageTool compatible" description="Use OpenADA as a LanguageTool-compatible spelling and grammar provider." />
           </section>
 
+          <section className="grade-band" aria-labelledby="grades-heading">
+            <div><ShieldCheck size={20} aria-hidden /><h2 id="grades-heading">Grade scale</h2><p>Grades are derived from the ADA score returned by axe-core findings.</p></div>
+            <div className="grade-list"><span><strong>A+</strong> 97-100</span><span><strong>A</strong> 93-96</span><span><strong>B</strong> 85-92</span><span><strong>C</strong> 70-84</span><span><strong>D</strong> 50-69</span><span><strong>F</strong> 0-49</span></div>
+          </section>
+
           <section className="notes" aria-label="Integration notes">
             <div><ShieldCheck size={20} aria-hidden /><h2>Authentication</h2><p>Public deployments can allow anonymous checks. When API keys are configured, send <code>X-API-Key</code> or <code>Authorization: Bearer ...</code>.</p></div>
             <div><Code2 size={20} aria-hidden /><h2>Widget</h2><p>Add the hosted widget to a public page to submit its URL and show a small score badge. The widget never receives private page content.</p></div>
+            <div><Globe2 size={20} aria-hidden /><h2>Scan controls</h2><p>Public scans can be disabled with <code>OPENADA_PUBLIC_SCANS_ENABLED=false</code>, limited with <code>OPENADA_SCAN_ALLOWED_HOSTS</code>, or protected with <code>OPENADA_API_KEYS</code>.</p></div>
           </section>
         </div>
         <style jsx global>{`
@@ -73,8 +79,16 @@ const ApiReferencePage: NextPage = () => {
           .notes div { display: grid; grid-template-columns: auto 1fr; gap: 8px 10px; }
           .notes svg { color: #25635f; }
           .notes p { grid-column: 2; color: #64748b; line-height: 1.5; }
+          .grade-band { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 1fr); gap: 24px; margin-top: 34px; border: 1px solid #c8d7d3; border-radius: 8px; background: #eaf3f1; padding: 18px; }
+          .grade-band > div:first-child { display: grid; grid-template-columns: auto 1fr; gap: 7px 10px; }
+          .grade-band > div:first-child svg { color: #25635f; }
+          .grade-band h2 { font-size: 1.05rem; }
+          .grade-band p { grid-column: 2; color: #526176; line-height: 1.45; }
+          .grade-list { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+          .grade-list span { border: 1px solid #c8d7d3; border-radius: 5px; background: #fff; padding: 7px 8px; color: #526176; font-size: .78rem; font-weight: 750; }
+          .grade-list strong { color: #25635f; font-size: 1rem; }
           code { border-radius: 4px; background: #e8eef4; padding: 2px 5px; font-family: "SFMono-Regular", Consolas, monospace; font-size: .86em; }
-          @media (max-width: 680px) { .api-page { padding: 18px; } .site-nav { display: grid; gap: 16px; margin-bottom: 46px; } .site-nav-links { justify-content: flex-start; } h1 { font-size: 2.45rem; } .notes { grid-template-columns: 1fr; } }
+          @media (max-width: 680px) { .api-page { padding: 18px; } .site-nav { display: grid; gap: 16px; margin-bottom: 46px; } .site-nav-links { justify-content: flex-start; } h1 { font-size: 2.45rem; } .notes, .grade-band { grid-template-columns: 1fr; } .grade-list { justify-content: flex-start; } }
         `}</style>
       </main>
       </OpenAdaShell>

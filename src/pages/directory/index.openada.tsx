@@ -13,6 +13,7 @@ type Site = {
   scanCount: number
   pageCount: number
   latestScore: number | null
+  latestGrade: string | null
   latestViolations: number
   latestLanguageErrors: number
 }
@@ -25,6 +26,7 @@ type Page = {
   lastScanAt: string
   scanCount: number
   latestScore: number | null
+  latestGrade: string | null
 }
 
 const DirectoryPage: NextPage = () => {
@@ -77,7 +79,7 @@ const DirectoryPage: NextPage = () => {
           {activeSite ? (
             <section className="site-detail" aria-labelledby="pages-heading">
               <div className="site-summary">
-                <div><span>Latest ADA score</span><strong>{activeSite.latestScore ?? '--'}</strong></div>
+                <div><span>Latest ADA grade</span><strong>{activeSite.latestGrade ?? '--'}</strong><small>{activeSite.latestScore ?? '--'} / 100</small></div>
                 <div><span>Pages observed</span><strong>{activeSite.pageCount}</strong></div>
                 <div><span>Language issues</span><strong>{activeSite.latestLanguageErrors}</strong></div>
               </div>
@@ -96,7 +98,7 @@ const DirectoryPage: NextPage = () => {
                 <div className="site-card-top"><Globe2 size={19} aria-hidden /><span>{formatDate(site.lastScanAt)}</span></div>
                 <h2>{site.displayName}</h2>
                 <p>{site.hostname}</p>
-                <div className="site-card-meta"><strong>{site.latestScore ?? '--'}</strong><span>ADA score</span><span>{site.pageCount} page{site.pageCount === 1 ? '' : 's'}</span></div>
+                <div className="site-card-meta"><strong>{site.latestGrade ?? '--'}</strong><span>{site.latestScore ?? '--'} / 100</span><span>{site.pageCount} page{site.pageCount === 1 ? '' : 's'}</span></div>
               </a>)}
             </section>
           )}
@@ -138,6 +140,7 @@ const DirectoryPage: NextPage = () => {
           .site-summary div { display: grid; gap: 8px; border-left: 3px solid #b8e7d9; padding: 4px 0 4px 13px; }
           .site-summary span, .section-heading span { color: #64748b; font-size: .82rem; font-weight: 750; }
           .site-summary strong { font-size: 1.8rem; }
+          .site-summary small { color: #64748b; font-size: .8rem; }
           .section-heading { margin-bottom: 12px; }
           .section-heading h2 { font-size: 1.15rem; }
           .page-list { border-top: 1px solid #dce3ea; }

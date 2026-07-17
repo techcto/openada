@@ -44,6 +44,8 @@ Use `openada-existing.yaml` when the AWS account already has the VPC, ECS cluste
 
 The OpenADA UI and API are routed by a dedicated host header. Use a hostname covered by the existing ALB certificate, such as `ada.example.com`, and create its DNS record pointing at the existing ALB.
 
+Public URL scans are enabled by default. Set `OPENADA_PUBLIC_SCANS_ENABLED=false` to disable them, or set `OPENADA_SCAN_ALLOWED_HOSTS` to a comma-separated hostname allowlist. Set `OPENADA_API_KEYS` when scan submissions should require a bearer token or `X-API-Key` header. The widget is opt-out: use `data-openada-auto="false"` and call `window.OpenADA.init()` manually when a site owner wants an explicit scan action.
+
 Run the offline check first:
 
 ```bash

@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { applyCors, enforceApiKey, handleOptions, readStringParam, requirePost } from '@lib/openada/http'
+import { applyCors, enforceApiKey, enforceScanHost, handleOptions, publicScansEnabled, readStringParam, requirePost } from '@lib/openada/http'
 import { checkAda, htmlToText } from '@lib/openada/ada'
 import { checkLanguage } from '@lib/openada/language'
 import { fetchRemoteHtml } from '@lib/openada/remote'
@@ -19,6 +19,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (!requirePost(req, res)) return
   if (!enforceApiKey(req, res)) return
+  if (!publicScansEnabled()) {
+    res.status(404).json({ error: { code: 'scans_disabled', message: 'Public site scans are disabled.' } })
+    return
+  }
 
   const url = readStringParam(req.body?.url).trim()
   const title = readStringParam(req.body?.title).slice(0, 240)
@@ -35,8 +39,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return
   }
 
+  if (!enforceScanHost(url, res)) return
+
   try {
     const fetched = await fetchRemoteHtml(url)
+    if (!enforceScanHost(fetched.url, res)) return
     const sourceHtml = fetched.html.slice(0, 200000)
     const [ada, languageResult] = await Promise.all([
       checkAda({ html: sourceHtml, url: fetched.url, wcagTags }),
@@ -62,6 +69,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(201).json({
       sourceUrl: fetched.url,
       ada,
+      grade: ada.grade,
       language: { errors: languageIssues.length, issues: languageIssues },
       directory: saved,
     })
