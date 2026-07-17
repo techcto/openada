@@ -292,6 +292,10 @@ The CloudFormation launch form supplies the Marketplace image defaults for the l
 
 Subscribe to [OpenADA MCP AgentCore on AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-2bjfvhksfwuwq) when you need the managed AgentCore Runtime front end. The AgentCore product has its own Marketplace identity and release workflow; configure its private Marketplace product identifier as the `MP_AWS_AGENTCORE_PRODUCT_ID` repository variable. It must not reuse the OpenADA Private ECS product identifier. Version tags build the AgentCore image, publish its CFT to `s3://openada-us/cloudformation/`, and submit its separate delivery-option changeset.
 
+<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-agentcore-runtime.yaml&amp;stackName=openada-agentcore"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch the OpenADA MCP AgentCore runtime stack" /></a>
+
+Use the separate [OpenADA Private Quickstart](devops/cloudformation/README.md) for the ECS product and the separate [OpenADA MCP AgentCore Quickstart](devops/agentcore/README.md) for the AgentCore product.
+
 ## Contest Note
 
 OpenADA is intentionally focused: it contains only the UI, API, scan worker, deployment, documentation, and public widget needed to make the service real. It does not carry unrelated application modules or a local LanguageTool runtime.

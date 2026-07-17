@@ -71,6 +71,12 @@ Balancer. Private deployments can require API keys and restrict crawl hosts.
 [Subscribe to OpenADA MCP AgentCore in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-2bjfvhksfwuwq), then use the
 [OpenADA MCP AgentCore Quickstart](devops/agentcore/README.md).
 
+<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-agentcore-runtime.yaml&amp;stackName=openada-agentcore"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch the OpenADA MCP AgentCore runtime stack" /></a>
+
+Use [OpenADA Private Quickstart](devops/cloudformation/README.md) for the ECS
+service, or [OpenADA MCP AgentCore Quickstart](devops/agentcore/README.md) for
+the stateless AI-agent gateway.
+
 Configure:
 
 ```text

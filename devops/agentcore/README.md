@@ -4,7 +4,14 @@ Connect Amazon Bedrock AgentCore Runtime to OpenADA's accessibility, language-
 quality, public-scan, and improvement-history tools through a stateless MCP
 server.
 
-[Subscribe to OpenADA MCP AgentCore in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-2bjfvhksfwuwq), then follow the customer deployment steps below.
+[Subscribe to OpenADA MCP AgentCore in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-2bjfvhksfwuwq) in the customer AWS account, then follow the customer deployment steps below.
+
+<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-agentcore-runtime.yaml&amp;stackName=openada-agentcore"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch the OpenADA MCP AgentCore runtime stack" /></a>
+
+The launch button opens the AgentCore runtime helper stack in `us-east-1`
+with `openada-agentcore` as the suggested stack name. Subscribe first, keep the
+Marketplace `ContainerImageUri` default, and provide `OpenAdaMcpUrl` before
+creating the stack.
 
 Configure the private Marketplace product identifier as the
 `MP_AWS_AGENTCORE_PRODUCT_ID` repository variable. Marketplace product metadata
