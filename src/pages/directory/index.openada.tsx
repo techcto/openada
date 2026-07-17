@@ -3,7 +3,7 @@ import type { NextPage } from 'next'
 import type { ReactNode } from 'react'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { ArrowLeft, CalendarDays, ExternalLink, FileSearch, Globe2, LoaderCircle, ScanSearch, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, CalendarDays, ExternalLink, FileDown, FileSearch, Globe2, LoaderCircle, Printer, ScanSearch, ShieldCheck } from 'lucide-react'
 import { OpenAdaShell } from '@components/OpenAdaShell'
 
 type Site = {
@@ -248,6 +248,9 @@ const DirectoryPage: NextPage = () => {
         .scan-row-score small, .scan-row-pages { color: #64748b; font-size: .8rem; }
         .scan-row-pages { text-align: right; }
         .page-list { border-top: 1px solid #dce3ea; } .page-row { min-height: 76px; border-bottom: 1px solid #e7edf3; color: #172033; text-decoration: none; transition: transform .15s ease; } .page-row > span:first-child { display: grid; gap: 5px; } .page-row small { color: #64748b; overflow-wrap: anywhere; } .page-score { display: inline-flex; align-items: center; gap: 6px; font-weight: 900; }
+        .archive-actions, .detail-actions, .report-actions { display: flex; align-items: center; gap: 8px; }
+        .report-actions button { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: #25635f; padding: 0 10px; font: inherit; font-size: .8rem; font-weight: 850; cursor: pointer; }
+        .report-actions button:hover, .report-actions button:focus-visible { border-color: #25635f; background: #eef8f5; }
         .page-detail { border-top: 1px solid #dce3ea; padding-top: 24px; } .detail-heading { align-items: flex-start; } .detail-heading p { color: #64748b; overflow-wrap: anywhere; } .detail-heading a { display: inline-flex; align-items: center; gap: 7px; color: #25635f; font-weight: 850; text-decoration: none; }
         .page-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; margin-top: 28px; }
         .page-main, .page-sidebar { min-width: 0; }
@@ -265,8 +268,9 @@ const DirectoryPage: NextPage = () => {
         .finding-section { margin-top: 30px; } .finding-section > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid #dce3ea; padding-bottom: 11px; } .finding-section > header span { color: #64748b; font-size: .82rem; } .finding-list { list-style: none; margin: 0; padding: 0; } .finding-list li { display: grid; gap: 6px; border-bottom: 1px solid #e7edf3; padding: 16px 0; } .finding-list strong { font-size: .95rem; } .finding-list p { color: #64748b; line-height: 1.45; } .finding-meta { color: #9f1239; font-size: .76rem; font-weight: 900; text-transform: uppercase; } .no-findings { color: #15803d; padding: 18px 0; font-weight: 800; }
         .error { margin-bottom: 18px; border: 1px solid #fecdd3; background: #fff1f2; color: #9f1239; padding: 14px; font-weight: 750; }
         @media (max-width: 900px) { .page-layout { grid-template-columns: minmax(0, 1fr) 260px; gap: 16px; } .scan-row { grid-template-columns: 30px minmax(0, 1fr) 140px 78px; } .scan-row-pages { display: none; } }
-        @media (max-width: 820px) { .directory-heading { display: grid; align-items: start; } .site-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .page-layout { grid-template-columns: 1fr; } .page-sidebar { order: -1; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; } }
-        @media (max-width: 620px) { .directory-page { padding: 18px; } .site-grid, .detail-metrics { grid-template-columns: 1fr; } .detail-metrics { display: grid; } .scan-row { grid-template-columns: 26px minmax(0, 1fr) 68px; gap: 8px; padding: 12px 0; } .scan-row-date { grid-column: 2; grid-row: 2; justify-self: start; text-align: left; font-size: .75rem; } .scan-row-score { grid-column: 3; grid-row: 1 / span 2; } .page-row { align-items: flex-start; padding: 14px 0; } .page-row > span:last-child { text-align: right; } .page-sidebar { grid-template-columns: 1fr; } .page-preview-frame { height: 420px; } }
+        @media print { .global-header, .global-footer, .back-link, .report-actions, .detail-actions > a { display: none !important; } .directory-shell, .directory-page { background: #fff; } .directory-page { width: 100%; padding: 0; } .directory-heading { margin-bottom: 18px; } .page-preview-frame { height: 480px; } }
+        @media (max-width: 820px) { .directory-heading { display: grid; align-items: start; } .site-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .page-layout { grid-template-columns: 1fr; } .page-sidebar { order: -1; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; } .detail-actions { align-items: flex-end; flex-direction: column; } }
+        @media (max-width: 620px) { .directory-page { padding: 18px; } .site-grid, .detail-metrics { grid-template-columns: 1fr; } .detail-metrics { display: grid; } .scan-row { grid-template-columns: 26px minmax(0, 1fr) 68px; gap: 8px; padding: 12px 0; } .scan-row-date { grid-column: 2; grid-row: 2; justify-self: start; text-align: left; font-size: .75rem; } .scan-row-score { grid-column: 3; grid-row: 1 / span 2; } .page-row { align-items: flex-start; padding: 14px 0; } .page-row > span:last-child { text-align: right; } .page-sidebar { grid-template-columns: 1fr; } .page-preview-frame { height: 420px; } .archive-bar { align-items: flex-start; flex-direction: column; } .archive-actions { width: 100%; justify-content: space-between; } .report-actions { flex-wrap: wrap; } }
       `}</style>
     </>
   )
@@ -296,7 +300,7 @@ function ScanView({ site, scan, pages }: { site?: Site; scan: Scan; pages: PageS
     return leftUrl.localeCompare(rightUrl, undefined, { sensitivity: 'base' })
   })
   return <section aria-labelledby="pages-heading">
-    <div className="archive-bar"><div><h2 id="pages-heading">Pages in this scan</h2><p>{site?.hostname} · scanned {formatDate(scan.completedAt || scan.createdAt, true)}</p></div><span className="scan-status">{scan.status}</span></div>
+    <div className="archive-bar"><div><h2 id="pages-heading">Pages in this scan</h2><p>{site?.hostname} · scanned {formatDate(scan.completedAt || scan.createdAt, true)}</p></div><div className="archive-actions"><span className="scan-status">{scan.status}</span><ReportActions /></div></div>
     <div className="page-list">{sortedPages.length === 0 ? <div className="empty"><FileSearch size={24} aria-hidden /><h2>No page results yet</h2><p>This scan is still processing or did not return any pages.</p></div> : sortedPages.map((page, index) => {
       const id = pageId(page)
       const url = page.sourceUrl || page.url || ''
@@ -316,7 +320,7 @@ function PageView({ page, history, siteId }: { page: PageDetail; history: PageHi
     void router.push(`/directory/${encodeURIComponent(siteId)}/scans/${encodeURIComponent(scan)}/pages/${encodeURIComponent(pageScan.id)}`)
   }
   return <section className="page-detail" aria-labelledby="page-detail-heading">
-    <div className="detail-heading"><div><p className="eyebrow">Page detail</p><h2 id="page-detail-heading">{page.title || new URL(page.sourceUrl).pathname}</h2><p>{page.sourceUrl}</p></div><a href={page.sourceUrl} target="_blank" rel="noreferrer">Open page <ExternalLink size={15} aria-hidden /></a></div>
+    <div className="detail-heading"><div><p className="eyebrow">Page detail</p><h2 id="page-detail-heading">{page.title || new URL(page.sourceUrl).pathname}</h2><p>{page.sourceUrl}</p></div><div className="detail-actions"><a href={page.sourceUrl} target="_blank" rel="noreferrer">Open page <ExternalLink size={15} aria-hidden /></a><ReportActions /></div></div>
     <div className="page-layout">
       <div className="page-main">
         <div className="page-preview">
@@ -343,6 +347,14 @@ function PageView({ page, history, siteId }: { page: PageDetail; history: PageHi
       </aside>
     </div>
   </section>
+}
+
+function ReportActions() {
+  const printReport = () => window.print()
+  return <div className="report-actions" aria-label="Report actions">
+    <button type="button" onClick={printReport}><Printer size={15} aria-hidden /> Print</button>
+    <button type="button" onClick={printReport}><FileDown size={15} aria-hidden /> Save PDF</button>
+  </div>
 }
 
 function FindingSection({ title, count, empty, children }: { title: string; count: number; empty: string; children: ReactNode }) {

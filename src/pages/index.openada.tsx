@@ -177,8 +177,6 @@ const HomePage: NextPage = () => {
           </div>
         </div>
 
-        <ContestBanner />
-
         <div className="url-band">
           <div className="url-intro">
             <p className="eyebrow">Check a public page or website</p>
@@ -218,6 +216,8 @@ const HomePage: NextPage = () => {
             )}
           </div>
         </div>
+
+        <ContestBanner />
 
         <div className="work-grid">
           <form id="checker-form" className="editor-pane" onSubmit={handleSubmit}>

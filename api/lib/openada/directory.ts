@@ -63,6 +63,15 @@ export type ScanRecord = ScanInput & {
   scannedAt: string
 }
 
+type CompletedScanJob = {
+  completedAt: string
+  pagesScanned: number
+  result?: {
+    ada?: { score?: number; grade?: string; violationsCount?: number }
+    language?: { errors?: number }
+  }
+}
+
 function siteDisplayName(hostname: string): string {
   const label = hostname.replace(/^www\./i, '').split('.')[0] || hostname
   return label.replace(/[-_]+/g, ' ').replace(/\b\w/g, (character) => character.toUpperCase())
@@ -248,15 +257,13 @@ export async function recordSiteScanSummary(input: {
   })
 }
 
-export async function listSites(): Promise<SiteRecord[]> {
-  const result = await client.send(new ScanCommand({ TableName: table('OPENADA_SITES_TABLE'), Limit: 100 }))
-  const sites = (result.Items || []) as SiteRecord[]
+async function latestCompletedJobs(): Promise<Map<string, CompletedScanJob>> {
   const jobTable = String(process.env.OPENADA_SCAN_JOBS_TABLE || '').trim()
-  if (!jobTable || sites.length === 0) return sites.sort((left, right) => right.lastScanAt.localeCompare(left.lastScanAt))
+  if (!jobTable) return new Map()
 
   const jobsResult = await client.send(new ScanCommand({ TableName: jobTable, Limit: 100 }))
-  const latestJobs = new Map<string, { completedAt: string; pagesScanned: number; result?: { ada?: { score?: number; grade?: string; violationsCount?: number }; language?: { errors?: number } } }>()
-  for (const item of (jobsResult.Items || []) as Array<{ siteId?: string; url?: string; status?: string; completedAt?: string; createdAt: string; pagesScanned: number; result?: { ada?: { score?: number; grade?: string; violationsCount?: number }; language?: { errors?: number } } }>) {
+  const latestJobs = new Map<string, CompletedScanJob>()
+  for (const item of (jobsResult.Items || []) as Array<{ siteId?: string; url?: string; status?: string; completedAt?: string; createdAt: string; pagesScanned: number; result?: CompletedScanJob['result'] }>) {
     if (item.status !== 'completed') continue
     let siteId = item.siteId?.toLowerCase() || ''
     if (!siteId && item.url) {
@@ -267,20 +274,27 @@ export async function listSites(): Promise<SiteRecord[]> {
     const current = latestJobs.get(siteId)
     if (!current || completedAt > current.completedAt) latestJobs.set(siteId, { completedAt, pagesScanned: item.pagesScanned, result: item.result })
   }
+  return latestJobs
+}
 
-  return sites.map((site) => {
-    const latest = latestJobs.get(site.id)
-    if (!latest || latest.completedAt < site.lastScanAt) return site
-    return {
-      ...site,
-      lastScanAt: latest.completedAt,
-      pageCount: latest.pagesScanned || site.pageCount,
-      latestScore: latest.result?.ada?.score ?? site.latestScore,
-      latestGrade: latest.result?.ada?.grade ?? site.latestGrade,
-      latestViolations: latest.result?.ada?.violationsCount ?? site.latestViolations,
-      latestLanguageErrors: latest.result?.language?.errors ?? site.latestLanguageErrors,
-    }
-  }).sort((left, right) => right.lastScanAt.localeCompare(left.lastScanAt))
+function applyLatestJob(site: SiteRecord, latest: CompletedScanJob | undefined): SiteRecord {
+  if (!latest || latest.completedAt < site.lastScanAt) return site
+  return {
+    ...site,
+    lastScanAt: latest.completedAt,
+    pageCount: latest.pagesScanned || site.pageCount,
+    latestScore: latest.result?.ada?.score ?? site.latestScore,
+    latestGrade: latest.result?.ada?.grade ?? site.latestGrade,
+    latestViolations: latest.result?.ada?.violationsCount ?? site.latestViolations,
+    latestLanguageErrors: latest.result?.language?.errors ?? site.latestLanguageErrors,
+  }
+}
+
+export async function listSites(): Promise<SiteRecord[]> {
+  const result = await client.send(new ScanCommand({ TableName: table('OPENADA_SITES_TABLE'), Limit: 100 }))
+  const sites = (result.Items || []) as SiteRecord[]
+  const latestJobs = await latestCompletedJobs()
+  return sites.map((site) => applyLatestJob(site, latestJobs.get(site.id))).sort((left, right) => right.lastScanAt.localeCompare(left.lastScanAt))
 }
 
 export async function getSite(siteId: string): Promise<{ site: SiteRecord | null; pages: PageRecord[]; scans: ScanRecord[] }> {
@@ -291,7 +305,9 @@ export async function getSite(siteId: string): Promise<{ site: SiteRecord | null
   ])
   const pages = ((pageResult.Items || []) as PageRecord[]).sort((left, right) => right.lastScanAt.localeCompare(left.lastScanAt))
   const scans = ((scanResult.Items || []) as ScanRecord[]).sort((left, right) => right.scannedAt.localeCompare(left.scannedAt))
-  return { site: (siteResult.Item as SiteRecord | undefined) || null, pages, scans }
+  const site = (siteResult.Item as SiteRecord | undefined) || null
+  const latestJobs = site ? await latestCompletedJobs() : new Map<string, CompletedScanJob>()
+  return { site: site ? applyLatestJob(site, latestJobs.get(site.id)) : null, pages, scans }
 }
 
 export async function getScan(scanId: string): Promise<ScanRecord | null> {
