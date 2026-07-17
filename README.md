@@ -11,6 +11,23 @@
 
 [![CI](https://github.com/techcto/openada/actions/workflows/ci.yml/badge.svg)](https://github.com/techcto/openada/actions/workflows/ci.yml)
 [![Open in GitHub](https://img.shields.io/badge/Open%20in-GitHub-181717?logo=github)](https://github.com/techcto/openada)
+[![100% built with GPT-5.6 Luna](https://img.shields.io/badge/100%25%20built%20with-GPT--5.6%20Luna-10b981?logo=openai&logoColor=white)](https://openai.devpost.com/)
+
+This is a brand-new project built 100% for [OpenAI Build Week](https://openai.devpost.com/), the OpenAI Codex challenge. GPT-5.6 is here, and Codex is now available in ChatGPT; this project explores what is possible when a coding agent helps turn a public-interest idea into a complete, deployed service. Submissions are due Tuesday, July 21 at 5:00 PM PT.
+
+## Why We Built OpenADA
+
+Two days after the contest began, we received the contest email. On July 16,
+2026, we purchased the OpenADA.us domain through GoDaddy and started building
+with a simple goal: do something good for the world and give back by creating
+free accessibility infrastructure that can benefit many people, powered by
+OpenAI Codex.
+
+The product idea itself was born during this contest. Before we started, we had
+not imagined turning public accessibility scans into a browsable, dated archive
+that people and AI agents could query, compare, and improve over time. The
+contest gave us the spark, and working with GPT-5.6 Luna in Codex helped turn
+that unexpected idea into a deployed, turnkey platform.
 
 Start with the [OpenADA Quickstart](Quickstart.md) for local testing, AWS Marketplace deployment, and AgentCore setup.
 
@@ -49,23 +66,49 @@ Try it live:
 - [Public API reference](https://openada.us/api-reference)
 - [ADA guidance](https://openada.us/docs)
 
+### AI Access And Product Modes
+
+OpenADA is usable in the tools where developers and accessibility teams already
+work. The public MCP endpoint is documented for **ChatGPT Developer Mode**,
+**OpenAI Codex CLI and IDE**, and **Claude custom connectors**. Each integration
+has step-by-step setup instructions, the correct `/mcp` endpoint, authentication
+guidance, example prompts, and links to the official client documentation in the
+[MCP connection guide](https://openada.us/docs/mcp).
+
+The project has two complementary deployment products:
+
+- **Public OpenADA:** a hosted, anonymous service for testing public pages,
+  running bounded same-host scans, browsing dated reports, and trying the API or
+  MCP tools without managing infrastructure.
+- **Private OpenADA:** an AWS Marketplace ECS deployment for organizations that
+  need their own UI, API, scan worker, Redis queue, DynamoDB archive, VPC, API
+  keys, allowed-host controls, and operational boundary.
+- **OpenADA MCP AgentCore:** a separate ARM64, stateless MCP gateway for Amazon
+  Bedrock AgentCore Runtime. It connects an AI agent to either the hosted public
+  service or a private OpenADA endpoint; AgentCore supplies the AWS IAM/SigV4
+  runtime boundary while OpenADA performs the checks and scans.
+
+The [root Quickstart](Quickstart.md), [Private OpenADA Quickstart](devops/cloudformation/README.md),
+and [AgentCore Quickstart](devops/agentcore/README.md) explain which path to
+choose and how to launch it.
+
 ## Judging Criteria
 
 ### Technological Implementation
 
-OpenADA is a real, deployed service rather than a static demo. Codex was used as an engineering collaborator across the full loop: shaping the API, building the crawler and durable scan workflow, iterating on the UI, writing CloudFormation and container workflows, debugging production behavior, and verifying the live AWS deployment. The result is a working Next.js UI, API service, asynchronous scan worker, Redis-backed queue, DynamoDB archive, public widget, OpenAPI document, and Docker/GitHub Actions release path.
+OpenADA is a real, deployed service rather than a static demo. Codex was used as an engineering collaborator across the full loop: shaping the API and MCP tools, building the crawler and durable scan workflow, iterating on the UI, writing CloudFormation and container workflows, debugging production behavior, and verifying the live AWS deployment. The result is a working Next.js UI, API service, asynchronous scan worker, Redis-backed queue, DynamoDB archive, public widget, OpenAPI document, stateless AgentCore gateway, and GitHub Actions Marketplace release path.
 
 ### Design
 
-The product has a complete workflow: a search-style URL entry point, a fast five-page default for first-time testing, adjustable crawl limits, progress feedback, a report route, a directory with latest scores, sorted page results, color-coded grades, page-level findings, historical scan selection, printable reports, API reference, and human-readable guidance. It is designed for repeated use by editors, developers, accessibility teams, and the public.
+The product has a complete workflow: a search-style URL entry point, a fast five-page default for first-time testing, adjustable crawl limits, progress feedback, a report route, a directory with latest scores, sorted page results, color-coded grades, page-level findings, historical scan selection, printable reports, API reference, MCP instructions for ChatGPT, Codex, and Claude, and human-readable guidance. It is designed for repeated use by editors, developers, accessibility teams, AI agents, and the public.
 
 ### Potential Impact
 
-Public agencies and small organizations should not need a large procurement budget or a specialized accessibility team just to understand where their websites fail. OpenADA gives web developers, agencies, government teams, and site owners a low-friction API and free public scanning path for published pages. The public archive also makes accessibility progress visible over time instead of hiding every scan inside a private dashboard.
+Public agencies and small organizations should not need a large procurement budget or a specialized accessibility team just to understand where their websites fail. OpenADA gives web developers, agencies, government teams, and site owners a low-friction API and free public scanning path for published pages. Teams can start in the public service, move to a private AWS deployment when they need control, or connect AI agents through AgentCore. The public archive also makes accessibility progress visible over time instead of hiding every scan inside a private dashboard.
 
 ### Quality of the Idea
 
-Most accessibility tools produce a private score and stop there. OpenADA combines accessibility, language quality, a public API, and an open web archive. The archive makes a website’s improvement legible: not just “what is my score now?”, but “which pages changed, what failed, and did the site improve from the last scan?” That public, time-based layer is the project’s distinctive idea.
+Most accessibility tools produce a private score and stop there. OpenADA combines accessibility, language quality, a public API, MCP tools, a choice between public and private operation, an AgentCore integration, and an open web archive. The archive makes a website’s improvement legible: not just “what is my score now?”, but “which pages changed, what failed, and did the site improve from the last scan?” That public, time-based layer is the project’s distinctive idea, and it emerged as a brand-new direction for us because of this contest.
 
 ### What The Judges Can Verify
 
@@ -74,16 +117,45 @@ Most accessibility tools produce a private score and stop there. OpenADA combine
 - The main directory uses the newest completed site crawl for its score and page count.
 - Each site has dated scans; each scan has sorted pages; each page has ADA and language findings plus historical versions.
 - The API remains useful without the UI through `/api/v1/check`, `/api/v1/ada/check`, `/api/v2/check`, `/api/v1/scans`, and `/api/v1/directory`.
+- ChatGPT, Codex, and Claude can connect to the public `/mcp` endpoint using the documented client-specific setup paths.
+- The same MCP tools can point at a protected Private OpenADA endpoint through `OPENADA_API_KEY` or run behind the AgentCore IAM/SigV4 boundary.
+- Public OpenADA, Private OpenADA, and OpenADA MCP AgentCore are documented as separate deployment choices rather than one oversized installation.
 - The deployment can be reproduced from the repository with Docker, CloudFormation, and GitHub Actions.
 
 ## What It Does
 
+OpenADA is a complete turnkey service, not a code sample or a dashboard mockup.
+The repository carries the product experience, application services, async
+processing, persistence, deployment infrastructure, AI integration, release
+automation, and operator documentation needed to run it end to end.
+
 - Runs `axe-core` against submitted HTML in the API container.
 - Returns LanguageTool-compatible results from `POST /api/v2/check`.
 - Supports a combined `POST /api/v1/check` request for HTML editors and page workflows.
-- Runs as three focused containers: a Next.js UI, a Next.js API, and an asynchronous scan worker, with Redis for job delivery and DynamoDB for the public archive.
+- Runs as three focused containers: a Next.js UI, a Next.js API, and an asynchronous scan worker.
+- Uses Redis for queue delivery and DynamoDB for public sites, pages, scan history, findings, and durable job progress.
 - Includes a hosted widget that can scan a public page and publish its score to the directory.
+- Exposes OpenAPI and MCP interfaces so both software integrations and AI agents can use the same service.
 - Uses an optional managed LanguageTool-compatible upstream through `LANGUAGETOOL_UPSTREAM_URL`.
+- Ships public and private operating modes, plus a separate stateless AgentCore gateway for AWS-native AI access.
+
+## Turnkey Platform
+
+Every major layer is included and connected:
+
+| Layer | Included capability |
+| --- | --- |
+| Public experience | URL-first checker, crawl controls, live scan progress, reports, printing, directory, page history, and ADA guidance |
+| Developer surface | Combined accessibility/language API, ADA endpoint, LanguageTool-compatible endpoint, OpenAPI document, widget, and health checks |
+| AI surface | Stateless MCP tools for ChatGPT, Codex, Claude, and Amazon Bedrock AgentCore |
+| Scan engine | Same-host crawler, robots-aware public-page fetching, bounded async jobs, retryable progress, and page-level results |
+| Persistence | Redis queue plus DynamoDB tables for sites, pages, scans, findings, and job state |
+| AWS deployment | ECS Fargate, ALB routing, Cloud Map service discovery, IAM roles, CloudWatch logs, optional ACM HTTPS, and CloudFormation |
+| Delivery | Versioned ARM64 and AMD64 container builds, Marketplace changesets, S3-hosted CFTs, CI checks, and release documentation |
+
+The result is a service that can be tried publicly in seconds, run locally with
+Docker Compose, launched privately from AWS Marketplace, or placed behind an AI
+agent without rebuilding the core application.
 
 ## Local Development
 
@@ -161,6 +233,12 @@ Use `https://openada.example.com/api/v2/check` for LanguageTool-compatible check
 
 ## AWS Deployment
 
+OpenADA packages the application and its AWS operating model together. The
+CloudFormation templates turn the core service into a repeatable launch rather
+than a hand-assembled collection of cloud resources. The standalone path creates
+the surrounding environment; the existing-environment path adds OpenADA to an
+ECS platform that is already operated by the customer.
+
 `devops/cloudformation/openada.yaml` provisions:
 
 - ECS Fargate cluster and task execution roles
@@ -171,7 +249,19 @@ Use `https://openada.example.com/api/v2/check` for LanguageTool-compatible check
 - Redis-backed scan queue and four on-demand DynamoDB tables for sites, pages, immutable scan records, and scan jobs
 - Optional ACM HTTPS listener
 
-Version tags publish rendered standalone and existing-cluster CFTs to `s3://openada-us/cloudformation/` with Marketplace image defaults for that release. The source templates use `{RELEASE_VERSION}` replacement tokens; local deployments can still override the image parameters. The template does not install Java LanguageTool, MySQL, or a local LanguageTool service. Redis is used only for asynchronous scan delivery; DynamoDB stores public directory metadata, page findings, immutable scan records, and durable job progress. OpenSearch remains an optional future search layer, not a requirement for the free service.
+Version tags publish rendered standalone and existing-cluster CFTs to
+`s3://openada-us/cloudformation/` with Marketplace image defaults for that
+release. The source templates use `{RELEASE_VERSION}` replacement tokens; local
+deployments can still override the image parameters. The template does not
+install Java LanguageTool, MySQL, or a local LanguageTool service. Redis is used
+only for asynchronous scan delivery; DynamoDB stores public directory metadata,
+page findings, immutable scan records, and durable job progress. OpenSearch
+remains an optional future search layer, not a requirement for the free service.
+
+The same release path builds the containers, publishes the CFT artifacts,
+submits the Marketplace delivery option, and records the versioned operational
+contract. That gives AWS customers a clear path from subscription to a running
+service while keeping the public demo and private deployment on the same codebase.
 
 ### Subscribe And Deploy On AWS
 

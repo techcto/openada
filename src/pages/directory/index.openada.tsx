@@ -189,7 +189,7 @@ const DirectoryPage: NextPage = () => {
       <Head>
         <title>{title} | OpenADA</title>
         <meta name="description" content={description} />
-        <meta name="keywords" content="ADA report, ADA compliance report, WCAG report, website accessibility scan, accessibility audit, public website accessibility, Seminole County ADA report" />
+        <meta name="keywords" content="ADA report, ADA compliance report, WCAG report, website accessibility scan, accessibility audit, public website accessibility" />
         <link rel="canonical" href={`https://openada.us${canonicalPath}`} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       </Head>
@@ -207,7 +207,7 @@ const DirectoryPage: NextPage = () => {
             </div>
 
             {error && <p className="error" role="alert">{error}</p>}
-            {!loading && level === 'sites' && <section className="directory-intro" aria-labelledby="directory-intro-heading"><h2 id="directory-intro-heading">Public ADA and WCAG reports</h2><p>OpenADA is a public archive of automated website accessibility scans. Browse sites, compare scan dates, and open page-level findings for ADA and WCAG review. The directory is designed for organizations, public agencies, and anyone looking for a clear website accessibility report, including searches such as “Seminole County ADA report.”</p></section>}
+            {!loading && level === 'sites' && <section className="directory-intro" aria-labelledby="directory-intro-heading"><h2 id="directory-intro-heading">Public ADA and WCAG reports</h2><p>OpenADA is a public archive of automated website accessibility scans. Browse sites, compare scan dates, and open page-level findings for ADA and WCAG review. The directory is designed for organizations, public agencies, and anyone looking for a clear website accessibility report.</p></section>}
             {loading ? <section className="loading"><LoaderCircle className="spin" size={32} aria-hidden /><strong>Loading the public archive</strong></section> : page ? <PageView page={page} history={data.pageHistory || []} siteId={selectedSite} /> : scan ? <ScanView site={site} scan={scan} pages={data.pages || []} /> : site ? <SiteView site={site} scans={data.scans || []} /> : <SiteList sites={data.sites || []} />}
           </div>
         </main>
@@ -334,8 +334,8 @@ function PageView({ page, history, siteId }: { page: PageDetail; history: PageHi
       <div className="page-main">
         <div className="page-preview">
           <div className="section-label">Captured page preview</div>
-          <PagePreview url={page.sourceUrl} title={page.title || page.sourceUrl} />
-          <p className="preview-note">Some websites block embedded previews with security headers. Use Open page to view the live page directly.</p>
+          <PagePreview url={page.sourceUrl} />
+          <p className="preview-note">Live previews are temporarily hidden while OpenADA connects a secure screenshot service. Use Open page to view the live page directly.</p>
         </div>
         <FindingSection title="ADA checks" count={violations.length} empty="No WCAG violations found on this page.">{violations.map((finding, index) => <li key={`${findingValue(finding, 'id')}-${index}`}><span className="finding-meta">{findingValue(finding, 'impact') || 'review'} · {findingValue(finding, 'id')}</span><strong>{findingValue(finding, 'help') || 'Accessibility issue'}</strong><p>{findingValue(finding, 'description') || findingValue(finding, 'failureSummary')}</p></li>)}</FindingSection>
         <FindingSection title="Language checks" count={languageIssues.length} empty="No language issues found on this page.">{languageIssues.map((issue, index) => <li key={`${findingValue(issue, 'ruleId')}-${index}`}><span className="finding-meta">{findingValue(issue, 'type') || 'language'} · {findingValue(issue, 'ruleId')}</span><strong>{findingValue(issue, 'message') || 'Language issue'}</strong><p>{findingValue(issue, 'word')}{findingValue(issue, 'fix') ? ` → ${findingValue(issue, 'fix')}` : ''}</p></li>)}</FindingSection>
@@ -358,25 +358,9 @@ function PageView({ page, history, siteId }: { page: PageDetail; history: PageHi
   </section>
 }
 
-function PagePreview({ url, title }: { url: string; title: string }) {
-  const [state, setState] = useState<'loading' | 'ready' | 'blocked'>('loading')
-
-  useEffect(() => {
-    setState('loading')
-  }, [url])
-
+function PagePreview({ url }: { url: string }) {
   return <div className="page-preview-stage">
-    {state !== 'blocked' && <iframe
-      className="page-preview-frame"
-      src={url}
-      title={`Preview of ${title}`}
-      loading="lazy"
-      sandbox="allow-scripts allow-same-origin"
-      onLoad={() => setState('ready')}
-      onError={() => setState('blocked')}
-    />}
-    {state === 'loading' && <p className="preview-status" role="status">Loading page preview...</p>}
-    {state === 'blocked' && <div className="preview-unavailable" role="status"><ShieldCheck size={24} aria-hidden /><strong>Preview unavailable</strong><p>This website does not allow embedded viewing or did not respond to the preview frame.</p><a href={url} target="_blank" rel="noreferrer">Open page in a new window <ExternalLink size={14} aria-hidden /></a></div>}
+    <div className="preview-unavailable" role="status"><ShieldCheck size={24} aria-hidden /><strong>Screenshot preview coming soon</strong><p>Some websites block embedded viewing. OpenADA will connect a secure screenshot service so these pages can be previewed without exposing a browser error.</p><a href={url} target="_blank" rel="noreferrer">Open page in a new window <ExternalLink size={14} aria-hidden /></a></div>
   </div>
 }
 
