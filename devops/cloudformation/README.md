@@ -19,6 +19,24 @@ The standalone mode is implemented by `openada.yaml`. The existing-environment m
 
 Use the public CloudFormation launch links from the [root Quickstart](../../Quickstart.md):
 
+Before opening the launch form, confirm these prerequisites:
+
+- Your AWS account is subscribed to [OpenADA Private](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e), and the launch region is `us-east-1`.
+- The deployment identity can create the resources requested by the template,
+  including ECS, IAM roles, EC2 security groups, Elastic Load Balancing,
+  CloudWatch Logs, DynamoDB, and ElastiCache. Accept the IAM capability in the
+  CloudFormation launch flow.
+- For a new environment, have a VPC, public subnets in at least two
+  availability zones, and service subnets with a NAT route. The ECS tasks need
+  outbound access for Marketplace ECR image pulls, CloudWatch logs, and public
+  page scans.
+- For an existing environment, have an ECS cluster, an ALB listener, an ALB
+  security group, service subnets, and a Redis endpoint reachable from those
+  subnets. The listener priorities `100`, `101`, and `102` must be unused.
+- If using HTTPS, have an ACM certificate in `us-east-1` that covers the public
+  hostname. For an existing ALB, create the DNS record for `HostHeader` before
+  testing the service.
+
 <table>
   <tr>
     <td width="50%"><strong>New ECS environment</strong><br />Provide <code>VpcId</code>, at least two public subnets for the ALB, and service subnets with NAT access to pull the Marketplace images and write CloudWatch logs.<br /><br /><a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada.yaml&amp;stackName=openada"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch a new OpenADA ECS environment" /></a></td>

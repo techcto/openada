@@ -1,6 +1,57 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: OpenADA UI, API, and public scan directory on an existing ECS cluster and ALB.
 
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Network prerequisites
+        Parameters:
+          - VpcId
+          - ServiceSubnets
+          - HostHeader
+      - Label:
+          default: Existing ECS and ALB resources
+        Parameters:
+          - Cluster
+          - LoadBalancerSecurityGroup
+          - ListenerArn
+          - UiListenerPriority
+          - ApiListenerPriority
+          - OpenAiAppsChallengeListenerPriority
+      - Label:
+          default: OpenADA settings
+        Parameters:
+          - EnvironmentName
+          - ApiKeys
+          - PublicScansEnabled
+          - ScanAllowedHosts
+          - CorsAllowedOrigins
+          - LanguageToolUpstreamUrl
+          - RedisHost
+          - RedisPort
+          - RedisPassword
+          - RedisTls
+      - Label:
+          default: Marketplace images
+        Parameters:
+          - UiImage
+          - ApiImage
+          - WorkerImage
+          - DesiredCount
+          - AssignPublicIp
+    ParameterLabels:
+      VpcId:
+        default: VPC
+      ServiceSubnets:
+        default: Service subnets with NAT access
+      UiImage:
+        default: Marketplace UI image (leave unchanged)
+      ApiImage:
+        default: Marketplace API image (leave unchanged)
+      WorkerImage:
+        default: Marketplace worker image (leave unchanged)
+
 Parameters:
   EnvironmentName:
     Type: String

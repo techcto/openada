@@ -1,6 +1,54 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: OpenADA UI, API, and public scan directory on ECS Fargate behind an ALB.
 
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Network prerequisites
+        Parameters:
+          - VpcId
+          - PublicSubnets
+          - ServiceSubnets
+      - Label:
+          default: OpenADA settings
+        Parameters:
+          - EnvironmentName
+          - CertificateArn
+          - ApiKeys
+          - PublicScansEnabled
+          - ScanAllowedHosts
+          - CorsAllowedOrigins
+          - LanguageToolUpstreamUrl
+      - Label:
+          default: Scan queue
+        Parameters:
+          - RedisNodeType
+          - RedisAuthToken
+      - Label:
+          default: Marketplace images
+        Parameters:
+          - UiImage
+          - ApiImage
+          - WorkerImage
+          - DesiredCount
+          - AssignPublicIp
+    ParameterLabels:
+      VpcId:
+        default: VPC
+      PublicSubnets:
+        default: Public subnets for the load balancer
+      ServiceSubnets:
+        default: Service subnets with NAT access
+      ApiKeys:
+        default: Private API key (optional)
+      UiImage:
+        default: Marketplace UI image (leave unchanged)
+      ApiImage:
+        default: Marketplace API image (leave unchanged)
+      WorkerImage:
+        default: Marketplace worker image (leave unchanged)
+
 Parameters:
   EnvironmentName:
     Type: String
