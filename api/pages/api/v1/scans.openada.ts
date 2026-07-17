@@ -47,7 +47,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!enforceScanHost(url, res)) return
 
   try {
-    const pending = [url]
+    const pending = [new URL(url).toString()]
     const visited = new Set<string>()
     const pages: Array<{
       sourceUrl: string
@@ -105,7 +105,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         if (crawl) {
           for (const link of extractSameHostLinks(sourceHtml, fetched.url)) {
-            if (!visited.has(link) && !pending.includes(link) && new URL(link).hostname === crawlHostname) {
+            if (pending.length < 50 && !visited.has(link) && !pending.includes(link) && new URL(link).hostname === crawlHostname) {
               pending.push(link)
             }
           }
