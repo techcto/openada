@@ -2,7 +2,7 @@ import { lookup } from 'node:dns/promises'
 import { isIP } from 'node:net'
 import { JSDOM } from 'jsdom'
 
-const MAX_HTML_BYTES = 2 * 1024 * 1024
+const MAX_HTML_BYTES = 10 * 1024 * 1024
 const MAX_REDIRECTS = 3
 const REQUEST_TIMEOUT_MS = 15_000
 
@@ -90,7 +90,7 @@ async function fetchRemoteHtmlAtUrl(input: string, redirectCount: number): Promi
 
     const contentLength = Number(response.headers.get('content-length') || 0)
     if (contentLength > MAX_HTML_BYTES) {
-      throw new Error('The page is larger than the 2 MB URL check limit.')
+      throw new Error('The page is larger than the 10 MB URL check limit.')
     }
 
     const html = await readResponseBody(response)
@@ -152,7 +152,7 @@ async function readResponseBody(response: Response): Promise<string> {
     totalBytes += chunk.length
     if (totalBytes > MAX_HTML_BYTES) {
       await reader.cancel()
-      throw new Error('The page is larger than the 2 MB URL check limit.')
+      throw new Error('The page is larger than the 10 MB URL check limit.')
     }
     chunks.push(chunk)
   }

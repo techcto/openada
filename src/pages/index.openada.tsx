@@ -193,6 +193,12 @@ const HomePage: NextPage = () => {
                 type="url"
                 value={url}
                 onChange={(event) => setUrl(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault()
+                    handleSiteScan()
+                  }
+                }}
                 placeholder="https://example.com/page"
                 inputMode="url"
                 autoComplete="url"
