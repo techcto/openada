@@ -19,12 +19,13 @@ The standalone mode is implemented by `openada.yaml`. The existing-environment m
 
 Use the public CloudFormation launch links from the [root Quickstart](../../Quickstart.md):
 
-- **New ECS environment:** provide `VpcId`, at least two public subnets for the
-  ALB, and service subnets with NAT access to pull the Marketplace images and
-  write CloudWatch logs.
-- **Existing ECS environment:** provide `VpcId`, `Cluster`,
-  `LoadBalancerSecurityGroup`, `ListenerArn`, `ServiceSubnets`, `HostHeader`,
-  and a reachable `RedisHost`.
+<table>
+  <tr>
+    <td width="50%"><strong>New ECS environment</strong><br />Provide <code>VpcId</code>, at least two public subnets for the ALB, and service subnets with NAT access to pull the Marketplace images and write CloudWatch logs.<br /><br /><a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada.yaml"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch a new OpenADA ECS environment" /></a></td>
+    <td width="50%"><strong>Existing ECS environment</strong><br />Provide <code>VpcId</code>, <code>Cluster</code>, <code>LoadBalancerSecurityGroup</code>, <code>ListenerArn</code>, <code>ServiceSubnets</code>, <code>HostHeader</code>, and a reachable <code>RedisHost</code>.<br /><br /><a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-existing.yaml"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch OpenADA in an existing ECS environment" /></a></td>
+  </tr>
+</table>
+
 - Keep the `UiImage`, `ApiImage`, and `WorkerImage` defaults supplied by the
   launch template. They point to the subscribed Marketplace delivery.
 - Set `CertificateArn` for HTTPS on a new environment. The certificate must be

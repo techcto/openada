@@ -31,8 +31,14 @@ for the Marketplace subscription and the CloudFormation launch.
 
 1. [Subscribe to OpenADA Private in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e).
 2. Stay in `us-east-1`, then choose the deployment that matches your account:
-   - [Launch a new ECS environment](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada.yaml)
-   - [Add OpenADA to an existing ECS environment](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-existing.yaml)
+
+<table>
+  <tr>
+    <td width="50%"><strong>New ECS environment</strong><br />Creates a complete standalone OpenADA stack.<br /><br /><a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada.yaml"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch a new OpenADA ECS environment" /></a></td>
+    <td width="50%"><strong>Existing ECS environment</strong><br />Adds OpenADA services to an existing environment.<br /><br /><a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-existing.yaml"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch OpenADA in an existing ECS environment" /></a></td>
+  </tr>
+</table>
+
 3. Keep the prefilled Marketplace image defaults. Do not replace them with Docker
    Hub images or local image names.
 4. Complete the required VPC, subnet, load balancer, cluster, and Redis fields

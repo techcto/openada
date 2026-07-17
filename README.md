@@ -269,8 +269,20 @@ service while keeping the public demo and private deployment on the same codebas
 
 Choose a deployment path:
 
-- [Launch a new OpenADA ECS stack](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada.yaml) creates the ECS cluster, ALB, Redis queue, services, and directory tables.
-- [Add OpenADA to an existing ECS environment](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-existing.yaml) reuses an existing ECS cluster, ALB, VPC, subnets, and reachable Redis endpoint.
+<table>
+  <tr>
+    <td width="50%">
+      <strong>New ECS environment</strong><br />
+      Creates the ECS cluster, ALB, Redis queue, services, and directory tables.<br /><br />
+      <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada.yaml"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch a new OpenADA ECS stack" /></a>
+    </td>
+    <td width="50%">
+      <strong>Existing ECS environment</strong><br />
+      Reuses an existing ECS cluster, ALB, VPC, subnets, and reachable Redis endpoint.<br /><br />
+      <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-existing.yaml"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch OpenADA in an existing ECS environment" /></a>
+    </td>
+  </tr>
+</table>
 
 The CloudFormation launch form supplies the Marketplace image defaults for the latest published release. Provide the VPC, public and service subnets, Redis settings when using the existing-environment template, and an ACM certificate ARN when HTTPS is required. Service subnets need NAT access to pull the private ECR images and send logs unless public IP assignment is enabled. The public templates remain available at [`openada.yaml`](https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada.yaml) and [`openada-existing.yaml`](https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-existing.yaml).
 
