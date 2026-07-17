@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
-import { BookOpen, Code2, ExternalLink, Globe2, Github, Star } from 'lucide-react'
+import { BookOpen, Bot, Code2, ExternalLink, Globe2, Github, Star } from 'lucide-react'
 
-type CurrentPage = 'home' | 'directory' | 'api' | 'docs' | 'scan' | 'report'
+type CurrentPage = 'home' | 'directory' | 'api' | 'docs' | 'mcp' | 'scan' | 'report'
 
 export function OpenAdaShell({ children, current }: { children: ReactNode; current: CurrentPage }) {
   return (
@@ -16,6 +16,7 @@ export function OpenAdaShell({ children, current }: { children: ReactNode; curre
             <a className={current === 'directory' ? 'global-nav-link current' : 'global-nav-link'} href="/directory" aria-current={current === 'directory' ? 'page' : undefined}><Globe2 size={16} aria-hidden /> Directory</a>
             <a className={current === 'api' ? 'global-nav-link current' : 'global-nav-link'} href="/api-reference" aria-current={current === 'api' ? 'page' : undefined}><Code2 size={16} aria-hidden /> Public API</a>
             <a className={current === 'docs' ? 'global-nav-link current' : 'global-nav-link'} href="/docs" aria-current={current === 'docs' ? 'page' : undefined}><BookOpen size={16} aria-hidden /> ADA guidance</a>
+            <a className={current === 'mcp' ? 'global-nav-link current' : 'global-nav-link'} href="/docs/mcp" aria-current={current === 'mcp' ? 'page' : undefined}><Bot size={16} aria-hidden /> MCP</a>
             <a className="global-nav-link" href="https://github.com/techcto/openada" target="_blank" rel="noreferrer"><Github size={16} aria-hidden /> GitHub</a>
           </nav>
         </div>

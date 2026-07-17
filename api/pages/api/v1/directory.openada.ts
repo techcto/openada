@@ -1,14 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { applyCors, handleOptions } from '@lib/openada/http'
 import { getScan, getSite, listSites } from '@lib/openada/directory'
+import { hostnamesMatch } from '@lib/openada/host'
 import { getScanJob, listScanJobsForHost } from '@lib/openada/scan-jobs'
 
 type JobLike = NonNullable<Awaited<ReturnType<typeof getScanJob>>>
 
 function jobBelongsToSite(job: JobLike, siteId: string): boolean {
-  if (job.siteId) return job.siteId.toLowerCase() === siteId
+  if (job.siteId) return hostnamesMatch(job.siteId, siteId)
   try {
-    return new URL(job.url).hostname.toLowerCase() === siteId
+    return hostnamesMatch(new URL(job.url).hostname, siteId)
   } catch {
     return false
   }
@@ -41,13 +42,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return
     }
 
-    const siteId = typeof req.query.site === 'string' ? req.query.site.trim().toLowerCase() : ''
+    let siteId = typeof req.query.site === 'string' ? req.query.site.trim().toLowerCase() : ''
     if (!siteId) {
       res.status(200).json({ sites: await listSites() })
       return
     }
 
-    const result = await getSite(siteId)
+    let result = await getSite(siteId)
+    if (!result.site && !siteId.startsWith('www.')) {
+      const wwwSiteId = `www.${siteId}`
+      const wwwResult = await getSite(wwwSiteId)
+      if (wwwResult.site) {
+        siteId = wwwSiteId
+        result = wwwResult
+      }
+    }
     if (!result.site) {
       res.status(404).json({ error: { code: 'site_not_found', message: 'That site is not in the directory.' } })
       return

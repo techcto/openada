@@ -9,6 +9,55 @@ import { startQueuedScan } from '@lib/openada/scan-service'
 
 const MAX_HTML = 200000
 const MAX_TEXT = 20000
+const recordSchema = z.record(z.string(), z.unknown())
+
+const checkPageOutputSchema = z.object({
+  sourceUrl: z.string().nullable(),
+  ada: recordSchema.nullable(),
+  language: z.object({
+    errors: z.number(),
+    issues: z.array(recordSchema),
+  }).passthrough(),
+}).passthrough()
+
+const scanSiteOutputSchema = z.object({
+  jobId: z.string(),
+  status: z.string(),
+  url: z.string(),
+  maxPages: z.number(),
+  statusUrl: z.string(),
+  message: z.string(),
+}).passthrough()
+
+const scanStatusOutputSchema = z.object({
+  jobId: z.string(),
+  status: z.string(),
+  url: z.string(),
+  maxPages: z.number(),
+  pagesScanned: z.number(),
+  pagesDiscovered: z.number(),
+  queuedPages: z.number(),
+  currentUrl: z.string().nullable(),
+  score: z.number().nullable(),
+  grade: z.string().nullable(),
+  languageErrors: z.number().nullable(),
+  errors: z.array(recordSchema),
+  result: recordSchema.optional(),
+  error: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  completedAt: z.string().nullable(),
+}).passthrough()
+
+const directoryOutputSchema = z.object({
+  sites: z.array(recordSchema).optional(),
+  site: recordSchema.optional(),
+  pages: z.array(recordSchema).optional(),
+  scans: z.array(recordSchema).optional(),
+  scanJobs: z.array(scanStatusOutputSchema).optional(),
+  selectedScan: scanStatusOutputSchema.nullable().optional(),
+  selectedPage: recordSchema.nullable().optional(),
+}).passthrough()
 
 function jsonSafe<T>(value: T): T {
   return JSON.parse(JSON.stringify(value, (_key, nested) => {
@@ -87,6 +136,7 @@ export function createOpenAdaMcpServer(): McpServer {
       language: z.string().default('en-US').describe('LanguageTool language code, such as en-US.'),
       wcagTags: z.string().optional().describe('Comma-separated axe-core tags, such as wcag2a,wcag2aa.'),
     },
+    outputSchema: checkPageOutputSchema,
   }, async ({ url, html, text, language, wcagTags }) => {
     if (!html?.trim() && !text?.trim() && !url) return toolError('Provide html, text, or a public URL.')
     try {
@@ -130,6 +180,7 @@ export function createOpenAdaMcpServer(): McpServer {
       wcagTags: z.string().optional().describe('Comma-separated axe-core tags.'),
       title: z.string().max(240).optional().describe('Optional title for the scan pages.'),
     },
+    outputSchema: scanSiteOutputSchema,
   }, async ({ url, maxPages, language, wcagTags, title }) => {
     try {
       const job = await startQueuedScan({
@@ -160,6 +211,7 @@ export function createOpenAdaMcpServer(): McpServer {
       jobId: z.string().min(1).describe('Job ID returned by openada_scan_site.'),
       includePages: z.boolean().default(true).describe('Include page summaries and findings when the scan is complete.'),
     },
+    outputSchema: scanStatusOutputSchema,
   }, async ({ jobId, includePages }) => {
     try {
       const job = await getScanJob(jobId)
@@ -183,11 +235,20 @@ export function createOpenAdaMcpServer(): McpServer {
       scanId: z.string().optional().describe('Optional scan job ID to inspect.'),
       pageId: z.string().optional().describe('Optional stored page scan ID to inspect findings.'),
     },
+    outputSchema: directoryOutputSchema,
   }, async ({ site, scanId, pageId }) => {
     try {
       if (!site?.trim()) return toolResult({ sites: await listSites() })
-      const siteId = site.trim().toLowerCase()
-      const detail = await getSite(siteId)
+      let siteId = site.trim().toLowerCase()
+      let detail = await getSite(siteId)
+      if (!detail.site && !siteId.startsWith('www.')) {
+        const wwwSiteId = `www.${siteId}`
+        const wwwDetail = await getSite(wwwSiteId)
+        if (wwwDetail.site) {
+          siteId = wwwSiteId
+          detail = wwwDetail
+        }
+      }
       if (!detail.site) return toolError('That site is not in the public directory.')
       const jobs = await listScanJobsForHost(siteId)
       const selectedJob = scanId ? await getScanJob(scanId) : null

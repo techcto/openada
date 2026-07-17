@@ -4,9 +4,9 @@
   "description": "OpenADA helps web developers, public agencies, and civic teams find accessibility and language issues across public web pages. Check one page, queue a same-host crawl, follow durable progress, and compare public scan history over time. OpenADA combines axe-core accessibility checks with LanguageTool-compatible language analysis and publishes a browsable public archive.",
   "category": "Developer tools",
   "website": "https://openada.us",
-  "supportUrl": "https://openada.us/api-reference",
-  "privacyPolicyUrl": "https://openada.us/docs/privacy",
-  "termsUrl": "https://openada.us/docs/terms",
+  "supportUrl": "https://openada.us/support",
+  "privacyPolicyUrl": "https://openada.us/privacy",
+  "termsUrl": "https://openada.us/terms",
   "mcpServerUrl": "https://openada.us/mcp",
   "tools": [
     "openada_check_page",

@@ -70,7 +70,13 @@ async function fetchRemoteHtmlAtUrl(input: string, redirectCount: number): Promi
 
       const location = response.headers.get('location')
       if (!location) throw new Error('The page returned an invalid redirect.')
-      return fetchRemoteHtmlAtUrl(new URL(location, url).toString(), redirectCount + 1)
+      const redirectUrl = new URL(location, url)
+      // Some geo-routing CDNs emit a locale wildcard such as /us-* to HTTP clients.
+      // Resolve it to the neutral English locale instead of following a literal 404 path.
+      if (redirectUrl.pathname.includes('*')) {
+        redirectUrl.pathname = redirectUrl.pathname.replace(/\*/g, 'en')
+      }
+      return fetchRemoteHtmlAtUrl(redirectUrl.toString(), redirectCount + 1)
     }
 
     if (!response.ok) {

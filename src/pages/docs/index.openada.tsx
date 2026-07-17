@@ -4,7 +4,6 @@ import type { ReactNode } from 'react'
 import {
   AlertCircle,
   ArrowLeft,
-  Bot,
   BookOpen,
   CheckCircle2,
   ExternalLink,
@@ -63,7 +62,6 @@ const DocsPage: NextPage = () => {
             <a href="#exceptions">Exceptions, not shortcuts</a>
             <a href="#test-and-improve">Test and improve</a>
             <a href="#openada-workflow">The OpenADA workflow</a>
-            <a href="#mcp">AI agents with MCP</a>
             <a href="#law-library">Federal law map</a>
             <a href="#official-sources">Official sources</a>
           </aside>
@@ -167,22 +165,6 @@ const DocsPage: NextPage = () => {
                 <Endpoint method="GET" path="/api/health" detail="Check whether the API container is available." />
               </div>
               <a className="primary-link" href="/"><SearchCheck size={17} aria-hidden /><span>Try the live checker</span></a>
-            </section>
-
-            <section id="mcp" className="docs-section workflow-section mcp-section">
-              <div className="section-kicker"><Bot size={17} aria-hidden /> OpenADA for AI agents</div>
-              <h2>Give your AI coding partner an accessibility archive</h2>
-              <p>OpenADA is a remote Model Context Protocol server. Connect an MCP-capable assistant to the live endpoint and ask it to check a public page, start a bounded site scan, follow scan progress, or inspect the public history of a website.</p>
-              <div className="notice notice-neutral"><Bot size={20} aria-hidden /><p><strong>One connection, four useful tools.</strong> The same service powers ChatGPT, Codex, Claude, and other MCP clients. Site scans return immediately with a job ID, then the agent polls durable progress while the worker checks pages in the background.</p></div>
-              <div className="mcp-grid">
-                <div className="mcp-card"><h3>1. ChatGPT</h3><p>Open the Apps or Connectors developer flow available in your ChatGPT workspace, add a remote MCP server, and enter:</p><code className="mcp-code">https://openada.us/mcp</code><p>For a public app submission, use the same URL in the OpenAI Apps submission form. OpenADA is an app-only integration, so it does not require a custom ChatGPT UI to be useful.</p><a className="text-link" href="https://learn.chatgpt.com/docs/submit-plugins" target="_blank" rel="noreferrer">Open the ChatGPT submission guide <ExternalLink size={14} aria-hidden /></a></div>
-                <div className="mcp-card"><h3>2. Codex CLI or IDE</h3><p>Add a Streamable HTTP server from the MCP settings in Codex, or add this table to <code>~/.codex/config.toml</code>:</p><pre className="mcp-code-block"><code>{`[mcp_servers.openada]\nurl = "https://openada.us/mcp"\ndefault_tools_approval_mode = "writes"`}</code></pre><p>Run <code>codex mcp list</code>, restart the client, then ask Codex to check a URL. The <code>writes</code> approval mode keeps the queued scan tool visible for confirmation.</p><a className="text-link" href="https://developers.openai.com/codex/mcp" target="_blank" rel="noreferrer">Read the Codex MCP guide <ExternalLink size={14} aria-hidden /></a></div>
-                <div className="mcp-card"><h3>3. Claude Code</h3><p>Register the remote server from a project directory:</p><pre className="mcp-code-block"><code>{`claude mcp add --transport http openada https://openada.us/mcp\nclaude mcp list`}</code></pre><p>Then use <code>/mcp</code> inside Claude Code to inspect the connection. If a deployment requires a key, add <code>--header "X-API-Key: $OPENADA_API_KEY"</code>.</p><a className="text-link" href="https://code.claude.com/docs/en/mcp" target="_blank" rel="noreferrer">Read the Claude Code MCP guide <ExternalLink size={14} aria-hidden /></a></div>
-                <div className="mcp-card"><h3>4. Inspect locally</h3><p>Run the MCP Inspector to explore the server and call tools before adding it to an agent:</p><pre className="mcp-code-block"><code>{`npx @modelcontextprotocol/inspector`}</code></pre><p>Choose Streamable HTTP and enter <code>http://localhost:3001/mcp</code> for Docker Compose, or the public URL for the deployed service.</p><a className="text-link" href="https://modelcontextprotocol.io/docs/tools/inspector" target="_blank" rel="noreferrer">Open the MCP Inspector docs <ExternalLink size={14} aria-hidden /></a></div>
-              </div>
-              <h3 className="mcp-prompts-heading">Useful prompts</h3>
-              <div className="prompt-list"><code>Check https://example.gov and summarize the most serious accessibility findings.</code><code>Start a 50-page scan for https://example.gov, report progress, and tell me the final grade.</code><code>Show the latest archived scan for www.example.gov and explain what should improve first.</code></div>
-              <div className="notice notice-important"><AlertCircle size={20} aria-hidden /><p>OpenADA only fetches public URLs and applies bounded same-host crawling. Results are automated engineering signals, not legal advice, a compliance certification, or a guarantee about litigation risk. Pair every report with manual testing and the requirements that apply to the organization.</p></div>
             </section>
 
             <section id="law-library" className="docs-section">

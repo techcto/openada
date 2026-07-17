@@ -107,3 +107,8 @@ tmp
 /public
 !/public/
 !/public/openada-logo.svg
+!/public/openada-app-icon.svg
+!/public/openada-app-icon-dark.svg
+!/public/openada-directory-icon.png
+!/public/openada-composer-icon.png
+!/public/openadademo1.mp4

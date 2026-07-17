@@ -1,6 +1,7 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocumentClient, GetCommand, PutCommand, ScanCommand } from '@aws-sdk/lib-dynamodb'
 import { randomUUID } from 'node:crypto'
+import { hostnamesMatch } from '@lib/openada/host'
 
 // Durable scan state lives in DynamoDB so the UI can reconnect after a task restart.
 export type ScanJobStatus = 'pending' | 'running' | 'completed' | 'failed'
@@ -94,13 +95,12 @@ export async function listScanJobs(url: string): Promise<ScanJob[]> {
 }
 
 export async function listScanJobsForHost(hostname: string): Promise<ScanJob[]> {
-  const siteId = hostname.trim().toLowerCase()
   const result = await client.send(new ScanCommand({ TableName: table(), Limit: 100 }))
   return ((result.Items || []) as ScanJob[])
     .filter((job) => {
-      if (job.siteId) return job.siteId.toLowerCase() === siteId
+      if (job.siteId) return hostnamesMatch(job.siteId, hostname)
       try {
-        return new URL(job.url).hostname.toLowerCase() === siteId
+        return hostnamesMatch(new URL(job.url).hostname, hostname)
       } catch {
         return false
       }

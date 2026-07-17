@@ -114,7 +114,8 @@ const HomePage: NextPage = () => {
 
     const submittedUrl = url.trim()
     const submitter = (event.nativeEvent as SubmitEvent).submitter
-    const crawl = submitter instanceof HTMLButtonElement && submitter.value === 'site'
+    // Pressing Enter in the URL field has no submitter; treat it like the primary site-scan action.
+    const crawl = (!submitter && Boolean(submittedUrl)) || (submitter instanceof HTMLButtonElement && submitter.value === 'site')
     if (crawl && !submittedUrl) {
       setError('Enter a public page URL to scan the site.')
       return

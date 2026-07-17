@@ -47,6 +47,11 @@ Parameters:
     Default: ''
     NoEcho: true
     Description: Optional comma-separated API keys. Prefer a secret-backed deployment for production credentials.
+  OpenAiAppsChallengeToken:
+    Type: String
+    Default: ''
+    NoEcho: true
+    Description: Optional token returned at /.well-known/openai-apps-challenge during app submission domain verification.
   LanguageToolUpstreamUrl:
     Type: String
     Default: ''
@@ -89,6 +94,12 @@ Parameters:
     MinValue: 1
     MaxValue: 49999
     Description: Unused priority for the OpenADA API host and path rule.
+  OpenAiAppsChallengeListenerPriority:
+    Type: Number
+    Default: 102
+    MinValue: 1
+    MaxValue: 49999
+    Description: Priority for the OpenAI Apps challenge host and path rule.
 
 Resources:
   ServiceSecurityGroup:
@@ -305,6 +316,8 @@ Resources:
               Value: production
             - Name: OPENADA_API_KEYS
               Value: !Ref ApiKeys
+            - Name: OPENAI_APPS_CHALLENGE_TOKEN
+              Value: !Ref OpenAiAppsChallengeToken
             - Name: OPENADA_CORS_ORIGINS
               Value: !Ref CorsAllowedOrigins
             - Name: LANGUAGETOOL_UPSTREAM_URL
@@ -464,6 +477,22 @@ Resources:
         - Field: path-pattern
           PathPatternConfig:
             Values: [/api/*]
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref ApiTargetGroup
+
+  OpenAiAppsChallengeListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref ListenerArn
+      Priority: !Ref OpenAiAppsChallengeListenerPriority
+      Conditions:
+        - Field: host-header
+          HostHeaderConfig:
+            Values: [!Ref HostHeader]
+        - Field: path-pattern
+          PathPatternConfig:
+            Values: [/.well-known/openai-apps-challenge]
       Actions:
         - Type: forward
           TargetGroupArn: !Ref ApiTargetGroup

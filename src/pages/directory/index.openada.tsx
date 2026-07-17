@@ -259,7 +259,16 @@ const DirectoryPage: NextPage = () => {
         .score-panel .metric { padding: 16px; }
         .page-preview { border: 1px solid #dce3ea; border-radius: 8px; background: #fff; overflow: hidden; }
         .section-label { border-bottom: 1px solid #e7edf3; padding: 13px 16px; color: #25635f; font-size: .78rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+        .page-preview-stage { position: relative; min-height: 560px; background: #f8fafc; }
         .page-preview-frame { display: block; width: 100%; height: 560px; border: 0; background: #fff; }
+        .preview-status, .preview-unavailable { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 10px; padding: 24px; text-align: center; color: #526176; }
+        .preview-status { pointer-events: none; }
+        .preview-unavailable { align-content: center; background: #f8fafc; }
+        .preview-unavailable svg { color: #25635f; }
+        .preview-unavailable strong { color: #172033; font-size: 1.05rem; }
+        .preview-unavailable p { max-width: 340px; line-height: 1.5; }
+        .preview-unavailable a { display: inline-flex; align-items: center; gap: 6px; color: #25635f; font-weight: 850; text-decoration: none; }
+        .preview-unavailable a:hover, .preview-unavailable a:focus-visible { text-decoration: underline; }
         .preview-note { border-top: 1px solid #e7edf3; padding: 10px 14px; color: #64748b; font-size: .78rem; line-height: 1.45; }
         .history-picker { display: grid; gap: 9px; border: 1px solid #dce3ea; border-radius: 8px; background: #fff; padding: 16px; color: #25635f; font-size: .86rem; font-weight: 800; }
         .history-label { display: inline-flex; align-items: center; gap: 8px; }
@@ -268,9 +277,9 @@ const DirectoryPage: NextPage = () => {
         .finding-section { margin-top: 30px; } .finding-section > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid #dce3ea; padding-bottom: 11px; } .finding-section > header span { color: #64748b; font-size: .82rem; } .finding-list { list-style: none; margin: 0; padding: 0; } .finding-list li { display: grid; gap: 6px; border-bottom: 1px solid #e7edf3; padding: 16px 0; } .finding-list strong { font-size: .95rem; } .finding-list p { color: #64748b; line-height: 1.45; } .finding-meta { color: #9f1239; font-size: .76rem; font-weight: 900; text-transform: uppercase; } .no-findings { color: #15803d; padding: 18px 0; font-weight: 800; }
         .error { margin-bottom: 18px; border: 1px solid #fecdd3; background: #fff1f2; color: #9f1239; padding: 14px; font-weight: 750; }
         @media (max-width: 900px) { .page-layout { grid-template-columns: minmax(0, 1fr) 260px; gap: 16px; } .scan-row { grid-template-columns: 30px minmax(0, 1fr) 140px 78px; } .scan-row-pages { display: none; } }
-        @media print { .global-header, .global-footer, .back-link, .report-actions, .detail-actions > a { display: none !important; } .directory-shell, .directory-page { background: #fff; } .directory-page { width: 100%; padding: 0; } .directory-heading { margin-bottom: 18px; } .page-preview-frame { height: 480px; } }
+        @media print { .global-header, .global-footer, .back-link, .report-actions, .detail-actions > a, .preview-status, .preview-unavailable { display: none !important; } .directory-shell, .directory-page { background: #fff; } .directory-page { width: 100%; padding: 0; } .directory-heading { margin-bottom: 18px; } .page-preview-frame, .page-preview-stage { height: 480px; min-height: 480px; } }
         @media (max-width: 820px) { .directory-heading { display: grid; align-items: start; } .site-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .page-layout { grid-template-columns: 1fr; } .page-sidebar { order: -1; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; } .detail-actions { align-items: flex-end; flex-direction: column; } }
-        @media (max-width: 620px) { .directory-page { padding: 18px; } .site-grid, .detail-metrics { grid-template-columns: 1fr; } .detail-metrics { display: grid; } .scan-row { grid-template-columns: 26px minmax(0, 1fr) 68px; gap: 8px; padding: 12px 0; } .scan-row-date { grid-column: 2; grid-row: 2; justify-self: start; text-align: left; font-size: .75rem; } .scan-row-score { grid-column: 3; grid-row: 1 / span 2; } .page-row { align-items: flex-start; padding: 14px 0; } .page-row > span:last-child { text-align: right; } .page-sidebar { grid-template-columns: 1fr; } .page-preview-frame { height: 420px; } .archive-bar { align-items: flex-start; flex-direction: column; } .archive-actions { width: 100%; justify-content: space-between; } .report-actions { flex-wrap: wrap; } }
+        @media (max-width: 620px) { .directory-page { padding: 18px; } .site-grid, .detail-metrics { grid-template-columns: 1fr; } .detail-metrics { display: grid; } .scan-row { grid-template-columns: 26px minmax(0, 1fr) 68px; gap: 8px; padding: 12px 0; } .scan-row-date { grid-column: 2; grid-row: 2; justify-self: start; text-align: left; font-size: .75rem; } .scan-row-score { grid-column: 3; grid-row: 1 / span 2; } .page-row { align-items: flex-start; padding: 14px 0; } .page-row > span:last-child { text-align: right; } .page-sidebar { grid-template-columns: 1fr; } .page-preview-frame, .page-preview-stage { height: 420px; min-height: 420px; } .archive-bar { align-items: flex-start; flex-direction: column; } .archive-actions { width: 100%; justify-content: space-between; } .report-actions { flex-wrap: wrap; } }
       `}</style>
     </>
   )
@@ -325,8 +334,8 @@ function PageView({ page, history, siteId }: { page: PageDetail; history: PageHi
       <div className="page-main">
         <div className="page-preview">
           <div className="section-label">Captured page preview</div>
-          <iframe className="page-preview-frame" src={page.sourceUrl} title={`Preview of ${page.title || page.sourceUrl}`} loading="lazy" sandbox="allow-scripts allow-same-origin" />
-          <p className="preview-note">Some websites block embedded previews. Use Open page to view the live page directly.</p>
+          <PagePreview url={page.sourceUrl} title={page.title || page.sourceUrl} />
+          <p className="preview-note">Some websites block embedded previews with security headers. Use Open page to view the live page directly.</p>
         </div>
         <FindingSection title="ADA checks" count={violations.length} empty="No WCAG violations found on this page.">{violations.map((finding, index) => <li key={`${findingValue(finding, 'id')}-${index}`}><span className="finding-meta">{findingValue(finding, 'impact') || 'review'} · {findingValue(finding, 'id')}</span><strong>{findingValue(finding, 'help') || 'Accessibility issue'}</strong><p>{findingValue(finding, 'description') || findingValue(finding, 'failureSummary')}</p></li>)}</FindingSection>
         <FindingSection title="Language checks" count={languageIssues.length} empty="No language issues found on this page.">{languageIssues.map((issue, index) => <li key={`${findingValue(issue, 'ruleId')}-${index}`}><span className="finding-meta">{findingValue(issue, 'type') || 'language'} · {findingValue(issue, 'ruleId')}</span><strong>{findingValue(issue, 'message') || 'Language issue'}</strong><p>{findingValue(issue, 'word')}{findingValue(issue, 'fix') ? ` → ${findingValue(issue, 'fix')}` : ''}</p></li>)}</FindingSection>
@@ -347,6 +356,28 @@ function PageView({ page, history, siteId }: { page: PageDetail; history: PageHi
       </aside>
     </div>
   </section>
+}
+
+function PagePreview({ url, title }: { url: string; title: string }) {
+  const [state, setState] = useState<'loading' | 'ready' | 'blocked'>('loading')
+
+  useEffect(() => {
+    setState('loading')
+  }, [url])
+
+  return <div className="page-preview-stage">
+    {state !== 'blocked' && <iframe
+      className="page-preview-frame"
+      src={url}
+      title={`Preview of ${title}`}
+      loading="lazy"
+      sandbox="allow-scripts allow-same-origin"
+      onLoad={() => setState('ready')}
+      onError={() => setState('blocked')}
+    />}
+    {state === 'loading' && <p className="preview-status" role="status">Loading page preview...</p>}
+    {state === 'blocked' && <div className="preview-unavailable" role="status"><ShieldCheck size={24} aria-hidden /><strong>Preview unavailable</strong><p>This website does not allow embedded viewing or did not respond to the preview frame.</p><a href={url} target="_blank" rel="noreferrer">Open page in a new window <ExternalLink size={14} aria-hidden /></a></div>}
+  </div>
 }
 
 function ReportActions() {
