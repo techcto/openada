@@ -155,13 +155,13 @@ The container workflows publish to AWS ECR on `main`, `master`, and `v*` tag pus
 
 Set these GitHub repository secrets:
 
-- `MP_AWS_ACCESS_KEY_ID`: access key ID for the Marketplace publishing IAM user.
 - `MP_AWS_SECRET_ACCESS_KEY`: secret access key for that IAM user.
 - `DOCKERHUB_USERNAME`: Docker Hub account used to publish images.
 - `DOCKERHUB_TOKEN`: Docker Hub access token with push permission.
 
-Set this required repository variable for Marketplace releases:
+Set these GitHub repository variables:
 
+- `MP_AWS_ACCESS_KEY_ID`: access key ID for the Marketplace publishing IAM user.
 - `MP_AWS_MARKETPLACE_PRODUCT_ID`: the OpenADA AWS Marketplace container product identifier.
 
 Optional repository variables are `AWS_REGION` (defaults to `us-east-1`), `MP_AWS_ECR` (defaults to `709825985650.dkr.ecr.us-east-1.amazonaws.com`), `OPENADA_UI_REPOSITORY` (defaults to `solodev/openada-ui`), `OPENADA_API_REPOSITORY` (defaults to `solodev/openada-api`), `OPENADA_WORKER_REPOSITORY` (defaults to `solodev/openada-worker`), and `DOCKERHUB_NAMESPACE`. The three ECR repositories must already exist in the Marketplace account; the workflows verify them before building. Do not use another product's Marketplace identifier.
