@@ -5,14 +5,49 @@
 [![Open in GitHub](https://img.shields.io/badge/Open%20in-GitHub-181717?logo=github)](https://github.com/techcto/openada)
 [![Run Container Publish](https://img.shields.io/badge/Run%20container%20publish-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)](https://github.com/techcto/openada/actions/workflows/publish-containers.yml)
 
-OpenADA is a small hosted service for accessibility and language quality checks. It gives CMS products one stable API for WCAG audits and LanguageTool-compatible spelling and grammar checks.
+OpenADA is a hosted accessibility and language-quality service for the web. It gives CMS products one stable API for WCAG audits and LanguageTool-compatible spelling and grammar checks, then turns public site scans into a transparent, date-based archive anyone can browse.
+
+## Contest Pitch
+
+### The 30-Second Demo
+
+Paste a public URL, choose a crawl size, and press **Scan site**. OpenADA queues the work, shows live progress while pages are checked, and redirects to a public report. A visitor can then move through the archive:
+
+`site -> scan date -> pages -> page findings -> the same page across time`
+
+Try it live:
+
+- [OpenADA checker](https://openada.us/)
+- [Public directory](https://openada.us/directory)
+- [Solodev archive](https://openada.us/directory/www.solodev.com)
+- [Public API reference](https://openada.us/api-reference)
+- [ADA guidance](https://openada.us/docs)
+
+### Why This Wins
+
+**Technological implementation.** OpenADA is a real, deployed service rather than a static demo. Codex was used as an engineering collaborator across the full loop: understanding the existing CMS provider contract, shaping the API, building the crawler and durable scan workflow, iterating on the UI, writing CloudFormation and container workflows, debugging production behavior, and verifying the live AWS deployment. The result is a working Next.js UI, API service, asynchronous scan worker, Redis-backed queue, DynamoDB archive, public widget, OpenAPI document, and Docker/GitHub Actions release path.
+
+**Design.** The product has a complete workflow: a search-style URL entry point, a fast five-page default for first-time testing, adjustable crawl limits, progress feedback, a report route, a directory with latest scores, sorted page results, color-coded grades, page-level findings, historical scan selection, printable reports, API reference, and human-readable guidance. It is designed for repeated use by editors, developers, accessibility teams, and the public.
+
+**Potential impact.** CMS teams should not need to install and maintain a separate Java service just to give authors spelling checks, or build a second accessibility pipeline for published pages. OpenADA gives Solodev CMS a stable provider endpoint today and gives WordPress, Drupal, custom build systems, public agencies, and site owners the same low-friction integration path. The public archive also makes accessibility progress visible over time instead of hiding every scan inside a private dashboard.
+
+**Quality of the idea.** Most accessibility tools produce a private score and stop there. OpenADA combines accessibility, language quality, CMS integration, a public API, and an open web archive. The archive makes a website’s improvement legible: not just “what is my score now?”, but “which pages changed, what failed, and did the site improve from the last scan?” That public, time-based layer is the project’s distinctive idea.
+
+### What The Judges Can Verify
+
+- A live URL scan creates a durable asynchronous job and never blocks the web request while a crawl runs.
+- The UI reports pages scanned, queued work, current URL, and crawl errors before redirecting to the archive.
+- The main directory uses the newest completed site crawl for its score and page count.
+- Each site has dated scans; each scan has sorted pages; each page has ADA and language findings plus historical versions.
+- The API remains useful without the UI through `/api/v1/check`, `/api/v1/ada/check`, `/api/v2/check`, `/api/v1/scans`, and `/api/v1/directory`.
+- The deployment can be reproduced from the repository with Docker, CloudFormation, and GitHub Actions.
 
 ## What It Does
 
 - Runs `axe-core` against submitted HTML in the API container.
 - Returns LanguageTool-compatible results from `POST /api/v2/check`.
 - Supports a combined `POST /api/v1/check` request for HTML editors and page workflows.
-- Runs as two containers: a Next.js UI and a Next.js API, with a small DynamoDB-backed public scan directory.
+- Runs as three focused containers: a Next.js UI, a Next.js API, and an asynchronous scan worker, with Redis for job delivery and DynamoDB for the public archive.
 - Includes a hosted widget that can scan a public page and publish its score to the directory.
 - Uses an optional managed LanguageTool-compatible upstream through `LANGUAGETOOL_UPSTREAM_URL`.
 
@@ -29,7 +64,7 @@ For an automated local container smoke test, run `./cmd.sh compose-test`. It bui
 
 Open `http://localhost:3000`. The API health check is `http://localhost:3001/api/health`.
 The human-readable ADA guide is available at `http://localhost:3000/docs`.
-The public scan directory is available at `http://localhost:3000/directory`, and the API reference is at `http://localhost:3000/api-reference`.
+The public scan directory is available at `http://localhost:3000/directory`, and the API reference is at `http://localhost:3000/api-reference`. The homepage starts site crawls at five pages by default; the selector supports 25, 50, and 100 pages.
 
 The UI proxies `/api/*` to the API container. For a direct request:
 
@@ -79,13 +114,13 @@ The CMS then calls `https://openada.example.com/api/v2/check`; no local Language
 
 - ECS Fargate cluster and task execution roles
 - Public ALB with `/api/*` routed to the API service
-- UI and API target groups with health checks
+- UI, API, and scan-worker services with health checks and durable job progress
 - Private Cloud Map DNS for UI-to-API calls
-- CloudWatch log groups for both containers
-- Three on-demand DynamoDB tables for sites, pages, and immutable scan records
+- CloudWatch log groups for the application services
+- Redis-backed scan queue and four on-demand DynamoDB tables for sites, pages, immutable scan records, and scan jobs
 - Optional ACM HTTPS listener
 
-Build and publish `openada-ui` and `openada-api` images, then deploy the stack with the image URIs, VPC, public subnets, and private service subnets. The template does not install Java LanguageTool, MySQL, Redis, or a local service. DynamoDB stores only public directory metadata and scan summaries; Redis or OpenSearch can be added later as cache/search layers.
+Build and publish `openada-ui`, `openada-api`, and `openada-worker` images, then deploy the stack with the image URIs, VPC, public subnets, and private service subnets. The template does not install Java LanguageTool, MySQL, or a local LanguageTool service. Redis is used only for asynchronous scan delivery; DynamoDB stores public directory metadata, page findings, immutable scan records, and durable job progress. OpenSearch remains an optional future search layer, not a requirement for the free service.
 
 The widget is published to `s3://openada/widgets/openada-widget.js` by `./cmd.sh cft-new publish`. Add it to a public page:
 
@@ -129,6 +164,6 @@ Configure GitHub secrets `DOCKERHUB_USERNAME=techcto` and `DOCKERHUB_TOKEN` with
 
 ## Contest Note
 
-OpenADA is intentionally self-contained: it has no database, queue, local LanguageTool runtime, or inherited application modules.
+OpenADA is intentionally focused: it contains only the UI, API, scan worker, deployment, documentation, and public widget needed to make the service real. It does not carry inherited CMS modules or a local LanguageTool runtime.
 
 See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for the open-source notices for axe-core, LanguageTool, and Playwright.

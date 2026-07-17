@@ -215,9 +215,72 @@ export async function recordScan(input: ScanInput): Promise<{ site: SiteRecord; 
   }
 }
 
+export async function recordSiteScanSummary(input: {
+  hostname: string
+  scannedAt: string
+  ada: { score: number; grade: string; violationsCount: number } | null
+  languageErrors: number
+}): Promise<void> {
+  const siteId = input.hostname.trim().toLowerCase()
+  if (!siteId) return
+  await client.send(new UpdateCommand({
+    TableName: table('OPENADA_SITES_TABLE'),
+    Key: { id: siteId },
+    UpdateExpression: 'SET #lastScanAt = :scannedAt, #latestScore = :score, #latestGrade = :grade, #latestViolations = :violations, #latestLanguageErrors = :languageErrors',
+    ConditionExpression: 'attribute_not_exists(#lastScanAt) OR #lastScanAt <= :scannedAt',
+    ExpressionAttributeNames: {
+      '#lastScanAt': 'lastScanAt',
+      '#latestScore': 'latestScore',
+      '#latestGrade': 'latestGrade',
+      '#latestViolations': 'latestViolations',
+      '#latestLanguageErrors': 'latestLanguageErrors',
+    },
+    ExpressionAttributeValues: {
+      ':scannedAt': input.scannedAt,
+      ':score': input.ada?.score ?? null,
+      ':grade': input.ada?.grade ?? null,
+      ':violations': input.ada?.violationsCount ?? 0,
+      ':languageErrors': input.languageErrors,
+    },
+  })).catch((error: unknown) => {
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'ConditionalCheckFailedException') return
+    throw error
+  })
+}
+
 export async function listSites(): Promise<SiteRecord[]> {
   const result = await client.send(new ScanCommand({ TableName: table('OPENADA_SITES_TABLE'), Limit: 100 }))
-  return ((result.Items || []) as SiteRecord[]).sort((left, right) => right.lastScanAt.localeCompare(left.lastScanAt))
+  const sites = (result.Items || []) as SiteRecord[]
+  const jobTable = String(process.env.OPENADA_SCAN_JOBS_TABLE || '').trim()
+  if (!jobTable || sites.length === 0) return sites.sort((left, right) => right.lastScanAt.localeCompare(left.lastScanAt))
+
+  const jobsResult = await client.send(new ScanCommand({ TableName: jobTable, Limit: 100 }))
+  const latestJobs = new Map<string, { completedAt: string; pagesScanned: number; result?: { ada?: { score?: number; grade?: string; violationsCount?: number }; language?: { errors?: number } } }>()
+  for (const item of (jobsResult.Items || []) as Array<{ siteId?: string; url?: string; status?: string; completedAt?: string; createdAt: string; pagesScanned: number; result?: { ada?: { score?: number; grade?: string; violationsCount?: number }; language?: { errors?: number } } }>) {
+    if (item.status !== 'completed') continue
+    let siteId = item.siteId?.toLowerCase() || ''
+    if (!siteId && item.url) {
+      try { siteId = new URL(item.url).hostname.toLowerCase() } catch { siteId = '' }
+    }
+    if (!siteId) continue
+    const completedAt = item.completedAt || item.createdAt
+    const current = latestJobs.get(siteId)
+    if (!current || completedAt > current.completedAt) latestJobs.set(siteId, { completedAt, pagesScanned: item.pagesScanned, result: item.result })
+  }
+
+  return sites.map((site) => {
+    const latest = latestJobs.get(site.id)
+    if (!latest || latest.completedAt < site.lastScanAt) return site
+    return {
+      ...site,
+      lastScanAt: latest.completedAt,
+      pageCount: latest.pagesScanned || site.pageCount,
+      latestScore: latest.result?.ada?.score ?? site.latestScore,
+      latestGrade: latest.result?.ada?.grade ?? site.latestGrade,
+      latestViolations: latest.result?.ada?.violationsCount ?? site.latestViolations,
+      latestLanguageErrors: latest.result?.language?.errors ?? site.latestLanguageErrors,
+    }
+  }).sort((left, right) => right.lastScanAt.localeCompare(left.lastScanAt))
 }
 
 export async function getSite(siteId: string): Promise<{ site: SiteRecord | null; pages: PageRecord[]; scans: ScanRecord[] }> {

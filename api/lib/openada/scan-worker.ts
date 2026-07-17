@@ -1,4 +1,5 @@
 import type { Job } from 'bullmq'
+import { recordSiteScanSummary } from '@lib/openada/directory'
 import { getScanJob, updateScanJob } from '@lib/openada/scan-jobs'
 import type { ScanQueueData } from '@lib/openada/scan-queue'
 import { runSiteScan } from '@lib/openada/site-scan'
@@ -73,6 +74,15 @@ export async function processScanJob(job: Job<ScanQueueData>): Promise<void> {
     })
 
     const safeResult = publicResult(result)
+    const completedAt = new Date().toISOString()
+    await recordSiteScanSummary({
+      hostname: new URL(result.sourceUrl).hostname,
+      scannedAt: completedAt,
+      ada: result.ada
+        ? { score: result.ada.score, grade: result.ada.grade, violationsCount: result.ada.violationsCount }
+        : null,
+      languageErrors: result.language.errors,
+    })
     await updateScanJob(jobId, {
       status: 'completed',
       pagesScanned: result.crawl.pagesScanned,
@@ -82,7 +92,7 @@ export async function processScanJob(job: Job<ScanQueueData>): Promise<void> {
       errors: result.crawl.errors,
       pages: safeResult.pages as Array<Record<string, unknown>>,
       result: safeResult,
-      completedAt: new Date().toISOString(),
+      completedAt,
     })
   } catch (error) {
     await updateScanJob(jobId, {

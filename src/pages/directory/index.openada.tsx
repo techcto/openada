@@ -200,7 +200,7 @@ const DirectoryPage: NextPage = () => {
               <div>
                 {level !== 'sites' && <a className="back-link" href={backHref}><ArrowLeft size={16} aria-hidden /> Back</a>}
                 <p className="eyebrow">Open web accessibility archive</p>
-                <h1>{page ? page.title || new URL(page.sourceUrl).pathname : scan ? `Scan from ${formatDate(scan.completedAt || scan.createdAt)}` : site ? siteName(site) : 'The public scan directory'}</h1>
+                <h1>{page ? page.title || new URL(page.sourceUrl).pathname : scan ? `Scan from ${formatDate(scan.completedAt || scan.createdAt)}` : site ? siteName(site) : 'Public Scan Directory'}</h1>
                 <p className="lede">Browse public accessibility and language checks by website, scan date, page, and finding.</p>
               </div>
               <div className="directory-stat"><ScanSearch size={20} aria-hidden /><strong>{page ? page.ada?.grade || '--' : scan ? scan.pagesScanned : site ? site.scanCount : (data.sites || []).length}</strong><span>{page ? 'page grade' : scan ? 'pages in scan' : site ? 'scans recorded' : 'sites observed'}</span></div>
