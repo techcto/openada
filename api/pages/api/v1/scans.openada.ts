@@ -30,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const crawl = req.body?.crawl === true || readStringParam(req.body?.crawl).toLowerCase() === 'true'
   const requestedMaxPages = Number(req.body?.maxPages)
   const maxPages = crawl
-    ? Math.min(Math.max(Number.isFinite(requestedMaxPages) ? Math.floor(requestedMaxPages) : 5, 1), 10)
+    ? Math.min(Math.max(Number.isFinite(requestedMaxPages) ? Math.floor(requestedMaxPages) : 50, 1), 100)
     : 1
   const wcagTags = Array.isArray(req.body?.wcagTags)
     ? req.body.wcagTags
@@ -105,7 +105,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         if (crawl) {
           for (const link of extractSameHostLinks(sourceHtml, fetched.url)) {
-            if (pending.length < 50 && !visited.has(link) && !pending.includes(link) && new URL(link).hostname === crawlHostname) {
+            if (pending.length < 500 && !visited.has(link) && !pending.includes(link) && new URL(link).hostname === crawlHostname) {
               pending.push(link)
             }
           }

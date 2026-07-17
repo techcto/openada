@@ -29,7 +29,7 @@ const ApiReferencePage: NextPage = () => {
           <section className="endpoint-list" aria-labelledby="endpoints-heading">
             <div className="section-heading"><h2 id="endpoints-heading">Endpoints</h2><a href="/api/openapi" target="_blank" rel="noreferrer">OpenAPI JSON <ExternalLink size={15} aria-hidden /></a></div>
             <Endpoint method="POST" path="/api/v1/check" title="Combined check" description="Run axe-core accessibility checks and LanguageTool-compatible language checks against HTML, text, or a public URL." example={combinedExample} />
-            <Endpoint method="POST" path="/api/v1/scans" title="Public site scan" description="Fetch a public page, or crawl up to 10 same-host pages, run both checks, and publish numeric scores and letter grades to the OpenADA directory." example={scanExample} />
+            <Endpoint method="POST" path="/api/v1/scans" title="Public site scan" description="Fetch a public page, or crawl up to 100 same-host pages, run both checks, and publish numeric scores and letter grades to the OpenADA directory." example={scanExample} />
             <Endpoint method="GET" path="/api/v1/directory" title="Browse the directory" description="List public sites. Add ?site=example.com to retrieve its observed pages and scan history." />
             <Endpoint method="POST" path="/api/v1/ada/check" title="ADA only" description="Run axe-core WCAG checks against submitted HTML." />
             <Endpoint method="POST" path="/api/v2/check" title="LanguageTool compatible" description="Use OpenADA as a LanguageTool-compatible spelling and grammar provider." />

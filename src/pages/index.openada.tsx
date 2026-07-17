@@ -11,6 +11,7 @@ import {
   FileJson,
   Globe2,
   Languages,
+  LoaderCircle,
   Play,
   ScanSearch,
   ShieldCheck,
@@ -71,6 +72,8 @@ const HomePage: NextPage = () => {
   const [url, setUrl] = useState('')
   const [result, setResult] = useState<CheckResponse | null>(null)
   const [isChecking, setIsChecking] = useState(false)
+  const [scanLimit, setScanLimit] = useState(50)
+  const [activeScan, setActiveScan] = useState<'page' | 'site' | null>(null)
   const [error, setError] = useState('')
 
   const languageIssues = result?.language?.issues || []
@@ -100,6 +103,7 @@ const HomePage: NextPage = () => {
     }
 
     setIsChecking(true)
+    setActiveScan(crawl ? 'site' : 'page')
     setError('')
 
     try {
@@ -110,7 +114,7 @@ const HomePage: NextPage = () => {
           html: submittedUrl ? '' : html,
           url: submittedUrl || undefined,
           crawl: crawl || undefined,
-          maxPages: crawl ? 5 : undefined,
+          maxPages: crawl ? scanLimit : undefined,
           language: 'en-US',
           wcagTags: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'],
         }),
@@ -126,6 +130,7 @@ const HomePage: NextPage = () => {
       setError(nextError instanceof Error ? nextError.message : 'OpenADA check failed.')
     } finally {
       setIsChecking(false)
+      setActiveScan(null)
     }
   }
 
@@ -157,6 +162,22 @@ const HomePage: NextPage = () => {
               <span>{isChecking ? 'Scanning' : 'Scan site'}</span>
             </button>
             <p>OpenADA fetches public HTML pages. A URL takes priority over the editor content.</p>
+            <div className="url-controls">
+              <label htmlFor="scan-limit">Site scan pages</label>
+              <select id="scan-limit" value={scanLimit} onChange={(event) => setScanLimit(Number(event.target.value))}>
+                <option value="5">5</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+              <span>same-host pages</span>
+            </div>
+            {isChecking && (
+              <p className="scan-loader" role="status" aria-live="polite">
+                <LoaderCircle className="scan-loader-icon" size={16} aria-hidden />
+                {activeScan === 'site' ? 'Scanning site pages...' : 'Checking page...'}
+              </p>
+            )}
           </div>
         </div>
 
@@ -464,6 +485,49 @@ const HomePage: NextPage = () => {
           grid-column: 2 / span 2;
           color: #64748b;
           font-size: 0.84rem;
+        }
+
+        .url-controls {
+          grid-column: 2 / span 2;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          color: #64748b;
+          font-size: 0.82rem;
+        }
+
+        .url-controls label {
+          color: #334155;
+          font-weight: 800;
+        }
+
+        .url-controls select {
+          min-height: 30px;
+          border: 1px solid #cbd5e1;
+          border-radius: 5px;
+          background: #ffffff;
+          color: #172033;
+          font: inherit;
+          font-weight: 750;
+          padding: 0 7px;
+        }
+
+        .scan-loader {
+          grid-column: 2 / span 2;
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          color: #25635f;
+          font-size: 0.86rem;
+          font-weight: 800;
+        }
+
+        .scan-loader-icon {
+          animation: openada-spin 0.9s linear infinite;
+        }
+
+        @keyframes openada-spin {
+          to { transform: rotate(360deg); }
         }
 
         .crawl-summary {
@@ -782,6 +846,11 @@ const HomePage: NextPage = () => {
           .url-field p {
             grid-column: 1;
             grid-row: auto;
+          }
+
+          .url-controls,
+          .scan-loader {
+            grid-column: 1;
           }
 
           .url-submit {
