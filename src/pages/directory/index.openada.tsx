@@ -187,7 +187,7 @@ const DirectoryPage: NextPage = () => {
           </div>
         </main>
       </OpenAdaShell>
-      <style jsx>{`
+      <style jsx global>{`
         .directory-shell { min-height: 100vh; background: #f6f8fb; color: #172033; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
         .directory-page { width: min(1180px, 100%); margin: 0 auto; padding: 28px; }
         .directory-heading { display: flex; align-items: end; justify-content: space-between; gap: 28px; margin-bottom: 34px; }
