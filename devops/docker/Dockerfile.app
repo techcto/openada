@@ -21,6 +21,7 @@ COPY src/pages/_app.openada.tsx ./src/pages/_app.openada.tsx
 COPY src/components/OpenAdaShell.tsx ./src/components/OpenAdaShell.tsx
 COPY src/pages/docs/index.openada.tsx ./src/pages/docs/index.openada.tsx
 COPY src/pages/directory/index.openada.tsx ./src/pages/directory/index.openada.tsx
+COPY src/pages/directory/[...slug].openada.tsx ./src/pages/directory/[...slug].openada.tsx
 COPY src/pages/api-reference/index.openada.tsx ./src/pages/api-reference/index.openada.tsx
 COPY src/sass/app.scss ./src/sass/app.scss
 COPY devops/widget/openada-widget.js ./public/openada-widget.js

@@ -37,6 +37,7 @@ export type SiteScanProgress = {
 
 type SiteScanInput = {
   url: string
+  scanJobId?: string
   title?: string
   language: string
   wcagTags: string[]
@@ -96,8 +97,20 @@ export async function runSiteScan(input: SiteScanInput): Promise<SiteScanResult>
         url: fetched.url,
         sourceUrl: fetched.url,
         title: pageTitle,
+        scanJobId: input.scanJobId,
         ada,
         languageErrors: languageIssues.length,
+        details: {
+          ada: {
+            score: ada.score,
+            grade: ada.grade,
+            violationsCount: ada.violationsCount,
+            passesCount: ada.passesCount,
+            incompleteCount: ada.incompleteCount,
+            violations: ada.violations,
+          },
+          language: { errors: languageIssues.length, issues: languageIssues },
+        },
       })
 
       pages.push({

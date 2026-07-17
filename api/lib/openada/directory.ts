@@ -6,6 +6,7 @@ export type ScanInput = {
   url: string
   sourceUrl: string
   title?: string
+  scanJobId?: string
   ada: {
     score: number
     grade: string
@@ -14,6 +15,17 @@ export type ScanInput = {
     incompleteCount: number
   } | null
   languageErrors: number
+  details?: {
+    ada: {
+      score: number
+      grade: string
+      violationsCount: number
+      passesCount: number
+      incompleteCount: number
+      violations: unknown[]
+    } | null
+    language: { errors: number; issues: Array<Record<string, unknown>> }
+  }
 }
 
 export type SiteRecord = {
@@ -99,10 +111,19 @@ export async function recordScan(input: ScanInput): Promise<{ site: SiteRecord; 
     latestScore: score,
     latestGrade: grade,
   }
-  // Persist the directory summary, not the full axe result. Axe can include
-  // class instances in incomplete results that DynamoDB cannot marshal.
+  const details = input.details ? JSON.parse(JSON.stringify(input.details, (_key, value) => {
+    if (value instanceof Error) return { name: value.name, message: value.message }
+    return value
+  })) : undefined
+
+  // Keep the page-level findings needed for the public detail view. Axe can
+  // include class instances in results, so normalize before DynamoDB writes.
   const scan: ScanRecord = {
-    ...input,
+    url: input.url,
+    sourceUrl: input.sourceUrl,
+    title: input.title,
+    scanJobId: input.scanJobId,
+    languageErrors: input.languageErrors,
     ada: input.ada
       ? {
           score: input.ada.score,
@@ -112,6 +133,7 @@ export async function recordScan(input: ScanInput): Promise<{ site: SiteRecord; 
           incompleteCount: input.ada.incompleteCount,
         }
       : null,
+    details,
     id: scanId,
     siteId,
     pageId,
@@ -202,4 +224,9 @@ export async function getSite(siteId: string): Promise<{ site: SiteRecord | null
   const pages = ((pageResult.Items || []) as PageRecord[]).sort((left, right) => right.lastScanAt.localeCompare(left.lastScanAt))
   const scans = ((scanResult.Items || []) as ScanRecord[]).sort((left, right) => right.scannedAt.localeCompare(left.scannedAt))
   return { site: (siteResult.Item as SiteRecord | undefined) || null, pages, scans }
+}
+
+export async function getScan(scanId: string): Promise<ScanRecord | null> {
+  const result = await client.send(new GetCommand({ TableName: table('OPENADA_SCANS_TABLE'), Key: { id: scanId } }))
+  return (result.Item as ScanRecord | undefined) || null
 }

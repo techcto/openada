@@ -130,3 +130,5 @@ Configure GitHub secrets `DOCKERHUB_USERNAME=techcto` and `DOCKERHUB_TOKEN` with
 ## Contest Note
 
 OpenADA is intentionally self-contained: it has no database, queue, local LanguageTool runtime, or inherited application modules.
+
+See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for the open-source notices for axe-core, LanguageTool, and Playwright.

@@ -7,6 +7,7 @@ export type ScanJobStatus = 'pending' | 'running' | 'completed' | 'failed'
 
 export type ScanJob = {
   id: string
+  siteId?: string
   status: ScanJobStatus
   url: string
   maxPages: number
@@ -40,8 +41,10 @@ function now(): string {
 export async function createScanJob(input: Pick<ScanJob, 'url' | 'maxPages'>): Promise<ScanJob> {
   const timestamp = now()
   const canonicalUrl = new URL(input.url).toString()
+  const siteId = new URL(canonicalUrl).hostname.toLowerCase()
   const job: ScanJob = {
     id: randomUUID(),
+    siteId,
     status: 'pending',
     url: canonicalUrl,
     maxPages: input.maxPages,
@@ -88,4 +91,19 @@ export async function listScanJobs(url: string): Promise<ScanJob[]> {
   }))
 
   return ((result.Items || []) as ScanJob[]).sort((left, right) => right.createdAt.localeCompare(left.createdAt))
+}
+
+export async function listScanJobsForHost(hostname: string): Promise<ScanJob[]> {
+  const siteId = hostname.trim().toLowerCase()
+  const result = await client.send(new ScanCommand({ TableName: table(), Limit: 100 }))
+  return ((result.Items || []) as ScanJob[])
+    .filter((job) => {
+      if (job.siteId) return job.siteId.toLowerCase() === siteId
+      try {
+        return new URL(job.url).hostname.toLowerCase() === siteId
+      } catch {
+        return false
+      }
+    })
+    .sort((left, right) => right.createdAt.localeCompare(left.createdAt))
 }

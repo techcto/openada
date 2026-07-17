@@ -793,7 +793,10 @@ const HomePage: NextPage = () => {
           color: #334155;
           font-size: 0.9rem;
           font-weight: 800;
+          text-decoration: none;
         }
+
+        .powered-item:hover, .powered-item:focus-visible { color: #25635f; text-decoration: underline; }
 
         .powered-item svg {
           color: #25635f;
@@ -927,8 +930,9 @@ function PoweredBy() {
     <section className="powered-by" aria-label="OpenADA technology partners">
       <span className="powered-label">Powered by</span>
       <span className="powered-item"><Sparkles size={17} aria-hidden /> OpenAI</span>
-      <span className="powered-item"><ShieldCheck size={17} aria-hidden /> axe-core</span>
-      <span className="powered-item"><Languages size={17} aria-hidden /> LanguageTool</span>
+      <a className="powered-item" href="https://github.com/dequelabs/axe-core" target="_blank" rel="noreferrer"><ShieldCheck size={17} aria-hidden /> axe-core</a>
+      <a className="powered-item" href="https://github.com/languagetool-org/languagetool" target="_blank" rel="noreferrer"><Languages size={17} aria-hidden /> LanguageTool</a>
+      <a className="powered-item" href="https://github.com/microsoft/playwright" target="_blank" rel="noreferrer"><ScanSearch size={17} aria-hidden /> Playwright</a>
       <span className="powered-item"><Cloud size={17} aria-hidden /> AWS</span>
     </section>
   )

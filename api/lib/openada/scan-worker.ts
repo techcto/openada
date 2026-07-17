@@ -29,6 +29,7 @@ function publicResult(result: Awaited<ReturnType<typeof runSiteScan>>): Record<s
     crawl: result.crawl,
     pages: result.pages.map((page) => ({
       sourceUrl: page.sourceUrl,
+      scanId: page.directory.scan.id,
       title: page.title,
       ada: {
         score: page.ada.score,
@@ -52,6 +53,7 @@ export async function processScanJob(job: Job<ScanQueueData>): Promise<void> {
   try {
     const result = await runSiteScan({
       url: job.data.url,
+      scanJobId: jobId,
       title: job.data.title,
       language: job.data.language,
       wcagTags: job.data.wcagTags,
