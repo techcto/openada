@@ -9,6 +9,8 @@ const REQUEST_TIMEOUT_MS = 15_000
 export type RemoteHtmlResult = {
   html: string
   url: string
+  frameable: boolean
+  frameBlockReason?: string
 }
 
 export async function fetchRemoteHtml(input: string): Promise<RemoteHtmlResult> {
@@ -94,7 +96,8 @@ async function fetchRemoteHtmlAtUrl(input: string, redirectCount: number): Promi
     }
 
     const html = await readResponseBody(response)
-    return { html, url }
+    const frameBlockReason = getFrameBlockReason(response.headers)
+    return { html, url, frameable: !frameBlockReason, frameBlockReason: frameBlockReason || undefined }
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
       throw new Error('The page did not respond within 15 seconds.')
@@ -103,6 +106,26 @@ async function fetchRemoteHtmlAtUrl(input: string, redirectCount: number): Promi
   } finally {
     clearTimeout(timeout)
   }
+}
+
+function getFrameBlockReason(headers: Headers): string {
+  const frameOptions = headers.get('x-frame-options')?.trim().toLowerCase()
+  if (frameOptions === 'deny') return 'The page sends X-Frame-Options: DENY.'
+  if (frameOptions === 'sameorigin' || frameOptions?.startsWith('allow-from')) {
+    return 'The page only allows framing from its own origin.'
+  }
+
+  const contentSecurityPolicy = headers.get('content-security-policy') || ''
+  const frameAncestors = contentSecurityPolicy
+    .split(';')
+    .map((directive) => directive.trim())
+    .find((directive) => /^frame-ancestors(?:\s|$)/i.test(directive))
+
+  if (!frameAncestors) return ''
+  const sources = frameAncestors.split(/\s+/).slice(1).map((source) => source.toLowerCase())
+  if (sources.includes("'none'")) return 'The page sends a Content-Security-Policy that disables embedded previews.'
+  if (sources.includes('*') || sources.includes('https:') || sources.some((source) => source.startsWith('https://openada.us'))) return ''
+  return 'The page only allows embedded previews from other approved origins.'
 }
 
 async function validatePublicUrl(input: string): Promise<string> {

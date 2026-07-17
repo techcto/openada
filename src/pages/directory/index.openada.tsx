@@ -335,7 +335,6 @@ function PageView({ page, history, siteId }: { page: PageDetail; history: PageHi
         <div className="page-preview">
           <div className="section-label">Captured page preview</div>
           <PagePreview url={page.sourceUrl} />
-          <p className="preview-note">Live previews are temporarily hidden while OpenADA connects a secure screenshot service. Use Open page to view the live page directly.</p>
         </div>
         <FindingSection title="ADA checks" count={violations.length} empty="No WCAG violations found on this page.">{violations.map((finding, index) => <li key={`${findingValue(finding, 'id')}-${index}`}><span className="finding-meta">{findingValue(finding, 'impact') || 'review'} · {findingValue(finding, 'id')}</span><strong>{findingValue(finding, 'help') || 'Accessibility issue'}</strong><p>{findingValue(finding, 'description') || findingValue(finding, 'failureSummary')}</p></li>)}</FindingSection>
         <FindingSection title="Language checks" count={languageIssues.length} empty="No language issues found on this page.">{languageIssues.map((issue, index) => <li key={`${findingValue(issue, 'ruleId')}-${index}`}><span className="finding-meta">{findingValue(issue, 'type') || 'language'} · {findingValue(issue, 'ruleId')}</span><strong>{findingValue(issue, 'message') || 'Language issue'}</strong><p>{findingValue(issue, 'word')}{findingValue(issue, 'fix') ? ` → ${findingValue(issue, 'fix')}` : ''}</p></li>)}</FindingSection>
@@ -359,8 +358,32 @@ function PageView({ page, history, siteId }: { page: PageDetail; history: PageHi
 }
 
 function PagePreview({ url }: { url: string }) {
+  const [state, setState] = useState<'loading' | 'ready' | 'blocked'>('loading')
+  const [reason, setReason] = useState('')
+
+  useEffect(() => {
+    let cancelled = false
+    setState('loading')
+    setReason('')
+    fetch(`/api/v1/preview?url=${encodeURIComponent(url)}`)
+      .then(async (response) => {
+        const data = await response.json() as { frameable?: boolean; reason?: string | null }
+        if (!response.ok || !data.frameable) throw new Error(data.reason || 'This page does not allow embedded previews.')
+        if (!cancelled) setState('ready')
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setReason(error instanceof Error ? error.message : 'This page does not allow embedded previews.')
+          setState('blocked')
+        }
+      })
+    return () => { cancelled = true }
+  }, [url])
+
   return <div className="page-preview-stage">
-    <div className="preview-unavailable" role="status"><ShieldCheck size={24} aria-hidden /><strong>Screenshot preview coming soon</strong><p>Some websites block embedded viewing. OpenADA will connect a secure screenshot service so these pages can be previewed without exposing a browser error.</p><a href={url} target="_blank" rel="noreferrer">Open page in a new window <ExternalLink size={14} aria-hidden /></a></div>
+    {state === 'ready' && <iframe className="page-preview-frame" src={url} title="Captured page preview" loading="lazy" sandbox="allow-scripts allow-same-origin" />}
+    {state === 'loading' && <p className="preview-status" role="status">Checking preview availability...</p>}
+    {state === 'blocked' && <div className="preview-unavailable" role="status"><ShieldCheck size={24} aria-hidden /><strong>Preview unavailable</strong><p>{reason} OpenADA will connect a secure screenshot service for pages that cannot be embedded.</p><a href={url} target="_blank" rel="noreferrer">Open page in a new window <ExternalLink size={14} aria-hidden /></a></div>}
   </div>
 }
 
