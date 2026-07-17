@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">OpenADA</title>
+  <desc id="desc">A dark star inside a mint accessibility mark.</desc>
+  <rect x="13" y="13" width="94" height="94" rx="25" fill="#b8e7d9" stroke="#172033" stroke-width="8"/>
+  <path d="m60 30 8.3 18.1 19.7 2.1-14.6 13.3 4.2 19.3L60 72.9 42.4 82.8l4.2-19.3L32 50.2l19.7-2.1L60 30Z" fill="#172033"/>
+</svg>
