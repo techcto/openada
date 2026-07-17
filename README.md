@@ -160,7 +160,7 @@ Set these GitHub repository secrets:
 - `DOCKERHUB_USERNAME`: Docker Hub account used to publish images.
 - `DOCKERHUB_TOKEN`: Docker Hub access token with push permission.
 
-Optional repository variables are `AWS_REGION` (defaults to `us-east-1`), `OPENADA_UI_REPOSITORY`, `OPENADA_API_REPOSITORY`, `OPENADA_WORKER_REPOSITORY`, and `DOCKERHUB_NAMESPACE`.
+Optional repository variables are `AWS_REGION` (defaults to `us-east-1`), `MP_AWS_ECR` (defaults to the OpenADA AWS account registry), `OPENADA_UI_REPOSITORY`, `OPENADA_API_REPOSITORY`, `OPENADA_WORKER_REPOSITORY`, and `DOCKERHUB_NAMESPACE`. The three ECR repositories must already exist in the Marketplace account; the workflow verifies them before building.
 
 After the secrets are configured, create a release tag through the repository helper:
 
