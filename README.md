@@ -182,6 +182,12 @@ Choose a deployment path:
 
 The CloudFormation launch form supplies the Marketplace image defaults for the latest published release. Provide the VPC, public and service subnets, Redis settings when using the existing-environment template, and an ACM certificate ARN when HTTPS is required. Service subnets need NAT access to pull the private ECR images and send logs unless public IP assignment is enabled. The public templates remain available at [`openada.yaml`](https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada.yaml) and [`openada-existing.yaml`](https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-existing.yaml).
 
+### OpenADA MCP AgentCore
+
+[OpenADA MCP AgentCore](devops/agentcore/README.md) is a separate Marketplace product for customers who want a serverless Amazon Bedrock AgentCore Runtime front end for a hosted or private OpenADA service. It uses the dedicated `openada-agentcore` ARM64 image and the [`openada-agentcore-runtime.yaml`](devops/cloudformation/openada-agentcore-runtime.yaml) template. Choose `PUBLIC` networking for an HTTPS OpenADA endpoint or `VPC` networking when AgentCore must reach an internal OpenADA ALB. AgentCore handles IAM/SigV4 at the runtime boundary; the gateway uses `OPENADA_API_KEY` only for the outbound request to the private OpenADA MCP endpoint.
+
+The AgentCore product has its own Marketplace product identifier and release workflow. It must not reuse the OpenADA Private ECS product identifier. Set `MP_AWS_AGENTCORE_PRODUCT_ID` after the second Marketplace listing is created; version tags then build the AgentCore image, publish its CFT to `s3://openada-us/cloudformation/`, and submit its separate delivery-option changeset.
+
 ## Contest Note
 
 OpenADA is intentionally focused: it contains only the UI, API, scan worker, deployment, documentation, and public widget needed to make the service real. It does not carry unrelated application modules or a local LanguageTool runtime.

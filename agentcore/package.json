@@ -1,0 +1,14 @@
+{
+  "name": "openada-mcp-agentcore",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Stateless OpenADA MCP gateway for Amazon Bedrock AgentCore Runtime.",
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "check": "node --check server.mjs"
+  }
+}

@@ -11,6 +11,12 @@ Choose one deployment mode:
 
 The standalone mode is implemented by `openada.yaml`. The existing-environment mode is implemented by `openada-existing.yaml`. The standalone template creates a small Redis queue; the existing-environment template expects a reachable Redis endpoint.
 
+## OpenADA MCP AgentCore
+
+The separate `OpenADA MCP AgentCore` product is a stateless ARM64 gateway for Amazon Bedrock AgentCore Runtime. It forwards MCP requests to the OpenADA MCP endpoint supplied at launch and does not replace the ECS UI, API, worker, Redis, or DynamoDB services.
+
+Use `devops/cloudformation/openada-agentcore-runtime.yaml` after the AgentCore container image has been published. Set `OpenAdaMcpUrl` to the private OpenADA MCP URL and `OpenAdaApiKey` to the same random value configured as `ApiKeys` on the private OpenADA stack. Select `NetworkMode=VPC` with private subnets and security groups when the OpenADA endpoint is internal to a VPC. AgentCore invocation uses AWS IAM/SigV4; the gateway does not need AWS access keys.
+
 ## Publish test images
 
 After logging in to Docker Hub, build and publish the UI, API, and scan-worker images without committing first:
