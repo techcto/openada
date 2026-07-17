@@ -161,33 +161,36 @@ const HomePage: NextPage = () => {
         </div>
 
         <div className="url-band">
+          <div className="url-intro">
+            <p className="eyebrow">Check a public page or website</p>
+            <p>Paste a URL to see accessibility and language findings.</p>
+          </div>
           <div className="url-field">
-            <label htmlFor="page-url"><Globe2 size={16} aria-hidden /> Page URL</label>
-            <input
-              id="page-url"
-              form="checker-form"
-              type="url"
-              value={url}
-              onChange={(event) => setUrl(event.target.value)}
-              placeholder="https://example.com/page"
-              inputMode="url"
-              autoComplete="url"
-            />
-            <button className="url-submit" type="submit" form="checker-form" value="site" disabled={!url.trim() || isChecking} aria-label="Scan this site">
-              <ScanSearch size={16} aria-hidden />
-              <span>{isChecking ? 'Scanning' : 'Scan site'}</span>
-            </button>
-            <p>OpenADA fetches public HTML pages. A URL takes priority over the editor content.</p>
-            <div className="url-controls">
-              <label htmlFor="scan-limit">Site scan pages</label>
-              <select id="scan-limit" value={scanLimit} onChange={(event) => setScanLimit(Number(event.target.value))}>
-                <option value="5">5</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
+            <label className="sr-only" htmlFor="page-url">Page URL</label>
+            <div className="url-input-group">
+              <span className="url-input-icon" aria-hidden><Globe2 size={18} /></span>
+              <input
+                id="page-url"
+                form="checker-form"
+                type="url"
+                value={url}
+                onChange={(event) => setUrl(event.target.value)}
+                placeholder="https://example.com/page"
+                inputMode="url"
+                autoComplete="url"
+              />
+              <select id="scan-limit" value={scanLimit} onChange={(event) => setScanLimit(Number(event.target.value))} aria-label="Number of same-host pages to scan">
+                <option value="5">5 pages</option>
+                <option value="25">25 pages</option>
+                <option value="50">50 pages</option>
+                <option value="100">100 pages</option>
               </select>
-              <span>same-host pages</span>
+              <button className="url-submit" type="submit" form="checker-form" value="site" disabled={!url.trim() || isChecking} aria-label="Scan this site">
+                <ScanSearch size={16} aria-hidden />
+                <span>{isChecking ? 'Scanning' : 'Scan site'}</span>
+              </button>
             </div>
+            <p className="url-caption">We scan public pages on the same site. Choose the crawl size before you start.</p>
             {isChecking && (
               <p className="scan-loader" role="status" aria-live="polite">
                 <LoaderCircle className="scan-loader-icon" size={16} aria-hidden />
@@ -420,6 +423,11 @@ const HomePage: NextPage = () => {
           font-weight: 850;
         }
 
+        .masthead {
+          justify-content: center;
+          text-align: center;
+        }
+
         h2 {
           font-size: 1rem;
           font-weight: 800;
@@ -454,85 +462,110 @@ const HomePage: NextPage = () => {
           box-shadow: 0 10px 24px rgba(23, 32, 51, 0.05);
         }
 
+        .url-intro {
+          padding: 20px 24px 14px;
+          text-align: center;
+        }
+
+        .url-intro .eyebrow {
+          margin-bottom: 5px;
+        }
+
+        .url-intro > p:last-child,
+        .url-caption {
+          color: #64748b;
+          font-size: 0.86rem;
+        }
+
         .url-field {
-          display: grid;
-          grid-template-columns: auto minmax(0, 1fr) auto;
-          align-items: center;
-          gap: 8px 14px;
-          padding: 15px 18px;
+          padding: 0 24px 18px;
         }
 
-        .url-field label {
-          grid-row: 1 / span 2;
-          display: inline-flex;
-          align-items: center;
-          gap: 7px;
-          color: #172033;
-          font-weight: 850;
+        .sr-only {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
           white-space: nowrap;
+          border: 0;
         }
 
-        .url-field input {
+        .url-input-group {
+          display: flex;
+          align-items: stretch;
           width: 100%;
-          min-height: 38px;
+          min-height: 48px;
           border: 1px solid #cbd5e1;
-          border-radius: 6px;
-          outline: none;
-          padding: 0 11px;
-          color: #172033;
+          border-radius: 999px;
           background: #fbfcfe;
-          font: inherit;
+          overflow: hidden;
+          transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
 
-        .url-field input:focus {
+        .url-input-group:focus-within {
           border-color: #25635f;
           box-shadow: 0 0 0 3px rgba(37, 99, 95, 0.14);
         }
 
-        .url-submit {
-          grid-column: 3;
-          grid-row: 1;
-          min-height: 38px;
-          height: 38px;
-          padding: 0 13px;
-        }
-
-        .url-field p {
-          grid-column: 2 / span 2;
-          color: #64748b;
-          font-size: 0.84rem;
-        }
-
-        .url-controls {
-          grid-column: 2 / span 2;
+        .url-input-icon {
           display: inline-flex;
           align-items: center;
-          gap: 8px;
+          padding-left: 17px;
           color: #64748b;
-          font-size: 0.82rem;
         }
 
-        .url-controls label {
+        .url-field input {
+          flex: 1;
+          min-width: 0;
+          border: 0;
+          outline: none;
+          padding: 0 13px;
+          color: #172033;
+          background: transparent;
+          font: inherit;
+        }
+
+        .url-field input:focus {
+          box-shadow: none;
+        }
+
+        .url-input-group select {
+          min-width: 92px;
+          border: 0;
+          border-left: 1px solid #dce3ea;
+          outline: none;
+          background: #ffffff;
           color: #334155;
+          padding: 0 10px;
+          font: inherit;
+          font-size: 0.82rem;
           font-weight: 800;
         }
 
-        .url-controls select {
-          min-height: 30px;
-          border: 1px solid #cbd5e1;
-          border-radius: 5px;
-          background: #ffffff;
-          color: #172033;
-          font: inherit;
-          font-weight: 750;
-          padding: 0 7px;
+        .url-submit {
+          align-self: center;
+          min-height: 40px;
+          height: 40px;
+          margin-right: 4px;
+          border-radius: 999px;
+          padding: 0 16px;
+        }
+
+        .url-caption {
+          margin-top: 9px;
+          text-align: center;
         }
 
         .scan-loader {
-          grid-column: 2 / span 2;
           display: inline-flex;
           align-items: center;
           gap: 7px;
+          justify-content: center;
+          width: 100%;
+          margin-top: 10px;
           color: #25635f;
           font-size: 0.86rem;
           font-weight: 800;
@@ -856,28 +889,6 @@ const HomePage: NextPage = () => {
             display: grid;
           }
 
-          .url-field {
-            grid-template-columns: 1fr;
-          }
-
-          .url-field label,
-          .url-field input,
-          .url-field p {
-            grid-column: 1;
-            grid-row: auto;
-          }
-
-          .url-controls,
-          .scan-loader {
-            grid-column: 1;
-          }
-
-          .url-submit {
-            grid-column: 1;
-            grid-row: auto;
-            justify-self: start;
-          }
-
           .editor-pane,
           .result-pane {
             min-height: auto;
@@ -917,6 +928,60 @@ const HomePage: NextPage = () => {
 
           .metric-row {
             display: grid;
+          }
+
+          .url-intro {
+            padding-inline: 16px;
+          }
+
+          .url-field {
+            padding-inline: 16px;
+          }
+
+          .url-input-group {
+            flex-wrap: wrap;
+            overflow: visible;
+            gap: 8px;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+          }
+
+          .url-input-icon,
+          .url-field input,
+          .url-input-group select,
+          .url-submit {
+            min-height: 44px;
+            height: 44px;
+            border: 1px solid #cbd5e1;
+            background: #fbfcfe;
+          }
+
+          .url-input-icon {
+            border-right: 0;
+            border-radius: 999px 0 0 999px;
+            padding-left: 14px;
+          }
+
+          .url-field input {
+            flex-basis: calc(100% - 50px);
+            border-left: 0;
+            border-radius: 0 999px 999px 0;
+          }
+
+          .url-input-group select,
+          .url-submit {
+            flex: 1;
+          }
+
+          .url-input-group select {
+            border-radius: 999px;
+          }
+
+          .url-submit {
+            margin: 0;
+            border-color: #172033;
+            background: #172033;
           }
         }
       `}</style>

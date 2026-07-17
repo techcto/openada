@@ -110,6 +110,15 @@ function siteName(site: Site): string {
   return label.replace(/[-_]+/g, ' ').replace(/\b\w/g, (character) => character.toUpperCase())
 }
 
+function gradeClass(grade?: string | null, score?: number | null): string {
+  const normalized = grade?.trim().toUpperCase()
+  if (normalized === 'A' || (score !== null && score !== undefined && score >= 90)) return 'grade-a'
+  if (normalized === 'B' || (score !== null && score !== undefined && score >= 80)) return 'grade-b'
+  if (normalized === 'C' || (score !== null && score !== undefined && score >= 70)) return 'grade-c'
+  if (normalized === 'D' || normalized === 'F' || (score !== null && score !== undefined)) return 'grade-d'
+  return 'grade-unknown'
+}
+
 function findingValue(finding: unknown, key: string): string {
   if (!finding || typeof finding !== 'object') return ''
   const value = (finding as Record<string, unknown>)[key]
@@ -230,10 +239,15 @@ const DirectoryPage: NextPage = () => {
         .scan-row-main small { color: #64748b; overflow-wrap: anywhere; }
         .scan-row-date { color: #25635f; font-size: .82rem; font-weight: 800; text-align: right; }
         .scan-row-score { display: grid; gap: 4px; justify-items: end; }
-        .scan-row-score b { color: #b45309; font-size: 1.25rem; }
+        .scan-row-score b { font-size: 1.25rem; }
+        .grade-a { color: #15803d; }
+        .grade-b { color: #0f766e; }
+        .grade-c { color: #b45309; }
+        .grade-d { color: #be123c; }
+        .grade-unknown { color: #64748b; }
         .scan-row-score small, .scan-row-pages { color: #64748b; font-size: .8rem; }
         .scan-row-pages { text-align: right; }
-        .page-list { border-top: 1px solid #dce3ea; } .page-row { min-height: 76px; border-bottom: 1px solid #e7edf3; color: #172033; text-decoration: none; transition: transform .15s ease; } .page-row > span:first-child { display: grid; gap: 5px; } .page-row small { color: #64748b; overflow-wrap: anywhere; } .page-score { display: inline-flex; align-items: center; gap: 6px; color: #b45309; font-weight: 900; }
+        .page-list { border-top: 1px solid #dce3ea; } .page-row { min-height: 76px; border-bottom: 1px solid #e7edf3; color: #172033; text-decoration: none; transition: transform .15s ease; } .page-row > span:first-child { display: grid; gap: 5px; } .page-row small { color: #64748b; overflow-wrap: anywhere; } .page-score { display: inline-flex; align-items: center; gap: 6px; font-weight: 900; }
         .page-detail { border-top: 1px solid #dce3ea; padding-top: 24px; } .detail-heading { align-items: flex-start; } .detail-heading p { color: #64748b; overflow-wrap: anywhere; } .detail-heading a { display: inline-flex; align-items: center; gap: 7px; color: #25635f; font-weight: 850; text-decoration: none; }
         .page-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; margin-top: 28px; }
         .page-main, .page-sidebar { min-width: 0; }
@@ -270,19 +284,24 @@ function SiteView({ site, scans }: { site: Site; scans: Scan[] }) {
   return <section aria-labelledby="scan-history-heading">
     <div className="archive-bar"><div><h2 id="scan-history-heading">Scan history</h2><p>Choose a dated crawl to browse its pages and findings.</p></div><span className="scan-status">{scans.length} archive record{scans.length === 1 ? '' : 's'}</span></div>
     <div className="scan-list">{scans.length === 0 ? <div className="empty"><FileSearch size={24} aria-hidden /><h2>No scans recorded yet</h2><p>This site is in the directory, but no completed archive record is available.</p></div> : scans.map((scan) => <a className="scan-row" href={`/directory/${encodeURIComponent(site.id)}/scans/${encodeURIComponent(scan.id)}`} key={scan.id}>
-      <span className="scan-row-icon"><ScanSearch size={18} aria-hidden /></span><span className="scan-row-main"><strong>{scan.status === 'completed' ? 'Accessibility scan' : `Scan ${scan.status}`}</strong><small>{scan.url || site.hostname}</small></span><span className="scan-row-date">{formatDate(scan.completedAt || scan.createdAt, true)}</span><span className="scan-row-score"><b>{scan.grade ?? '--'}</b><small>{scan.score ?? '--'} / 100</small></span><span className="scan-row-pages">{scan.pagesScanned} page{scan.pagesScanned === 1 ? '' : 's'}</span>
+      <span className="scan-row-icon"><ScanSearch size={18} aria-hidden /></span><span className="scan-row-main"><strong>{scan.status === 'completed' ? 'Accessibility scan' : `Scan ${scan.status}`}</strong><small>{scan.url || site.hostname}</small></span><span className="scan-row-date">{formatDate(scan.completedAt || scan.createdAt, true)}</span><span className="scan-row-score"><b className={gradeClass(scan.grade, scan.score)}>{scan.grade ?? '--'}</b><small>{scan.score ?? '--'} / 100</small></span><span className="scan-row-pages">{scan.pagesScanned} page{scan.pagesScanned === 1 ? '' : 's'}</span>
     </a>)}</div>
   </section>
 }
 
 function ScanView({ site, scan, pages }: { site?: Site; scan: Scan; pages: PageSummary[] }) {
+  const sortedPages = [...pages].sort((left, right) => {
+    const leftUrl = left.sourceUrl || left.url || left.path || ''
+    const rightUrl = right.sourceUrl || right.url || right.path || ''
+    return leftUrl.localeCompare(rightUrl, undefined, { sensitivity: 'base' })
+  })
   return <section aria-labelledby="pages-heading">
     <div className="archive-bar"><div><h2 id="pages-heading">Pages in this scan</h2><p>{site?.hostname} · scanned {formatDate(scan.completedAt || scan.createdAt, true)}</p></div><span className="scan-status">{scan.status}</span></div>
-    <div className="page-list">{pages.length === 0 ? <div className="empty"><FileSearch size={24} aria-hidden /><h2>No page results yet</h2><p>This scan is still processing or did not return any pages.</p></div> : pages.map((page, index) => {
+    <div className="page-list">{sortedPages.length === 0 ? <div className="empty"><FileSearch size={24} aria-hidden /><h2>No page results yet</h2><p>This scan is still processing or did not return any pages.</p></div> : sortedPages.map((page, index) => {
       const id = pageId(page)
       const url = page.sourceUrl || page.url || ''
       return <a className="page-row" href={`/directory/${encodeURIComponent(site?.id || '')}/scans/${encodeURIComponent(scan.id)}/pages/${encodeURIComponent(id)}`} key={id || url || index}>
-        <span><strong>{page.title || url || `Page ${index + 1}`}</strong><small>{url || page.path}</small></span><span className="page-score">{page.ada?.grade || page.latestGrade || '--'} · {page.ada?.score ?? page.latestScore ?? '--'} <ExternalLink size={15} aria-hidden /></span>
+        <span><strong>{page.title || url || `Page ${index + 1}`}</strong><small>{url || page.path}</small></span><span className={`page-score ${gradeClass(page.ada?.grade || page.latestGrade, page.ada?.score ?? page.latestScore)}`}>{page.ada?.grade || page.latestGrade || '--'} · {page.ada?.score ?? page.latestScore ?? '--'} <ExternalLink size={15} aria-hidden /></span>
       </a>
     })}</div>
   </section>
