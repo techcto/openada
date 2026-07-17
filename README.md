@@ -1,3 +1,12 @@
+```text
+   ____                   ___  ____    _
+  / __ \____  ___  ____  /   |/  _/   (_)___
+ / / / / __ \/ _ \/ __ \/ /| |/ /    / / __ \
+/ /_/ / /_/ /  __/ / / / ___ / /    / / / / /
+\____/ .___/\___/_/ /_/_/  |_/_/   /_/_/ /_/
+    /_/       open accessibility for the public web
+```
+
 # OpenADA
 
 [![CI](https://github.com/techcto/openada/actions/workflows/ci.yml/badge.svg)](https://github.com/techcto/openada/actions/workflows/ci.yml)
