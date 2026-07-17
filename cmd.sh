@@ -16,7 +16,7 @@ Usage:
   ./cmd.sh cft-existing <cmd>   Test/deploy into an existing ECS cluster and ALB
   ./cmd.sh cft <command>        Compatibility alias for cft-new
   ./cmd.sh docker build [tag]   Build production images locally
-  ./cmd.sh docker push [tag]    Build and push production images to Docker Hub
+  ./cmd.sh docker push [tag]    Build and push production images to AWS ECR
   ./cmd.sh git <command>        Run git.sh (status, audit, tag, ...)
   ./cmd.sh images [tag]         Build local UI and API images
 EOF
@@ -82,11 +82,15 @@ case "${1:-help}" in
   docker)
     docker_action="${2:-push}"
     tag="${3:-latest}"
-    namespace="${DOCKERHUB_NAMESPACE:-techcto}"
+    ecr_registry="${MP_AWS_ECR:-709825985650.dkr.ecr.us-east-1.amazonaws.com}"
+    ecr_region="${AWS_REGION:-us-east-1}"
+    ui_repository="${OPENADA_UI_REPOSITORY:-solodev/openada-ui}"
+    api_repository="${OPENADA_API_REPOSITORY:-solodev/openada-api}"
+    worker_repository="${OPENADA_WORKER_REPOSITORY:-solodev/openada-worker}"
     platform="${DOCKER_PLATFORM:-linux/amd64}"
-    ui_image="${namespace}/openada-ui:${tag}"
-    api_image="${namespace}/openada-api:${tag}"
-    worker_image="${namespace}/openada-worker:${tag}"
+    ui_image="${ecr_registry}/${ui_repository}:${tag}"
+    api_image="${ecr_registry}/${api_repository}:${tag}"
+    worker_image="${ecr_registry}/${worker_repository}:${tag}"
 
     case "$docker_action" in
       build)
@@ -102,6 +106,8 @@ case "${1:-help}" in
         ;;
       push)
         "$ROOT_DIR/cmd.sh" docker build "$tag"
+        aws ecr get-login-password --region "$ecr_region" | \
+          docker login --username AWS --password-stdin "$ecr_registry"
         docker push "$ui_image"
         docker push "$api_image"
         docker push "$worker_image"

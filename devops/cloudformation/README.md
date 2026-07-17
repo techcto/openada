@@ -17,16 +17,24 @@ The separate `OpenADA MCP AgentCore` product is a stateless ARM64 gateway for Am
 
 Use `devops/cloudformation/openada-agentcore-runtime.yaml` after the AgentCore container image has been published. Set `OpenAdaMcpUrl` to the private OpenADA MCP URL and `OpenAdaApiKey` to the same random value configured as `ApiKeys` on the private OpenADA stack. Select `NetworkMode=VPC` with private subnets and security groups when the OpenADA endpoint is internal to a VPC. AgentCore invocation uses AWS IAM/SigV4; the gateway does not need AWS access keys.
 
-## Publish test images
+## Publish test images to AWS ECR
 
-After logging in to Docker Hub, build and publish the UI, API, and scan-worker images without committing first:
+For a manual ECR image push, authenticate to the target registry and use a new
+version tag. Marketplace repositories commonly use immutable tags, so do not
+reuse a published version:
 
 ```bash
-docker login
-./cmd.sh docker push latest
+export AWS_REGION=us-east-1
+export MP_AWS_ECR=709825985650.dkr.ecr.us-east-1.amazonaws.com
+export OPENADA_UI_REPOSITORY=solodev/openada-ui
+export OPENADA_API_REPOSITORY=solodev/openada-api
+export OPENADA_WORKER_REPOSITORY=solodev/openada-worker
+./cmd.sh docker push 0.1.10
 ```
 
-The command publishes `techcto/openada-ui:latest`, `techcto/openada-api:latest`, and `techcto/openada-worker:latest` for `linux/amd64`. Set `DOCKERHUB_NAMESPACE` or `DOCKER_PLATFORM` to override the defaults.
+The command builds and pushes the three `linux/amd64` images to AWS ECR. Normal
+release tags use the GitHub Actions release workflow and publish the versioned
+Marketplace images automatically.
 
 ## Publish CloudFormation files
 
@@ -69,9 +77,9 @@ export OPENADA_EXISTING_ALB_SG=sg-...
 export OPENADA_EXISTING_LISTENER_ARN=arn:aws:elasticloadbalancing:...
 export OPENADA_EXISTING_SUBNETS=subnet-...,subnet-...
 export OPENADA_HOST_HEADER=ada.example.com
-export OPENADA_UI_IMAGE=docker.io/techcto/openada-ui:1.0.0
-export OPENADA_API_IMAGE=docker.io/techcto/openada-api:1.0.0
-export OPENADA_WORKER_IMAGE=docker.io/techcto/openada-worker:1.0.0
+export OPENADA_UI_IMAGE=709825985650.dkr.ecr.us-east-1.amazonaws.com/solodev/openada-ui:1.0.0
+export OPENADA_API_IMAGE=709825985650.dkr.ecr.us-east-1.amazonaws.com/solodev/openada-api:1.0.0
+export OPENADA_WORKER_IMAGE=709825985650.dkr.ecr.us-east-1.amazonaws.com/solodev/openada-worker:1.0.0
 export OPENADA_REDIS_HOST=redis.internal.example
 ```
 
