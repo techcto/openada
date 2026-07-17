@@ -43,6 +43,8 @@ api/lib/utils/
 api/lib/workers/
 api/pages/api/*
 !api/pages/api/health.openada.ts
+!api/pages/api/mcp.openada.ts
+!api/pages/api/openai-apps-challenge.openada.ts
 !api/pages/api/openapi.openada.ts
 !api/pages/api/v1/
 !api/pages/api/v1/
@@ -129,6 +131,7 @@ src/pages/*.tsx
 !src/pages/directory/index.openada.tsx
 !src/pages/scan.openada.tsx
 !src/pages/report.openada.tsx
+!src/pages/support.openada.tsx
 src/sass/base/
 src/sass/components/
 src/sass/layout/
