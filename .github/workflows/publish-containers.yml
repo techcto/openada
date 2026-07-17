@@ -12,6 +12,7 @@ permissions:
 env:
   AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
   MP_AWS_ECR: ${{ vars.MP_AWS_ECR || '709825985650.dkr.ecr.us-east-1.amazonaws.com' }}
+  MP_AWS_ECR_ACCOUNT_ID: ${{ vars.MP_AWS_ECR_ACCOUNT_ID || '709825985650' }}
   UI_REPOSITORY: ${{ vars.OPENADA_UI_REPOSITORY || 'solodev/openada-ui' }}
   API_REPOSITORY: ${{ vars.OPENADA_API_REPOSITORY || 'solodev/openada-api' }}
   WORKER_REPOSITORY: ${{ vars.OPENADA_WORKER_REPOSITORY || 'solodev/openada-worker' }}
@@ -49,12 +50,17 @@ jobs:
           aws ecr get-login-password --region "$AWS_REGION" | \
             docker login --username AWS --password-stdin "$MP_AWS_ECR"
 
+      - name: Verify AWS publishing identity
+        run: aws sts get-caller-identity
+
       - name: Verify Marketplace ECR repositories
         run: |
           for repository in "$UI_REPOSITORY" "$API_REPOSITORY" "$WORKER_REPOSITORY"; do
-            aws ecr describe-repositories --repository-names "$repository" >/dev/null || {
+            aws ecr describe-repositories \
+              --registry-id "$MP_AWS_ECR_ACCOUNT_ID" \
+              --repository-names "$repository" >/dev/null || {
               echo "Missing ECR repository: $MP_AWS_ECR/$repository" >&2
-              echo "Create it first or set the matching OPENADA_*_REPOSITORY repository variable." >&2
+              echo "Confirm the publishing principal can access registry $MP_AWS_ECR_ACCOUNT_ID." >&2
               exit 1
             }
           done
