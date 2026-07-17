@@ -166,6 +166,8 @@ Set these GitHub repository variables:
 
 Optional repository variables are `AWS_REGION` (defaults to `us-east-1`), `MP_AWS_ECR` (defaults to `709825985650.dkr.ecr.us-east-1.amazonaws.com`), `OPENADA_UI_REPOSITORY` (defaults to `solodev/openada-ui`), `OPENADA_API_REPOSITORY` (defaults to `solodev/openada-api`), `OPENADA_WORKER_REPOSITORY` (defaults to `solodev/openada-worker`), and `DOCKERHUB_NAMESPACE`. The publishing principal may belong to a different AWS account; the workflows follow the Marketplace release pattern and authenticate directly to the target ECR registry before pushing. The target repositories must grant the publishing principal cross-account push access. Do not use another product's Marketplace identifier.
 
+For the cross-account Marketplace ECR setup, apply [`marketplace-ecr-repository-policy.json`](devops/iam/marketplace-ecr-repository-policy.json) separately to `solodev/openada-ui`, `solodev/openada-api`, and `solodev/openada-worker` in account `709825985650`. The publishing user also needs `ecr:GetAuthorizationToken` in its own IAM policy.
+
 After the secrets are configured, create a release tag through the repository helper:
 
 ```bash

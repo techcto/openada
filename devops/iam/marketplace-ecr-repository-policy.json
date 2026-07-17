@@ -14,11 +14,7 @@
         "ecr:PutImage",
         "ecr:UploadLayerPart"
       ],
-      "Resource": [
-        "arn:aws:ecr:us-east-1:709825985650:repository/solodev/openada-ui",
-        "arn:aws:ecr:us-east-1:709825985650:repository/solodev/openada-api",
-        "arn:aws:ecr:us-east-1:709825985650:repository/solodev/openada-worker"
-      ]
+      "Resource": "*"
     }
   ]
 }
