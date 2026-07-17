@@ -5,7 +5,17 @@
 [![Open in GitHub](https://img.shields.io/badge/Open%20in-GitHub-181717?logo=github)](https://github.com/techcto/openada)
 [![Run Container Publish](https://img.shields.io/badge/Run%20container%20publish-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)](https://github.com/techcto/openada/actions/workflows/publish-containers.yml)
 
-OpenADA is a hosted accessibility and language-quality service for the web. It gives CMS products one stable API for WCAG audits and LanguageTool-compatible spelling and grammar checks, then turns public site scans into a transparent, date-based archive anyone can browse.
+OpenADA is a hosted accessibility and language-quality service for the web. It gives web developers, agencies, public entities, and site owners one stable API for WCAG audits and LanguageTool-compatible spelling and grammar checks, then turns public site scans into a transparent, date-based archive anyone can browse.
+
+## The Problem
+
+Every public website is part of a public service: applying for a permit, finding an emergency contact, paying a bill, registering for school, or understanding a local policy. When a site is inaccessible, residents with disabilities are shut out of the same services everyone else depends on.
+
+This is a national delivery problem, not a niche feature request. State and local governments are working through the DOJ’s web-accessibility requirements while facing limited budgets, small technology teams, aging websites, vendors, PDFs, forms, and thousands of pages that must be understood and improved. The Department of Justice’s April 20, 2026 interim final rule extended the Title II compliance date to April 26, 2027 for covered public entities with populations of 50,000 or more, and to April 26, 2028 for smaller public entities and special district governments. The extension acknowledges the practical burden; it does not make accessible public services optional. Read the [Federal Register rule](https://www.federalregister.gov/documents/2026/04/20/2026-07663/extension-of-compliance-dates-for-nondiscrimination-on-the-basis-of-disability-accessibility-of-web).
+
+Commercial accessibility platforms can be difficult for a small city, county, school district, library, or special district to afford. OpenADA is built around a simple public-interest proposition: every government should be able to scan its own website for free, see which pages need attention, understand the findings, and measure improvement over time. The project starts as free infrastructure for public entities and developers; optional enterprise API capacity can help fund continued public access later.
+
+OpenADA is not a legal determination or a substitute for human accessibility testing, procurement review, or counsel. It is a practical starting point that turns a large, expensive, easy-to-ignore problem into a queue of concrete pages and findings.
 
 ## Contest Pitch
 
@@ -19,19 +29,26 @@ Try it live:
 
 - [OpenADA checker](https://openada.us/)
 - [Public directory](https://openada.us/directory)
-- [Solodev archive](https://openada.us/directory/www.solodev.com)
 - [Public API reference](https://openada.us/api-reference)
 - [ADA guidance](https://openada.us/docs)
 
-### Why This Wins
+## Judging Criteria
 
-**Technological implementation.** OpenADA is a real, deployed service rather than a static demo. Codex was used as an engineering collaborator across the full loop: understanding the existing CMS provider contract, shaping the API, building the crawler and durable scan workflow, iterating on the UI, writing CloudFormation and container workflows, debugging production behavior, and verifying the live AWS deployment. The result is a working Next.js UI, API service, asynchronous scan worker, Redis-backed queue, DynamoDB archive, public widget, OpenAPI document, and Docker/GitHub Actions release path.
+### Technological Implementation
 
-**Design.** The product has a complete workflow: a search-style URL entry point, a fast five-page default for first-time testing, adjustable crawl limits, progress feedback, a report route, a directory with latest scores, sorted page results, color-coded grades, page-level findings, historical scan selection, printable reports, API reference, and human-readable guidance. It is designed for repeated use by editors, developers, accessibility teams, and the public.
+OpenADA is a real, deployed service rather than a static demo. Codex was used as an engineering collaborator across the full loop: shaping the API, building the crawler and durable scan workflow, iterating on the UI, writing CloudFormation and container workflows, debugging production behavior, and verifying the live AWS deployment. The result is a working Next.js UI, API service, asynchronous scan worker, Redis-backed queue, DynamoDB archive, public widget, OpenAPI document, and Docker/GitHub Actions release path.
 
-**Potential impact.** CMS teams should not need to install and maintain a separate Java service just to give authors spelling checks, or build a second accessibility pipeline for published pages. OpenADA gives Solodev CMS a stable provider endpoint today and gives WordPress, Drupal, custom build systems, public agencies, and site owners the same low-friction integration path. The public archive also makes accessibility progress visible over time instead of hiding every scan inside a private dashboard.
+### Design
 
-**Quality of the idea.** Most accessibility tools produce a private score and stop there. OpenADA combines accessibility, language quality, CMS integration, a public API, and an open web archive. The archive makes a website’s improvement legible: not just “what is my score now?”, but “which pages changed, what failed, and did the site improve from the last scan?” That public, time-based layer is the project’s distinctive idea.
+The product has a complete workflow: a search-style URL entry point, a fast five-page default for first-time testing, adjustable crawl limits, progress feedback, a report route, a directory with latest scores, sorted page results, color-coded grades, page-level findings, historical scan selection, printable reports, API reference, and human-readable guidance. It is designed for repeated use by editors, developers, accessibility teams, and the public.
+
+### Potential Impact
+
+Public agencies and small organizations should not need a large procurement budget or a specialized accessibility team just to understand where their websites fail. OpenADA gives web developers, agencies, government teams, and site owners a low-friction API and free public scanning path for published pages. The public archive also makes accessibility progress visible over time instead of hiding every scan inside a private dashboard.
+
+### Quality of the Idea
+
+Most accessibility tools produce a private score and stop there. OpenADA combines accessibility, language quality, a public API, and an open web archive. The archive makes a website’s improvement legible: not just “what is my score now?”, but “which pages changed, what failed, and did the site improve from the last scan?” That public, time-based layer is the project’s distinctive idea.
 
 ### What The Judges Can Verify
 
@@ -60,7 +77,7 @@ Use Node.js 24 LTS for local development and container parity.
 ./cmd.sh dev
 ```
 
-For an automated local container smoke test, run `./cmd.sh compose-test`. It builds both images, waits for the API health check, verifies the UI, sends a combined ADA/language request, and tears the stack down afterward. Docker Engine and `curl` must be available locally.
+For an automated local container smoke test, run `./cmd.sh compose-test`. It builds the application containers, waits for the API health check, verifies the UI, sends a combined ADA/language request, and tears the stack down afterward. Docker Engine and `curl` must be available locally.
 
 Open `http://localhost:3000`. The API health check is `http://localhost:3001/api/health`.
 The human-readable ADA guide is available at `http://localhost:3000/docs`.
@@ -90,7 +107,7 @@ curl -X POST http://localhost:3001/api/v1/check \
 
 `POST /api/v1/check` accepts `html`, optional `text`, `language`, `url`, and `wcagTags`, and returns both `ada` and `language` results. When `url` is supplied without `html`, OpenADA fetches the public HTML page with bounded redirects, a 15-second timeout, and a 2 MB response limit.
 
-`POST /api/v2/check` follows the LanguageTool `/v2/check` response shape. This is the compatibility endpoint used by Solodev CMS.
+`POST /api/v2/check` follows the LanguageTool `/v2/check` response shape. This makes it easy for websites, publishing tools, and developer workflows to adopt OpenADA without changing their existing language-check integration.
 
 `POST /api/v1/scans` accepts a public `url`, runs both checks, and records the site, page, and scan in the public directory. Set `crawl: true` to follow same-host links from the starting page; the bounded crawl scans up to 100 pages (`maxPages`, default 50). `GET /api/v1/directory` lists recorded sites; add `?site=example.com` for its pages and recent scans. The machine-readable OpenAPI document is available at `/api/openapi`.
 
@@ -98,15 +115,15 @@ Every ADA result includes a letter grade derived from the numeric score: `A+` (9
 
 Set `OPENADA_API_KEYS` to a comma-separated list to require `Authorization: Bearer <key>` or `X-API-Key: <key>`. Set `OPENADA_CORS_ORIGINS` to a comma-separated allowlist in production.
 
-## Solodev CMS Integration
+## Website Integration
 
-The CMS already resolves the active `languagetool` provider setting and posts editor text to `{endpoint_url}/v2/check`. Configure the provider’s `endpoint_url` to the OpenADA API base URL, for example:
+Any website, application, publishing workflow, or build pipeline can post editor text or rendered page content to OpenADA. Point the integration at the OpenADA API base URL, for example:
 
 ```text
 https://openada.example.com/api
 ```
 
-The CMS then calls `https://openada.example.com/api/v2/check`; no local LanguageTool container is required. Keep `axe_core` enabled for editor-side browser feedback, and use OpenADA’s `/api/v1/ada/check` for server-side, batch, or remote page audits.
+Use `https://openada.example.com/api/v2/check` for LanguageTool-compatible checks, `/api/v1/ada/check` for server-side accessibility checks, and `/api/v1/check` when one request should return both. No local LanguageTool container is required. The same endpoints work for WordPress, Drupal, static sites, custom applications, CI pipelines, and any other web stack.
 
 ## AWS Deployment
 
@@ -164,6 +181,6 @@ Configure GitHub secrets `DOCKERHUB_USERNAME=techcto` and `DOCKERHUB_TOKEN` with
 
 ## Contest Note
 
-OpenADA is intentionally focused: it contains only the UI, API, scan worker, deployment, documentation, and public widget needed to make the service real. It does not carry inherited CMS modules or a local LanguageTool runtime.
+OpenADA is intentionally focused: it contains only the UI, API, scan worker, deployment, documentation, and public widget needed to make the service real. It does not carry unrelated application modules or a local LanguageTool runtime.
 
 See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for the open-source notices for axe-core, LanguageTool, and Playwright.
