@@ -1,0 +1,24 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowMarketplacePublisherPush",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::951157235292:user/marketplace-ecr"
+      },
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:CompleteLayerUpload",
+        "ecr:InitiateLayerUpload",
+        "ecr:PutImage",
+        "ecr:UploadLayerPart"
+      ],
+      "Resource": [
+        "arn:aws:ecr:us-east-1:709825985650:repository/solodev/openada-ui",
+        "arn:aws:ecr:us-east-1:709825985650:repository/solodev/openada-api",
+        "arn:aws:ecr:us-east-1:709825985650:repository/solodev/openada-worker"
+      ]
+    }
+  ]
+}

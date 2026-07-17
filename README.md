@@ -164,7 +164,7 @@ Set these GitHub repository variables:
 - `MP_AWS_ACCESS_KEY_ID`: access key ID for the Marketplace publishing IAM user.
 - `MP_AWS_MARKETPLACE_PRODUCT_ID`: the OpenADA AWS Marketplace container product identifier.
 
-Optional repository variables are `AWS_REGION` (defaults to `us-east-1`), `MP_AWS_ECR` (defaults to `709825985650.dkr.ecr.us-east-1.amazonaws.com`), `MP_AWS_ECR_ACCOUNT_ID` (defaults to `709825985650`), `OPENADA_UI_REPOSITORY` (defaults to `solodev/openada-ui`), `OPENADA_API_REPOSITORY` (defaults to `solodev/openada-api`), `OPENADA_WORKER_REPOSITORY` (defaults to `solodev/openada-worker`), and `DOCKERHUB_NAMESPACE`. The publishing principal may belong to a different AWS account; the workflows explicitly query the target ECR registry by ID and require cross-account ECR permissions. Do not use another product's Marketplace identifier.
+Optional repository variables are `AWS_REGION` (defaults to `us-east-1`), `MP_AWS_ECR` (defaults to `709825985650.dkr.ecr.us-east-1.amazonaws.com`), `OPENADA_UI_REPOSITORY` (defaults to `solodev/openada-ui`), `OPENADA_API_REPOSITORY` (defaults to `solodev/openada-api`), `OPENADA_WORKER_REPOSITORY` (defaults to `solodev/openada-worker`), and `DOCKERHUB_NAMESPACE`. The publishing principal may belong to a different AWS account; the workflows follow the Marketplace release pattern and authenticate directly to the target ECR registry before pushing. The target repositories must grant the publishing principal cross-account push access. Do not use another product's Marketplace identifier.
 
 After the secrets are configured, create a release tag through the repository helper:
 
