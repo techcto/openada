@@ -1,10 +1,14 @@
-name: Publish OpenADA Containers
+name: Release OpenADA to AWS Marketplace
 
 on:
   push:
-    branches: [main, master]
-    tags: ['v*']
+    tags:
+      - 'v*'
   workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Release version to build and publish without the leading v'
+        required: true
 
 permissions:
   contents: read
@@ -17,16 +21,34 @@ env:
   WORKER_REPOSITORY: ${{ vars.OPENADA_WORKER_REPOSITORY || 'solodev/openada-worker' }}
 
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Validate AWS publishing configuration
+      - name: Resolve release version
+        id: version
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.release_version }}
+        run: |
+          version="$INPUT_VERSION"
+          if [ -z "$version" ]; then
+            version="${GITHUB_REF_NAME#v}"
+          fi
+          case "$version" in
+            ''|*[!0-9A-Za-z.-]*)
+              echo "Invalid release version: $version" >&2
+              exit 1
+              ;;
+          esac
+          echo "value=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Validate AWS Marketplace configuration
         env:
           MP_AWS_ACCESS_KEY_ID: ${{ secrets.MP_AWS_ACCESS_KEY_ID }}
           MP_AWS_SECRET_ACCESS_KEY: ${{ secrets.MP_AWS_SECRET_ACCESS_KEY }}
+          MP_AWS_MARKETPLACE_PRODUCT_ID: ${{ vars.MP_AWS_MARKETPLACE_PRODUCT_ID }}
         run: |
           test -n "$MP_AWS_ACCESS_KEY_ID" || {
             echo 'Missing repository secret MP_AWS_ACCESS_KEY_ID.' >&2
@@ -34,6 +56,10 @@ jobs:
           }
           test -n "$MP_AWS_SECRET_ACCESS_KEY" || {
             echo 'Missing repository secret MP_AWS_SECRET_ACCESS_KEY.' >&2
+            exit 1
+          }
+          test -n "$MP_AWS_MARKETPLACE_PRODUCT_ID" || {
+            echo 'Missing repository variable MP_AWS_MARKETPLACE_PRODUCT_ID.' >&2
             exit 1
           }
 
@@ -54,43 +80,12 @@ jobs:
           for repository in "$UI_REPOSITORY" "$API_REPOSITORY" "$WORKER_REPOSITORY"; do
             aws ecr describe-repositories --repository-names "$repository" >/dev/null || {
               echo "Missing ECR repository: $MP_AWS_ECR/$repository" >&2
-              echo "Create it first or set the matching OPENADA_*_REPOSITORY repository variable." >&2
               exit 1
             }
           done
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Extract UI image metadata
-        id: ui-meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.MP_AWS_ECR }}/${{ env.UI_REPOSITORY }}
-          tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=sha
-            type=ref,event=tag
-
-      - name: Extract API image metadata
-        id: api-meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.MP_AWS_ECR }}/${{ env.API_REPOSITORY }}
-          tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=sha
-            type=ref,event=tag
-
-      - name: Extract worker image metadata
-        id: worker-meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.MP_AWS_ECR }}/${{ env.WORKER_REPOSITORY }}
-          tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=sha
-            type=ref,event=tag
 
       - name: Build and publish UI image
         uses: docker/build-push-action@v6
@@ -102,8 +97,7 @@ jobs:
           push: true
           provenance: false
           sbom: false
-          tags: ${{ steps.ui-meta.outputs.tags }}
-          labels: ${{ steps.ui-meta.outputs.labels }}
+          tags: ${{ env.MP_AWS_ECR }}/${{ env.UI_REPOSITORY }}:${{ steps.version.outputs.value }}
 
       - name: Build and publish API image
         uses: docker/build-push-action@v6
@@ -115,8 +109,7 @@ jobs:
           push: true
           provenance: false
           sbom: false
-          tags: ${{ steps.api-meta.outputs.tags }}
-          labels: ${{ steps.api-meta.outputs.labels }}
+          tags: ${{ env.MP_AWS_ECR }}/${{ env.API_REPOSITORY }}:${{ steps.version.outputs.value }}
 
       - name: Build and publish worker image
         uses: docker/build-push-action@v6
@@ -127,15 +120,10 @@ jobs:
           push: true
           provenance: false
           sbom: false
-          tags: ${{ steps.worker-meta.outputs.tags }}
-          labels: ${{ steps.worker-meta.outputs.labels }}
+          tags: ${{ env.MP_AWS_ECR }}/${{ env.WORKER_REPOSITORY }}:${{ steps.version.outputs.value }}
 
-      - name: Publish image references
-        run: |
-          {
-            echo '### Published images'
-            echo "UI: ${MP_AWS_ECR}/${UI_REPOSITORY}"
-            echo "API: ${MP_AWS_ECR}/${API_REPOSITORY}"
-            echo "Worker: ${MP_AWS_ECR}/${WORKER_REPOSITORY}"
-            echo 'Use the commit SHA tag for CloudFormation deployments.'
-          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Submit AWS Marketplace changeset
+        env:
+          MP_AWS_MARKETPLACE_PRODUCT_ID: ${{ vars.MP_AWS_MARKETPLACE_PRODUCT_ID }}
+          RELEASE_VERSION: ${{ steps.version.outputs.value }}
+        run: bash devops/changeset.sh

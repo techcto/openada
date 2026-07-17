@@ -151,7 +151,7 @@ See the full [MCP connection and submission guide](devops/mcp/README.md) and the
 
 ## GitHub Actions Publishing
 
-The container workflows publish to AWS ECR on `main`, `master`, and `v*` tag pushes. They publish public Docker Hub images on `v*` tag pushes or manual dispatch.
+The container workflows publish to AWS ECR on `main`, `master`, and `v*` tag pushes. They publish public Docker Hub images on `v*` tag pushes or manual dispatch. The `v*` release workflow also submits the three versioned images to AWS Marketplace through an `AddDeliveryOptions` changeset.
 
 Set these GitHub repository secrets:
 
@@ -160,7 +160,11 @@ Set these GitHub repository secrets:
 - `DOCKERHUB_USERNAME`: Docker Hub account used to publish images.
 - `DOCKERHUB_TOKEN`: Docker Hub access token with push permission.
 
-Optional repository variables are `AWS_REGION` (defaults to `us-east-1`), `MP_AWS_ECR` (defaults to the OpenADA AWS account registry), `OPENADA_UI_REPOSITORY`, `OPENADA_API_REPOSITORY`, `OPENADA_WORKER_REPOSITORY`, and `DOCKERHUB_NAMESPACE`. The three ECR repositories must already exist in the Marketplace account; the workflow verifies them before building.
+Set this required repository variable for Marketplace releases:
+
+- `MP_AWS_MARKETPLACE_PRODUCT_ID`: the OpenADA AWS Marketplace container product identifier.
+
+Optional repository variables are `AWS_REGION` (defaults to `us-east-1`), `MP_AWS_ECR` (defaults to `709825985650.dkr.ecr.us-east-1.amazonaws.com`), `OPENADA_UI_REPOSITORY` (defaults to `solodev/openada-ui`), `OPENADA_API_REPOSITORY` (defaults to `solodev/openada-api`), `OPENADA_WORKER_REPOSITORY` (defaults to `solodev/openada-worker`), and `DOCKERHUB_NAMESPACE`. The three ECR repositories must already exist in the Marketplace account; the workflows verify them before building. Do not use another product's Marketplace identifier.
 
 After the secrets are configured, create a release tag through the repository helper:
 
@@ -170,7 +174,15 @@ After the secrets are configured, create a release tag through the repository he
 ./git.sh tag 0.1.0
 ```
 
-That command creates and pushes the annotated `v0.1.0` tag. The tag starts CI, the ECR publish workflow, and the Docker Hub publish workflow. Do not put AWS credentials or Docker Hub tokens in the repository or in `git.sh`.
+That command creates and pushes the annotated `v0.1.0` tag. The tag starts CI, the ECR publish workflow, the Docker Hub publish workflow, and the Marketplace release workflow. The Marketplace workflow publishes these exact versioned images before submitting the changeset:
+
+```text
+709825985650.dkr.ecr.us-east-1.amazonaws.com/solodev/openada-ui:0.1.0
+709825985650.dkr.ecr.us-east-1.amazonaws.com/solodev/openada-api:0.1.0
+709825985650.dkr.ecr.us-east-1.amazonaws.com/solodev/openada-worker:0.1.0
+```
+
+Do not put AWS credentials, the Marketplace product ID, or Docker Hub tokens in the repository or in `git.sh`.
 
 ## Website Integration
 
@@ -211,8 +223,9 @@ The repository helpers cover the repeatable workflow:
 export OPENADA_VPC_ID=vpc-0123456789abcdef0
 export OPENADA_PUBLIC_SUBNETS=subnet-public-a,subnet-public-b
 export OPENADA_SERVICE_SUBNETS=subnet-private-a,subnet-private-b
-export OPENADA_UI_IMAGE=123456789012.dkr.ecr.us-east-1.amazonaws.com/openada/ui:TAG
-export OPENADA_API_IMAGE=123456789012.dkr.ecr.us-east-1.amazonaws.com/openada/api:TAG
+export OPENADA_UI_IMAGE=709825985650.dkr.ecr.us-east-1.amazonaws.com/solodev/openada-ui:TAG
+export OPENADA_API_IMAGE=709825985650.dkr.ecr.us-east-1.amazonaws.com/solodev/openada-api:TAG
+export OPENADA_WORKER_IMAGE=709825985650.dkr.ecr.us-east-1.amazonaws.com/solodev/openada-worker:TAG
 ./cft.sh deploy
 ```
 
