@@ -48,7 +48,7 @@
     badge.target = '_blank'
     badge.rel = 'noreferrer'
     badge.setAttribute('aria-label', 'OpenADA accessibility score ' + score + ' out of 100')
-    badge.textContent = 'OpenADA ' + score
+    badge.textContent = 'OpenADA ' + (data.grade || data.ada.grade) + ' · ' + score
     badge.style.cssText = 'position:fixed;z-index:2147483000;' + (config.position === 'bottom-left' ? 'left:16px;' : 'right:16px;') + 'bottom:16px;display:inline-flex;align-items:center;min-height:34px;padding:0 12px;border:1px solid #172033;border-radius:6px;background:#b8e7d9;color:#172033;box-shadow:3px 3px 0 #172033;font:800 13px/1 system-ui,sans-serif;text-decoration:none;'
     document.body.appendChild(badge)
   }

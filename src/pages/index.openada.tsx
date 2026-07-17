@@ -351,7 +351,8 @@ const HomePage: NextPage = () => {
         }
 
         h1 {
-          max-width: 760px;
+          width: 100%;
+          max-width: none;
           font-size: 2.4rem;
           line-height: 1.08;
           font-weight: 850;
