@@ -1,4 +1,5 @@
 {
+  "$schema": "https://developers.openai.com/apps-sdk/schemas/chatgpt-app-submission.v1.json",
   "submissionType": "app-only",
   "name": "OpenADA",
   "shortDescription": "Scan public websites for accessibility and language findings.",
