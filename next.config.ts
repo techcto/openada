@@ -19,10 +19,26 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   pageExtensions: ['openada.tsx'],
   async rewrites() {
+    const directoryRewrites = [
+      {
+        source: '/directory/:site/scans/:scan/pages/:page',
+        destination: '/directory?site=:site&scan=:scan&page=:page',
+      },
+      {
+        source: '/directory/:site/scans/:scan',
+        destination: '/directory?site=:site&scan=:scan',
+      },
+      {
+        source: '/directory/:site',
+        destination: '/directory?site=:site',
+      },
+    ]
+
     // Production traffic stays same-origin so the ALB can route /api/* to ECS.
-    if (process.env.NODE_ENV === 'production') return []
+    if (process.env.NODE_ENV === 'production') return directoryRewrites
 
     return [
+      ...directoryRewrites,
       {
         source: '/api/:path*',
         destination: `${apiOrigin}/api/:path*`,
