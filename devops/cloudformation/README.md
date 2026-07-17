@@ -1,26 +1,26 @@
 # OpenADA deployment modes
 
-OpenADA stores public directory metadata in three on-demand DynamoDB tables created by the stack: sites, pages, and immutable scan summaries. The check endpoints still work independently of the directory.
+OpenADA stores public directory metadata and asynchronous scan history in four on-demand DynamoDB tables: sites, pages, immutable scan summaries, and scan jobs. Site scans use BullMQ over Redis so the API returns immediately and the UI can reconnect to progress after a task restart.
 
 Choose one deployment mode:
 
 | Mode | Command | Creates | Reuses |
 | --- | --- | --- | --- |
-| New standalone environment | `./cmd.sh cft-new deploy` | ECS cluster, ALB, security groups, task services | Nothing |
-| Existing environment | `./cmd.sh cft-existing deploy` | OpenADA services, target groups, rules, task roles, logs | ECS cluster, ALB, VPC, subnets |
+| New standalone environment | `./cmd.sh cft-new deploy` | ECS cluster, ALB, Redis queue, worker, security groups, task services | Nothing |
+| Existing environment | `./cmd.sh cft-existing deploy` | OpenADA services, worker, target groups, rules, task roles, logs, scan-jobs table | ECS cluster, ALB, VPC, subnets, reachable Redis |
 
-The standalone mode is implemented by `openada.yaml`. The existing-environment mode is implemented by `openada-existing.yaml`. Neither mode creates an RDS database, Redis cluster, or search cluster for OpenADA.
+The standalone mode is implemented by `openada.yaml`. The existing-environment mode is implemented by `openada-existing.yaml`. The standalone template creates a small Redis queue; the existing-environment template expects a reachable Redis endpoint.
 
 ## Publish test images
 
-After logging in to Docker Hub, build and publish both production images without committing first:
+After logging in to Docker Hub, build and publish the UI, API, and scan-worker images without committing first:
 
 ```bash
 docker login
 ./cmd.sh docker push latest
 ```
 
-The command publishes `techcto/openada-ui:latest` and `techcto/openada-api:latest` for `linux/amd64`. Set `DOCKERHUB_NAMESPACE` or `DOCKER_PLATFORM` to override the defaults.
+The command publishes `techcto/openada-ui:latest`, `techcto/openada-api:latest`, and `techcto/openada-worker:latest` for `linux/amd64`. Set `DOCKERHUB_NAMESPACE` or `DOCKER_PLATFORM` to override the defaults.
 
 ## Publish CloudFormation files
 
@@ -65,6 +65,8 @@ export OPENADA_EXISTING_SUBNETS=subnet-...,subnet-...
 export OPENADA_HOST_HEADER=ada.example.com
 export OPENADA_UI_IMAGE=docker.io/techcto/openada-ui:1.0.0
 export OPENADA_API_IMAGE=docker.io/techcto/openada-api:1.0.0
+export OPENADA_WORKER_IMAGE=docker.io/techcto/openada-worker:1.0.0
+export OPENADA_REDIS_HOST=redis.internal.example
 ```
 
 Check the template against AWS, then deploy:
@@ -76,6 +78,10 @@ Check the template against AWS, then deploy:
 ```
 
 The listener priorities must be unused on the existing listener. Override them with `OPENADA_UI_LISTENER_PRIORITY` and `OPENADA_API_LISTENER_PRIORITY` when the defaults `100` and `101` are already occupied.
+
+## Asynchronous site scans
+
+The homepage sends site scans to `/scan?url=...`. The scan page starts `POST /api/v1/scans`, receives a job id, and polls `GET /api/v1/scans/{jobId}`. The worker updates page counts, the current URL, queued pages, failures, and the final result in DynamoDB. Completed reports are available at `/report?jobId=...` and include a date picker for earlier scans of the same normalized URL. The Print / save PDF action uses the browser print dialog so the report can be archived without a PDF service in the stack.
 
 ## Fresh standalone stack
 

@@ -13,6 +13,7 @@ COPY api/lib/openada/*.ts ./lib/openada/
 COPY api/pages/api/health.openada.ts ./pages/api/
 COPY api/pages/api/openapi.openada.ts ./pages/api/
 COPY api/pages/api/v1/*.openada.ts ./pages/api/v1/
+COPY api/pages/api/v1/scans/*.openada.ts ./pages/api/v1/scans/
 COPY api/pages/api/v1/ada/*.openada.ts ./pages/api/v1/ada/
 COPY api/pages/api/v1/language/*.openada.ts ./pages/api/v1/language/
 COPY api/pages/api/v2/*.openada.ts ./pages/api/v2/

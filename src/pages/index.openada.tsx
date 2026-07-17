@@ -67,6 +67,17 @@ const sampleHtml = `<main>
   <a href="/docs">click here</a>
 </main>`
 
+async function readApiResponse(response: Response): Promise<any> {
+  const body = await response.text()
+  try {
+    return body ? JSON.parse(body) : {}
+  } catch {
+    throw new Error(response.ok
+      ? 'OpenADA returned an invalid response.'
+      : `OpenADA returned HTTP ${response.status}. Please try again shortly.`)
+  }
+}
+
 const HomePage: NextPage = () => {
   const [html, setHtml] = useState(sampleHtml)
   const [url, setUrl] = useState('')
@@ -102,8 +113,13 @@ const HomePage: NextPage = () => {
       }
     }
 
+    if (crawl) {
+      window.location.assign(`/scan?url=${encodeURIComponent(submittedUrl)}&maxPages=${scanLimit}`)
+      return
+    }
+
     setIsChecking(true)
-    setActiveScan(crawl ? 'site' : 'page')
+    setActiveScan('page')
     setError('')
 
     try {
@@ -119,7 +135,7 @@ const HomePage: NextPage = () => {
           wcagTags: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'],
         }),
       })
-      const data = await response.json()
+      const data = await readApiResponse(response)
 
       if (!response.ok) {
         throw new Error(data?.error?.message || 'OpenADA check failed.')

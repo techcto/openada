@@ -1,9 +1,16 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { applyCors, enforceApiKey, enforceScanHost, handleOptions, publicScansEnabled, readStringParam, requirePost } from '@lib/openada/http'
-import { checkAda, htmlToText } from '@lib/openada/ada'
-import { checkLanguage } from '@lib/openada/language'
-import { extractDocumentTitle, extractSameHostLinks, fetchRemoteHtml } from '@lib/openada/remote'
-import { recordScan } from '@lib/openada/directory'
+import {
+  applyCors,
+  enforceApiKey,
+  enforceScanHost,
+  handleOptions,
+  publicScansEnabled,
+  readStringParam,
+  requirePost,
+} from '@lib/openada/http'
+import { createScanJob, listScanJobs } from '@lib/openada/scan-jobs'
+import { getScanQueue } from '@lib/openada/scan-queue'
+import { runSiteScan } from '@lib/openada/site-scan'
 
 export const config = {
   api: {
@@ -13,138 +20,102 @@ export const config = {
   },
 }
 
+function scanOptions(body: NextApiRequest['body']) {
+  const url = readStringParam(body?.url).trim()
+  const title = readStringParam(body?.title).slice(0, 240)
+  const language = readStringParam(body?.language, 'en-US')
+  const requestedMaxPages = Number(body?.maxPages)
+  const maxPages = Math.min(
+    Math.max(Number.isFinite(requestedMaxPages) ? Math.floor(requestedMaxPages) : 50, 1),
+    100,
+  )
+  const wcagTags = Array.isArray(body?.wcagTags)
+    ? body.wcagTags.map(String)
+    : readStringParam(body?.wcagTags)
+      .split(',')
+      .map((tag) => tag.trim())
+      .filter(Boolean)
+
+  return { url, title, language, maxPages, wcagTags }
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (handleOptions(req, res)) return
   applyCors(req, res)
 
-  if (!requirePost(req, res)) return
   if (!enforceApiKey(req, res)) return
   if (!publicScansEnabled()) {
     res.status(404).json({ error: { code: 'scans_disabled', message: 'Public site scans are disabled.' } })
     return
   }
 
-  const url = readStringParam(req.body?.url).trim()
-  const title = readStringParam(req.body?.title).slice(0, 240)
-  const language = readStringParam(req.body?.language, 'en-US')
-  const crawl = req.body?.crawl === true || readStringParam(req.body?.crawl).toLowerCase() === 'true'
-  const requestedMaxPages = Number(req.body?.maxPages)
-  const maxPages = crawl
-    ? Math.min(Math.max(Number.isFinite(requestedMaxPages) ? Math.floor(requestedMaxPages) : 50, 1), 100)
-    : 1
-  const wcagTags = Array.isArray(req.body?.wcagTags)
-    ? req.body.wcagTags
-    : readStringParam(req.body?.wcagTags)
-      .split(',')
-      .map((tag) => tag.trim())
-      .filter(Boolean)
-
-  if (!url) {
-    res.status(400).json({ error: { code: 'missing_url', message: 'The url field is required.' } })
+  if (req.method === 'GET') {
+    const url = readStringParam(req.query.url).trim()
+    if (!url) {
+      res.status(400).json({ error: { code: 'missing_url', message: 'The url query parameter is required.' } })
+      return
+    }
+    if (!enforceScanHost(url, res)) return
+    try {
+      const jobs = await listScanJobs(url)
+      res.status(200).json({
+        scans: jobs.map((job) => {
+          const result = job.result as { ada?: { score?: number; grade?: string }; pages?: unknown[] } | undefined
+          return {
+            jobId: job.id,
+            status: job.status,
+            url: job.url,
+            pagesScanned: job.pagesScanned,
+            maxPages: job.maxPages,
+            score: result?.ada?.score ?? null,
+            grade: result?.ada?.grade ?? null,
+            createdAt: job.createdAt,
+            completedAt: job.completedAt || null,
+          }
+        }),
+      })
+    } catch (error) {
+      res.status(500).json({ error: { code: 'scan_history_failed', message: error instanceof Error ? error.message : 'Unable to load scan history.' } })
+    }
     return
   }
 
-  if (!enforceScanHost(url, res)) return
+  if (!requirePost(req, res)) return
+
+  const options = scanOptions(req.body)
+  const crawl = req.body?.crawl === true || readStringParam(req.body?.crawl).toLowerCase() === 'true'
+
+  if (!options.url) {
+    res.status(400).json({ error: { code: 'missing_url', message: 'The url field is required.' } })
+    return
+  }
+  if (!enforceScanHost(options.url, res)) return
 
   try {
-    const pending = [new URL(url).toString()]
-    const visited = new Set<string>()
-    const pages: Array<{
-      sourceUrl: string
-      title: string
-      ada: Awaited<ReturnType<typeof checkAda>>
-      language: { errors: number; issues: Array<Record<string, unknown>> }
-      directory: Awaited<ReturnType<typeof recordScan>>
-    }> = []
-    const errors: Array<{ url: string; message: string }> = []
-    let crawlHostname = ''
-
-    while (pending.length > 0 && pages.length < maxPages) {
-      const nextUrl = pending.shift() as string
-      if (visited.has(nextUrl)) continue
-      visited.add(nextUrl)
-
+    if (crawl) {
+      const job = await createScanJob({ url: options.url, maxPages: options.maxPages })
       try {
-        const fetched = await fetchRemoteHtml(nextUrl)
-        if (!enforceScanHost(fetched.url, res)) return
-        const fetchedHostname = new URL(fetched.url).hostname
-        if (!crawlHostname) crawlHostname = fetchedHostname
-        if (fetchedHostname !== crawlHostname) continue
-
-        const sourceHtml = fetched.html.slice(0, 200000)
-        const text = htmlToText(sourceHtml)
-        const [ada, languageResult] = await Promise.all([
-          checkAda({ html: sourceHtml, url: fetched.url, wcagTags }),
-          checkLanguage(text.slice(0, 20000), language),
-        ])
-        const languageIssues = languageResult.matches.map((match) => ({
-          type: match.rule.issueType,
-          word: text.slice(match.offset, match.offset + match.length),
-          message: match.message,
-          fix: match.replacements[0]?.value || null,
-          offset: match.offset,
-          length: match.length,
-          ruleId: match.rule.id,
+        await getScanQueue().add('site-scan', { ...options, url: job.url, jobId: job.id }, { jobId: job.id })
+      } catch (queueError) {
+        await import('@lib/openada/scan-jobs').then(({ updateScanJob }) => updateScanJob(job.id, {
+          status: 'failed',
+          errorMessage: queueError instanceof Error ? queueError.message : 'The scan queue is unavailable.',
         }))
-        const pageTitle = title || extractDocumentTitle(sourceHtml) || fetchedHostname
-        const saved = await recordScan({
-          url: fetched.url,
-          sourceUrl: fetched.url,
-          title: pageTitle,
-          ada,
-          languageErrors: languageIssues.length,
-        })
-
-        pages.push({
-          sourceUrl: fetched.url,
-          title: pageTitle,
-          ada,
-          language: { errors: languageIssues.length, issues: languageIssues },
-          directory: saved,
-        })
-
-        if (crawl) {
-          for (const link of extractSameHostLinks(sourceHtml, fetched.url)) {
-            if (pending.length < 500 && !visited.has(link) && !pending.includes(link) && new URL(link).hostname === crawlHostname) {
-              pending.push(link)
-            }
-          }
-        }
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'The page scan failed.'
-        if (pages.length === 0) throw error
-        errors.push({ url: nextUrl, message })
+        throw new Error('The site scan queue is unavailable. Please try again shortly.')
       }
+
+      res.status(202).json({
+        jobId: job.id,
+        status: job.status,
+        url: job.url,
+        maxPages: job.maxPages,
+        statusUrl: `/api/v1/scans/${job.id}`,
+      })
+      return
     }
 
-    const first = pages[0]
-    res.status(201).json({
-      sourceUrl: first?.sourceUrl || url,
-      ada: first?.ada || null,
-      grade: first?.ada.grade || null,
-      language: first?.language || { errors: 0, issues: [] },
-      directory: first?.directory || null,
-      crawl: {
-        enabled: crawl,
-        maxPages,
-        pagesScanned: pages.length,
-        queuedPages: pending.length,
-        errors,
-      },
-      pages: pages.map((page) => ({
-        sourceUrl: page.sourceUrl,
-        title: page.title,
-        ada: {
-          score: page.ada.score,
-          grade: page.ada.grade,
-          violationsCount: page.ada.violationsCount,
-          passesCount: page.ada.passesCount,
-          incompleteCount: page.ada.incompleteCount,
-        },
-        language: { errors: page.language.errors },
-        directory: page.directory,
-      })),
-    })
+    const result = await runSiteScan({ ...options, crawl: false, maxPages: 1 })
+    res.status(201).json(result)
   } catch (error) {
     const message = error instanceof Error ? error.message : 'The public scan failed.'
     const status = message.includes('storage is not configured') ? 503 : 500

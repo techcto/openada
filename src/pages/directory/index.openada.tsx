@@ -29,6 +29,17 @@ type Page = {
   latestGrade: string | null
 }
 
+async function readApiResponse(response: Response): Promise<any> {
+  const body = await response.text()
+  try {
+    return body ? JSON.parse(body) : {}
+  } catch {
+    throw new Error(response.ok
+      ? 'OpenADA returned an invalid response.'
+      : `OpenADA returned HTTP ${response.status}. Please try again shortly.`)
+  }
+}
+
 const DirectoryPage: NextPage = () => {
   const router = useRouter()
   const selectedSite = typeof router.query.site === 'string' ? router.query.site : ''
@@ -41,7 +52,7 @@ const DirectoryPage: NextPage = () => {
     const load = async () => {
       try {
         const response = await fetch(selectedSite ? `/api/v1/directory?site=${encodeURIComponent(selectedSite)}` : '/api/v1/directory')
-        const data = await response.json()
+        const data = await readApiResponse(response)
         if (!response.ok) throw new Error(data?.error?.message || 'Directory unavailable.')
         if (selectedSite) {
           setActiveSite(data.site)

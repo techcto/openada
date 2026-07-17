@@ -24,12 +24,14 @@ Deploy parameters:
   OPENADA_SERVICE_SUBNETS        Comma-separated ECS subnet ids
   OPENADA_UI_IMAGE               UI ECR image URI
   OPENADA_API_IMAGE              API ECR image URI
+  OPENADA_WORKER_IMAGE           Scan worker ECR image URI
   OPENADA_DESIRED_COUNT          Optional ECS desired count
   OPENADA_CERTIFICATE_ARN        Optional ACM certificate ARN
   OPENADA_API_KEYS               Optional comma-separated API keys
   OPENADA_CORS_ORIGINS            Optional CORS allowlist
   OPENADA_PUBLIC_SCANS_ENABLED    true or false (default: true)
   OPENADA_SCAN_ALLOWED_HOSTS       Optional comma-separated scan host allowlist
+  OPENADA_REDIS_AUTH_TOKEN         Optional Redis AUTH token for a new standalone stack
   LANGUAGETOOL_UPSTREAM_URL       Optional LanguageTool-compatible upstream
   OPENADA_CFT_BUCKET              S3 bucket for CFT uploads (default: openada)
 EOF
@@ -56,13 +58,15 @@ offline_test() {
     'AWS::ElasticLoadBalancingV2::LoadBalancer' \
     'AWS::ElasticLoadBalancingV2::Listener' \
     'UiImage' \
-    'ApiImage'; do
+    'ApiImage' \
+    'WorkerImage'; do
     rg -q "$required" "$TEMPLATE" || die "Template check failed: missing $required"
   done
 
   for required_file in \
     "$ROOT_DIR/devops/docker/Dockerfile.app" \
     "$ROOT_DIR/devops/docker/Dockerfile.api" \
+    "$ROOT_DIR/devops/docker/Dockerfile.worker" \
     "$ROOT_DIR/package-lock.json" \
     "$ROOT_DIR/api/package-lock.json"; do
     [[ -f "$required_file" ]] || die "Build input missing: $required_file"
@@ -114,6 +118,7 @@ deploy() {
   : "${OPENADA_SERVICE_SUBNETS:?Set OPENADA_SERVICE_SUBNETS before deploying.}"
   : "${OPENADA_UI_IMAGE:?Set OPENADA_UI_IMAGE before deploying.}"
   : "${OPENADA_API_IMAGE:?Set OPENADA_API_IMAGE before deploying.}"
+  : "${OPENADA_WORKER_IMAGE:?Set OPENADA_WORKER_IMAGE before deploying.}"
 
   local parameters=(
     "VpcId=$OPENADA_VPC_ID"
@@ -121,6 +126,7 @@ deploy() {
     "ServiceSubnets=$OPENADA_SERVICE_SUBNETS"
     "UiImage=$OPENADA_UI_IMAGE"
     "ApiImage=$OPENADA_API_IMAGE"
+    "WorkerImage=$OPENADA_WORKER_IMAGE"
   )
 
   [[ -n "${OPENADA_DESIRED_COUNT:-}" ]] && parameters+=("DesiredCount=$OPENADA_DESIRED_COUNT")
@@ -130,6 +136,7 @@ deploy() {
   [[ -n "${OPENADA_PUBLIC_SCANS_ENABLED:-}" ]] && parameters+=("PublicScansEnabled=$OPENADA_PUBLIC_SCANS_ENABLED")
   [[ -n "${OPENADA_SCAN_ALLOWED_HOSTS:-}" ]] && parameters+=("ScanAllowedHosts=$OPENADA_SCAN_ALLOWED_HOSTS")
   [[ -n "${LANGUAGETOOL_UPSTREAM_URL:-}" ]] && parameters+=("LanguageToolUpstreamUrl=$LANGUAGETOOL_UPSTREAM_URL")
+  [[ -n "${OPENADA_REDIS_AUTH_TOKEN:-}" ]] && parameters+=("RedisAuthToken=$OPENADA_REDIS_AUTH_TOKEN")
 
   aws cloudformation deploy \
     --template-file "$TEMPLATE" \

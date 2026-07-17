@@ -31,6 +31,9 @@ Parameters:
   ApiImage:
     Type: String
     Description: OpenADA API image URI, for example Docker Hub or ECR.
+  WorkerImage:
+    Type: String
+    Description: OpenADA scan worker image URI, for example Docker Hub or ECR.
   DesiredCount:
     Type: Number
     Default: 1
@@ -60,6 +63,20 @@ Parameters:
     Type: String
     Default: ''
     Description: Optional comma-separated hostname allowlist for public URL scans.
+  RedisHost:
+    Type: String
+    Description: Existing Redis endpoint reachable from the ECS service subnets.
+  RedisPort:
+    Type: Number
+    Default: 6379
+  RedisPassword:
+    Type: String
+    Default: ''
+    NoEcho: true
+  RedisTls:
+    Type: String
+    Default: 'false'
+    AllowedValues: ['true', 'false']
   UiListenerPriority:
     Type: Number
     Default: 100
@@ -139,6 +156,7 @@ Resources:
                   - !GetAtt SitesTable.Arn
                   - !GetAtt PagesTable.Arn
                   - !GetAtt ScansTable.Arn
+                  - !GetAtt ScanJobsTable.Arn
 
   SitesTable:
     Type: AWS::DynamoDB::Table
@@ -172,6 +190,20 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: !Sub '${EnvironmentName}-scans'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  ScanJobsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${EnvironmentName}-scan-jobs'
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
         - AttributeName: id
@@ -283,6 +315,16 @@ Resources:
               Value: !Ref PagesTable
             - Name: OPENADA_SCANS_TABLE
               Value: !Ref ScansTable
+            - Name: OPENADA_SCAN_JOBS_TABLE
+              Value: !Ref ScanJobsTable
+            - Name: OPENADA_REDIS_HOST
+              Value: !Ref RedisHost
+            - Name: OPENADA_REDIS_PORT
+              Value: !Ref RedisPort
+            - Name: OPENADA_REDIS_TLS
+              Value: !Ref RedisTls
+            - Name: OPENADA_REDIS_PASSWORD
+              Value: !Ref RedisPassword
             - Name: OPENADA_PUBLIC_SCANS_ENABLED
               Value: !Ref PublicScansEnabled
             - Name: OPENADA_SCAN_ALLOWED_HOSTS
@@ -331,6 +373,71 @@ Resources:
         - ContainerName: api
           ContainerPort: 3001
           TargetGroupArn: !Ref ApiTargetGroup
+
+  WorkerLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/ecs/${EnvironmentName}/worker'
+      RetentionInDays: 30
+
+  WorkerTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub '${EnvironmentName}-worker'
+      Cpu: '512'
+      Memory: '1024'
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      ExecutionRoleArn: !GetAtt ExecutionRole.Arn
+      TaskRoleArn: !GetAtt TaskRole.Arn
+      ContainerDefinitions:
+        - Name: worker
+          Image: !Ref WorkerImage
+          Essential: true
+          Environment:
+            - Name: NODE_ENV
+              Value: production
+            - Name: OPENADA_SCAN_JOBS_TABLE
+              Value: !Ref ScanJobsTable
+            - Name: OPENADA_SITES_TABLE
+              Value: !Ref SitesTable
+            - Name: OPENADA_PAGES_TABLE
+              Value: !Ref PagesTable
+            - Name: OPENADA_SCANS_TABLE
+              Value: !Ref ScansTable
+            - Name: LANGUAGETOOL_UPSTREAM_URL
+              Value: !Ref LanguageToolUpstreamUrl
+            - Name: OPENADA_REDIS_HOST
+              Value: !Ref RedisHost
+            - Name: OPENADA_REDIS_PORT
+              Value: !Ref RedisPort
+            - Name: OPENADA_REDIS_TLS
+              Value: !Ref RedisTls
+            - Name: OPENADA_REDIS_PASSWORD
+              Value: !Ref RedisPassword
+            - Name: OPENADA_SCAN_WORKER_CONCURRENCY
+              Value: '1'
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref WorkerLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: worker
+
+  WorkerService:
+    Type: AWS::ECS::Service
+    DependsOn: ApiListenerRule
+    Properties:
+      ServiceName: !Sub '${EnvironmentName}-worker'
+      Cluster: !Ref Cluster
+      TaskDefinition: !Ref WorkerTaskDefinition
+      DesiredCount: !Ref DesiredCount
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: !Ref AssignPublicIp
+          SecurityGroups: [!Ref ServiceSecurityGroup]
+          Subnets: !Ref ServiceSubnets
 
   UiListenerRule:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule

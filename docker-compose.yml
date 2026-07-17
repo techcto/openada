@@ -40,6 +40,13 @@ services:
       NODE_ENV: development
       OPENADA_CORS_ORIGINS: ${OPENADA_CORS_ORIGINS:-http://localhost:3000}
       OPENADA_API_KEYS: ${OPENADA_API_KEYS:-}
+      OPENADA_SCAN_JOBS_TABLE: ${OPENADA_SCAN_JOBS_TABLE:-}
+      OPENADA_SITES_TABLE: ${OPENADA_SITES_TABLE:-}
+      OPENADA_PAGES_TABLE: ${OPENADA_PAGES_TABLE:-}
+      OPENADA_SCANS_TABLE: ${OPENADA_SCANS_TABLE:-}
+      OPENADA_REDIS_HOST: redis
+      OPENADA_REDIS_PORT: 6379
+      OPENADA_REDIS_TLS: 'false'
       LANGUAGETOOL_UPSTREAM_URL: ${LANGUAGETOOL_UPSTREAM_URL:-}
       CHOKIDAR_USEPOLLING: 'true'
       WATCHPACK_POLLING: 'true'
@@ -54,3 +61,43 @@ services:
       timeout: 5s
       retries: 10
       start_period: 15s
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - openada-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  worker:
+    init: true
+    build:
+      context: .
+      dockerfile: ./devops/docker/Dockerfile.worker
+    environment:
+      NODE_ENV: development
+      OPENADA_REDIS_HOST: redis
+      OPENADA_REDIS_PORT: 6379
+      OPENADA_REDIS_TLS: 'false'
+      OPENADA_SCAN_WORKER_CONCURRENCY: ${OPENADA_SCAN_WORKER_CONCURRENCY:-1}
+      OPENADA_SITES_TABLE: ${OPENADA_SITES_TABLE:-}
+      OPENADA_PAGES_TABLE: ${OPENADA_PAGES_TABLE:-}
+      OPENADA_SCANS_TABLE: ${OPENADA_SCANS_TABLE:-}
+      OPENADA_SCAN_JOBS_TABLE: ${OPENADA_SCAN_JOBS_TABLE:-}
+      LANGUAGETOOL_UPSTREAM_URL: ${LANGUAGETOOL_UPSTREAM_URL:-}
+    volumes:
+      - ./api/lib:/app/lib
+      - ./api/worker.ts:/app/worker.ts
+    depends_on:
+      redis:
+        condition: service_healthy
+
+volumes:
+  openada-redis:

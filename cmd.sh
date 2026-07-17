@@ -86,6 +86,7 @@ case "${1:-help}" in
     platform="${DOCKER_PLATFORM:-linux/amd64}"
     ui_image="${namespace}/openada-ui:${tag}"
     api_image="${namespace}/openada-api:${tag}"
+    worker_image="${namespace}/openada-worker:${tag}"
 
     case "$docker_action" in
       build)
@@ -95,12 +96,16 @@ case "${1:-help}" in
         docker build --platform "$platform" --target prod \
           -f "$ROOT_DIR/devops/docker/Dockerfile.api" \
           -t "$api_image" "$ROOT_DIR"
+        docker build --platform "$platform" \
+          -f "$ROOT_DIR/devops/docker/Dockerfile.worker" \
+          -t "$worker_image" "$ROOT_DIR"
         ;;
       push)
         "$ROOT_DIR/cmd.sh" docker build "$tag"
         docker push "$ui_image"
         docker push "$api_image"
-        printf 'Published %s and %s\n' "$ui_image" "$api_image"
+        docker push "$worker_image"
+        printf 'Published %s, %s, and %s\n' "$ui_image" "$api_image" "$worker_image"
         ;;
       *)
         printf 'Usage: ./cmd.sh docker build [tag]\n'
@@ -117,6 +122,7 @@ case "${1:-help}" in
     tag="${2:-local}"
     docker build --target prod -f "$ROOT_DIR/devops/docker/Dockerfile.app" -t "openada-ui:$tag" "$ROOT_DIR"
     docker build --target prod -f "$ROOT_DIR/devops/docker/Dockerfile.api" -t "openada-api:$tag" "$ROOT_DIR"
+    docker build -f "$ROOT_DIR/devops/docker/Dockerfile.worker" -t "openada-worker:$tag" "$ROOT_DIR"
     ;;
   -h|--help|help) usage ;;
   *) usage >&2; exit 2 ;;

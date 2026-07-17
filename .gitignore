@@ -127,6 +127,8 @@ src/pages/*.tsx
 !src/pages/api-reference/index.openada.tsx
 !src/pages/directory/
 !src/pages/directory/index.openada.tsx
+!src/pages/scan.openada.tsx
+!src/pages/report.openada.tsx
 src/sass/base/
 src/sass/components/
 src/sass/layout/

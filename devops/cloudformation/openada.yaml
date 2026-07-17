@@ -19,6 +19,9 @@ Parameters:
   ApiImage:
     Type: String
     Description: ECR image URI for the OpenADA API container.
+  WorkerImage:
+    Type: String
+    Description: ECR image URI for the OpenADA scan worker container.
   DesiredCount:
     Type: Number
     Default: 1
@@ -51,9 +54,19 @@ Parameters:
     Type: String
     Default: ''
     Description: Optional comma-separated hostname allowlist for public URL scans.
+  RedisNodeType:
+    Type: String
+    Default: cache.t4g.micro
+    Description: ElastiCache node type used for the OpenADA scan queue.
+  RedisAuthToken:
+    Type: String
+    Default: ''
+    NoEcho: true
+    Description: Optional Redis AUTH token. When set, transit encryption is enabled.
 
 Conditions:
   HasCertificate: !Not [!Equals [!Ref CertificateArn, '']]
+  HasRedisAuthToken: !Not [!Equals [!Ref RedisAuthToken, '']]
 
 Resources:
   Cluster:
@@ -86,6 +99,21 @@ Resources:
           FromPort: 3000
           ToPort: 3001
           SourceSecurityGroupId: !Ref AlbSecurityGroup
+
+  RedisSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: OpenADA Redis queue access from ECS tasks.
+      VpcId: !Ref VpcId
+
+  RedisIngressFromServices:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref RedisSecurityGroup
+      IpProtocol: tcp
+      FromPort: 6379
+      ToPort: 6379
+      SourceSecurityGroupId: !Ref ServiceSecurityGroup
 
   LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -218,6 +246,7 @@ Resources:
                   - !GetAtt SitesTable.Arn
                   - !GetAtt PagesTable.Arn
                   - !GetAtt ScansTable.Arn
+                  - !GetAtt ScanJobsTable.Arn
 
   SitesTable:
     Type: AWS::DynamoDB::Table
@@ -260,6 +289,40 @@ Resources:
           KeyType: HASH
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
+
+  ScanJobsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${EnvironmentName}-scan-jobs'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  RedisSubnetGroup:
+    Type: AWS::ElastiCache::SubnetGroup
+    Properties:
+      Description: OpenADA scan queue subnet group.
+      SubnetIds: !Ref ServiceSubnets
+
+  RedisReplicationGroup:
+    Type: AWS::ElastiCache::ReplicationGroup
+    Properties:
+      ReplicationGroupDescription: !Sub '${EnvironmentName} asynchronous scan queue'
+      Engine: redis
+      CacheNodeType: !Ref RedisNodeType
+      NumCacheClusters: 1
+      AutomaticFailoverEnabled: false
+      CacheSubnetGroupName: !Ref RedisSubnetGroup
+      SecurityGroupIds: [!Ref RedisSecurityGroup]
+      AtRestEncryptionEnabled: true
+      TransitEncryptionEnabled: !If [HasRedisAuthToken, true, false]
+      AuthToken: !If [HasRedisAuthToken, !Ref RedisAuthToken, !Ref AWS::NoValue]
 
   UiLogGroup:
     Type: AWS::Logs::LogGroup
@@ -332,6 +395,16 @@ Resources:
               Value: !Ref PagesTable
             - Name: OPENADA_SCANS_TABLE
               Value: !Ref ScansTable
+            - Name: OPENADA_SCAN_JOBS_TABLE
+              Value: !Ref ScanJobsTable
+            - Name: OPENADA_REDIS_HOST
+              Value: !GetAtt RedisReplicationGroup.PrimaryEndPoint.Address
+            - Name: OPENADA_REDIS_PORT
+              Value: !GetAtt RedisReplicationGroup.PrimaryEndPoint.Port
+            - Name: OPENADA_REDIS_TLS
+              Value: !If [HasRedisAuthToken, 'true', 'false']
+            - Name: OPENADA_REDIS_PASSWORD
+              Value: !Ref RedisAuthToken
             - Name: OPENADA_PUBLIC_SCANS_ENABLED
               Value: !Ref PublicScansEnabled
             - Name: OPENADA_SCAN_ALLOWED_HOSTS
@@ -380,6 +453,71 @@ Resources:
         - ContainerName: api
           ContainerPort: 3001
           TargetGroupArn: !Ref ApiTargetGroup
+
+  WorkerLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/ecs/${EnvironmentName}/worker'
+      RetentionInDays: 30
+
+  WorkerTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub '${EnvironmentName}-worker'
+      Cpu: '512'
+      Memory: '1024'
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      ExecutionRoleArn: !GetAtt ExecutionRole.Arn
+      TaskRoleArn: !GetAtt TaskRole.Arn
+      ContainerDefinitions:
+        - Name: worker
+          Image: !Ref WorkerImage
+          Essential: true
+          Environment:
+            - Name: NODE_ENV
+              Value: production
+            - Name: OPENADA_SCAN_JOBS_TABLE
+              Value: !Ref ScanJobsTable
+            - Name: OPENADA_SITES_TABLE
+              Value: !Ref SitesTable
+            - Name: OPENADA_PAGES_TABLE
+              Value: !Ref PagesTable
+            - Name: OPENADA_SCANS_TABLE
+              Value: !Ref ScansTable
+            - Name: LANGUAGETOOL_UPSTREAM_URL
+              Value: !Ref LanguageToolUpstreamUrl
+            - Name: OPENADA_REDIS_HOST
+              Value: !GetAtt RedisReplicationGroup.PrimaryEndPoint.Address
+            - Name: OPENADA_REDIS_PORT
+              Value: !GetAtt RedisReplicationGroup.PrimaryEndPoint.Port
+            - Name: OPENADA_REDIS_TLS
+              Value: !If [HasRedisAuthToken, 'true', 'false']
+            - Name: OPENADA_REDIS_PASSWORD
+              Value: !Ref RedisAuthToken
+            - Name: OPENADA_SCAN_WORKER_CONCURRENCY
+              Value: '1'
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref WorkerLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: worker
+
+  WorkerService:
+    Type: AWS::ECS::Service
+    DependsOn: RedisReplicationGroup
+    Properties:
+      ServiceName: !Sub '${EnvironmentName}-worker'
+      Cluster: !Ref Cluster
+      TaskDefinition: !Ref WorkerTaskDefinition
+      DesiredCount: !Ref DesiredCount
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: !Ref AssignPublicIp
+          SecurityGroups: [!Ref ServiceSecurityGroup]
+          Subnets: !Ref ServiceSubnets
 
 Outputs:
   WebsiteUrl:

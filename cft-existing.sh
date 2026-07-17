@@ -25,6 +25,7 @@ Required deployment values:
   OPENADA_HOST_HEADER             Dedicated hostname, for example ada.example.com
   OPENADA_UI_IMAGE                Published UI image URI
   OPENADA_API_IMAGE               Published API image URI
+  OPENADA_WORKER_IMAGE            Published scan worker image URI
 
 Optional values:
   OPENADA_DESIRED_COUNT
@@ -36,6 +37,10 @@ Optional values:
   OPENADA_SCAN_ALLOWED_HOSTS
   OPENADA_UI_LISTENER_PRIORITY
   OPENADA_API_LISTENER_PRIORITY
+  OPENADA_REDIS_HOST              Existing Redis endpoint reachable by ECS
+  OPENADA_REDIS_PORT              Existing Redis port (default: 6379)
+  OPENADA_REDIS_PASSWORD          Optional Redis password
+  OPENADA_REDIS_TLS               true or false (default: false)
 EOF
 }
 
@@ -56,7 +61,8 @@ offline_test() {
     'ListenerArn' \
     'HostHeader' \
     'UiImage' \
-    'ApiImage'; do
+    'ApiImage' \
+    'WorkerImage'; do
     rg -q "$required" "$TEMPLATE" || die "Template check failed: missing $required"
   done
 
@@ -92,6 +98,8 @@ deploy() {
   : "${OPENADA_HOST_HEADER:?Set OPENADA_HOST_HEADER before deploying.}"
   : "${OPENADA_UI_IMAGE:?Set OPENADA_UI_IMAGE before deploying.}"
   : "${OPENADA_API_IMAGE:?Set OPENADA_API_IMAGE before deploying.}"
+  : "${OPENADA_WORKER_IMAGE:?Set OPENADA_WORKER_IMAGE before deploying.}"
+  : "${OPENADA_REDIS_HOST:?Set OPENADA_REDIS_HOST before deploying.}"
 
   local parameters=(
     "VpcId=$OPENADA_EXISTING_VPC_ID"
@@ -102,6 +110,8 @@ deploy() {
     "HostHeader=$OPENADA_HOST_HEADER"
     "UiImage=$OPENADA_UI_IMAGE"
     "ApiImage=$OPENADA_API_IMAGE"
+    "WorkerImage=$OPENADA_WORKER_IMAGE"
+    "RedisHost=$OPENADA_REDIS_HOST"
   )
 
   [[ -n "${OPENADA_DESIRED_COUNT:-}" ]] && parameters+=("DesiredCount=$OPENADA_DESIRED_COUNT")
@@ -113,6 +123,9 @@ deploy() {
   [[ -n "${OPENADA_SCAN_ALLOWED_HOSTS:-}" ]] && parameters+=("ScanAllowedHosts=$OPENADA_SCAN_ALLOWED_HOSTS")
   [[ -n "${OPENADA_UI_LISTENER_PRIORITY:-}" ]] && parameters+=("UiListenerPriority=$OPENADA_UI_LISTENER_PRIORITY")
   [[ -n "${OPENADA_API_LISTENER_PRIORITY:-}" ]] && parameters+=("ApiListenerPriority=$OPENADA_API_LISTENER_PRIORITY")
+  [[ -n "${OPENADA_REDIS_PORT:-}" ]] && parameters+=("RedisPort=$OPENADA_REDIS_PORT")
+  [[ -n "${OPENADA_REDIS_PASSWORD:-}" ]] && parameters+=("RedisPassword=$OPENADA_REDIS_PASSWORD")
+  [[ -n "${OPENADA_REDIS_TLS:-}" ]] && parameters+=("RedisTls=$OPENADA_REDIS_TLS")
 
   aws cloudformation deploy \
     --template-file "$TEMPLATE" \

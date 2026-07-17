@@ -27,6 +27,7 @@
   "include": [
     "next-env.d.ts",
     "pages/api/health.openada.ts",
+    "worker.ts",
     "pages/api/v1/**/*.openada.ts",
     "pages/api/v2/**/*.openada.ts",
     "lib/openada/**/*.ts"

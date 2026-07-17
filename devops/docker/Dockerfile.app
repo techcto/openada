@@ -15,6 +15,8 @@ COPY tsconfig.json ./tsconfig.json
 COPY next.config.ts ./next.config.ts
 COPY next-env.d.ts ./next-env.d.ts
 COPY src/pages/index.openada.tsx ./src/pages/index.openada.tsx
+COPY src/pages/scan.openada.tsx ./src/pages/scan.openada.tsx
+COPY src/pages/report.openada.tsx ./src/pages/report.openada.tsx
 COPY src/pages/_app.openada.tsx ./src/pages/_app.openada.tsx
 COPY src/components/OpenAdaShell.tsx ./src/components/OpenAdaShell.tsx
 COPY src/pages/docs/index.openada.tsx ./src/pages/docs/index.openada.tsx

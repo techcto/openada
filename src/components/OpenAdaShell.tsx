@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { BookOpen, Code2, Globe2, Star } from 'lucide-react'
 
-type CurrentPage = 'home' | 'directory' | 'api' | 'docs'
+type CurrentPage = 'home' | 'directory' | 'api' | 'docs' | 'scan' | 'report'
 
 export function OpenAdaShell({ children, current }: { children: ReactNode; current: CurrentPage }) {
   return (

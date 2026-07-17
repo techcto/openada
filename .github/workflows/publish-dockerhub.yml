@@ -45,6 +45,15 @@ jobs:
             type=semver,pattern={{version}}
             type=sha
 
+      - name: Extract worker image metadata
+        id: worker-meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKERHUB_NAMESPACE }}/openada-worker
+          tags: |
+            type=semver,pattern={{version}}
+            type=sha
+
       - name: Build and publish UI image
         uses: docker/build-push-action@v6
         with:
@@ -71,10 +80,23 @@ jobs:
           tags: ${{ steps.api-meta.outputs.tags }}
           labels: ${{ steps.api-meta.outputs.labels }}
 
+      - name: Build and publish worker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: devops/docker/Dockerfile.worker
+          platforms: linux/amd64
+          push: true
+          provenance: false
+          sbom: false
+          tags: ${{ steps.worker-meta.outputs.tags }}
+          labels: ${{ steps.worker-meta.outputs.labels }}
+
       - name: Publish image references
         run: |
           {
             echo '### Published Docker Hub images'
             echo "${DOCKERHUB_NAMESPACE}/openada-ui"
             echo "${DOCKERHUB_NAMESPACE}/openada-api"
+            echo "${DOCKERHUB_NAMESPACE}/openada-worker"
           } >> "$GITHUB_STEP_SUMMARY"
