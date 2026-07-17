@@ -24,17 +24,17 @@ The command publishes `techcto/openada-ui:latest`, `techcto/openada-api:latest`,
 
 ## Publish CloudFormation files
 
-Set the bucket name if it is not `openada`, then upload both deployment modes and this README:
+The release workflow publishes rendered, versioned templates to `openada-us`. For a manual upload, use the same bucket:
 
 ```bash
 export AWS_PROFILE=<your-aws-profile>
-export OPENADA_CFT_BUCKET=openada
+export OPENADA_CFT_BUCKET=openada-us
 ./cmd.sh cft-new publish
 ```
 
 Both `cft-new deploy` and `cft-existing deploy` publish the CFT files before validating or deploying.
 
-The publishing identity needs `s3:PutObject` and `s3:AbortMultipartUpload` for the CloudFormation and widget prefixes, plus `s3:GetBucketLocation` for the bucket. A ready-to-attach policy is included at `devops/iam/openada-cft-publish-policy.json`.
+The release templates resolve their defaults to the versioned Marketplace images in `709825985650.dkr.ecr.us-east-1.amazonaws.com/solodev/*`. You can still override `UiImage`, `ApiImage`, and `WorkerImage` for a local or alternate registry deployment. The publishing identity needs `s3:PutObject` and `s3:AbortMultipartUpload` for the CloudFormation and widget prefixes, plus `s3:GetBucketLocation` for the bucket. A ready-to-attach policy is included at `devops/iam/openada-cft-publish-policy.json`.
 
 The deployment identity also needs DynamoDB table lifecycle permissions (`CreateTable`, `DeleteTable`, `DescribeTable`, `UpdateTable`, continuous-backup, and tag actions) because CloudFormation creates the directory tables. These are included in `devops/iam/openada-deploy-policy.json`.
 

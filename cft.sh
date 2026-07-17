@@ -5,7 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEMPLATE="${OPENADA_CFT_TEMPLATE:-$ROOT_DIR/devops/cloudformation/openada.yaml}"
 STACK_NAME="${OPENADA_STACK_NAME:-openada}"
 AWS_REGION="${AWS_REGION:-us-east-1}"
-CFT_BUCKET="${OPENADA_CFT_BUCKET:-openada}"
+CFT_BUCKET="${OPENADA_CFT_BUCKET:-openada-us}"
 
 usage() {
   cat <<'EOF'
@@ -34,7 +34,7 @@ Deploy parameters:
   OPENADA_REDIS_AUTH_TOKEN         Optional Redis AUTH token for a new standalone stack
   OPENADA_OPENAI_APPS_CHALLENGE_TOKEN Optional OpenAI Apps domain verification token
   LANGUAGETOOL_UPSTREAM_URL       Optional LanguageTool-compatible upstream
-  OPENADA_CFT_BUCKET              S3 bucket for CFT uploads (default: openada)
+  OPENADA_CFT_BUCKET              S3 bucket for CFT uploads (default: openada-us)
 EOF
 }
 

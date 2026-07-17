@@ -206,12 +206,12 @@ Use `https://openada.example.com/api/v2/check` for LanguageTool-compatible check
 - Redis-backed scan queue and four on-demand DynamoDB tables for sites, pages, immutable scan records, and scan jobs
 - Optional ACM HTTPS listener
 
-Build and publish `openada-ui`, `openada-api`, and `openada-worker` images, then deploy the stack with the image URIs, VPC, public subnets, and private service subnets. The template does not install Java LanguageTool, MySQL, or a local LanguageTool service. Redis is used only for asynchronous scan delivery; DynamoDB stores public directory metadata, page findings, immutable scan records, and durable job progress. OpenSearch remains an optional future search layer, not a requirement for the free service.
+Version tags publish rendered standalone and existing-cluster CFTs to `s3://openada-us/cloudformation/` with Marketplace image defaults for that release. The public template URLs are `https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada.yaml` and `https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-existing.yaml`. The source templates use `{RELEASE_VERSION}` replacement tokens; local deployments can still override the image parameters. The template does not install Java LanguageTool, MySQL, or a local LanguageTool service. Redis is used only for asynchronous scan delivery; DynamoDB stores public directory metadata, page findings, immutable scan records, and durable job progress. OpenSearch remains an optional future search layer, not a requirement for the free service.
 
-The widget is published to `s3://openada/widgets/openada-widget.js` by `./cmd.sh cft-new publish`. Add it to a public page:
+The widget is published to `s3://openada-us/widgets/openada-widget.js` by `./cmd.sh cft-new publish`. Add it to a public page:
 
 ```html
-<script src="https://openada.s3.us-east-1.amazonaws.com/widgets/openada-widget.js"></script>
+<script src="https://openada-us.s3.us-east-1.amazonaws.com/widgets/openada-widget.js"></script>
 ```
 
 The repository helpers cover the repeatable workflow:

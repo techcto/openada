@@ -12,7 +12,7 @@
       ],
       "Resource": "*"
     },
-    { "Effect": "Allow", "Action": "s3:GetBucketLocation", "Resource": "arn:aws:s3:::openada" },
-    { "Effect": "Allow", "Action": ["s3:PutObject", "s3:AbortMultipartUpload"], "Resource": ["arn:aws:s3:::openada/cloudformation/*", "arn:aws:s3:::openada/widgets/*"] }
+    { "Effect": "Allow", "Action": "s3:GetBucketLocation", "Resource": "arn:aws:s3:::openada-us" },
+    { "Effect": "Allow", "Action": ["s3:PutObject", "s3:AbortMultipartUpload"], "Resource": ["arn:aws:s3:::openada-us/cloudformation/*", "arn:aws:s3:::openada-us/widgets/*"] }
   ]
 }

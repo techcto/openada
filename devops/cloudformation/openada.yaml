@@ -15,13 +15,16 @@ Parameters:
     Description: Private subnets for ECS tasks. These subnets need NAT access for image pulls.
   UiImage:
     Type: String
-    Description: ECR image URI for the OpenADA UI container.
+    Default: '{MP_AWS_ECR}/{UI_REPOSITORY}:{RELEASE_VERSION}'
+    Description: Marketplace ECR image URI for the OpenADA UI container.
   ApiImage:
     Type: String
-    Description: ECR image URI for the OpenADA API container.
+    Default: '{MP_AWS_ECR}/{API_REPOSITORY}:{RELEASE_VERSION}'
+    Description: Marketplace ECR image URI for the OpenADA API container.
   WorkerImage:
     Type: String
-    Description: ECR image URI for the OpenADA scan worker container.
+    Default: '{MP_AWS_ECR}/{WORKER_REPOSITORY}:{RELEASE_VERSION}'
+    Description: Marketplace ECR image URI for the OpenADA scan worker container.
   DesiredCount:
     Type: Number
     Default: 1

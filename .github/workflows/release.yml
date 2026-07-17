@@ -20,6 +20,7 @@ env:
   UI_REPOSITORY: ${{ vars.OPENADA_UI_REPOSITORY || 'solodev/openada-ui' }}
   API_REPOSITORY: ${{ vars.OPENADA_API_REPOSITORY || 'solodev/openada-api' }}
   WORKER_REPOSITORY: ${{ vars.OPENADA_WORKER_REPOSITORY || 'solodev/openada-worker' }}
+  OPENADA_CFT_BUCKET: ${{ vars.OPENADA_CFT_BUCKET || 'openada-us' }}
 
 jobs:
   release:
@@ -128,6 +129,31 @@ jobs:
           provenance: false
           sbom: false
           tags: ${{ env.MP_AWS_ECR }}/${{ env.WORKER_REPOSITORY }}:${{ steps.version.outputs.value }}
+
+      - name: Publish versioned CloudFormation templates
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          for template in openada.yaml openada-existing.yaml; do
+            rendered="/tmp/$template"
+            sed \
+              -e "s|{MP_AWS_ECR}|$MP_AWS_ECR|g" \
+              -e "s|{UI_REPOSITORY}|$UI_REPOSITORY|g" \
+              -e "s|{API_REPOSITORY}|$API_REPOSITORY|g" \
+              -e "s|{WORKER_REPOSITORY}|$WORKER_REPOSITORY|g" \
+              -e "s|{RELEASE_VERSION}|$RELEASE_VERSION|g" \
+              "devops/cloudformation/$template" > "$rendered"
+            aws s3 cp "$rendered" \
+              "s3://$OPENADA_CFT_BUCKET/cloudformation/$template" \
+              --content-type text/yaml --cache-control no-cache --region "$AWS_REGION" --no-progress
+            versioned="${template%.yaml}-${RELEASE_VERSION}.yaml"
+            aws s3 cp "$rendered" \
+              "s3://$OPENADA_CFT_BUCKET/cloudformation/$versioned" \
+              --content-type text/yaml --cache-control no-cache --region "$AWS_REGION" --no-progress
+          done
+          aws s3 cp devops/cloudformation/README.md \
+            "s3://$OPENADA_CFT_BUCKET/cloudformation/README.md" \
+            --content-type text/markdown --cache-control no-cache --region "$AWS_REGION" --no-progress
 
       - name: Submit AWS Marketplace changeset
         env:

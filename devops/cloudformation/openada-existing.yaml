@@ -27,13 +27,16 @@ Parameters:
     AllowedPattern: '[A-Za-z0-9][A-Za-z0-9.-]*[A-Za-z0-9]'
   UiImage:
     Type: String
-    Description: OpenADA UI image URI, for example Docker Hub or ECR.
+    Default: '{MP_AWS_ECR}/{UI_REPOSITORY}:{RELEASE_VERSION}'
+    Description: Marketplace ECR image URI for the OpenADA UI container.
   ApiImage:
     Type: String
-    Description: OpenADA API image URI, for example Docker Hub or ECR.
+    Default: '{MP_AWS_ECR}/{API_REPOSITORY}:{RELEASE_VERSION}'
+    Description: Marketplace ECR image URI for the OpenADA API container.
   WorkerImage:
     Type: String
-    Description: OpenADA scan worker image URI, for example Docker Hub or ECR.
+    Default: '{MP_AWS_ECR}/{WORKER_REPOSITORY}:{RELEASE_VERSION}'
+    Description: Marketplace ECR image URI for the OpenADA scan worker container.
   DesiredCount:
     Type: Number
     Default: 1
