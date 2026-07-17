@@ -127,7 +127,7 @@ contract.
 
 ## Customer Deployment
 
-1. Subscribe to **OpenADA MCP AgentCore** in AWS Marketplace.
+1. [Subscribe to OpenADA MCP AgentCore in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-2bjfvhksfwuwq).
 2. Choose **Launch with Amazon Bedrock AgentCore Runtime**.
 3. Set `OPENADA_MCP_URL` to the hosted or private OpenADA MCP endpoint.
 4. Set `OPENADA_API_KEY` when the selected OpenADA deployment requires authentication.
@@ -138,7 +138,7 @@ For programmatic invocation, use an AWS-authenticated AgentCore client with an I
 role that is allowed to invoke this runtime. SigV4 belongs on that AWS service call,
 not in the MCP JSON-RPC body.
 
-For a private deployment, launch OpenADA first with the OpenADA ECS CloudFormation template, configure its DNS and HTTPS endpoint, then use that endpoint as `OPENADA_MCP_URL`.
+For a private deployment, [subscribe to Private OpenADA](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e) and launch it with the OpenADA ECS CloudFormation template. Configure its DNS and HTTPS endpoint, then use that endpoint as `OPENADA_MCP_URL`.
 
 When the OpenADA endpoint is internal to a VPC, choose `NetworkMode=VPC` and
 provide private subnet IDs and security groups. Allow the selected AgentCore
