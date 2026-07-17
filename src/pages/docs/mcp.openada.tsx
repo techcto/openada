@@ -36,9 +36,25 @@ const McpDocsPage: NextPage = () => (
           <section className="mcp-section" aria-labelledby="clients-title">
             <div className="mcp-section-heading"><p className="mcp-eyebrow">Connect a client</p><h2 id="clients-title">ChatGPT, Codex, and Claude</h2><p>Use the instructions for the tool you already work in. The public demo is anonymous; protected deployments can require a bearer token or API key.</p></div>
             <div className="mcp-client-list">
-              <ClientCard number="01" title="ChatGPT" description="In the Apps or Connectors developer flow available in your ChatGPT workspace, add a remote MCP server and enter the endpoint below." code="https://openada.us/mcp" link="https://learn.chatgpt.com/docs/submit-plugins" linkText="Open the ChatGPT submission guide" />
-              <ClientCard number="02" title="OpenAI Codex CLI or IDE" description="Add the server from Codex MCP settings, or place this configuration in ~/.codex/config.toml." code={'[mcp_servers.openada]\nurl = "https://openada.us/mcp"\ndefault_tools_approval_mode = "writes"'} link="https://developers.openai.com/codex/mcp" linkText="Read the Codex MCP guide" />
-              <ClientCard number="03" title="Claude Code" description="Register the remote server from a project directory, then inspect it with /mcp." code={'claude mcp add --transport http openada https://openada.us/mcp\nclaude mcp list'} link="https://code.claude.com/docs/en/mcp" linkText="Read the Claude Code MCP guide" />
+              <ClientCard number="01" title="ChatGPT" description="ChatGPT custom MCP servers are added from Developer Mode. The labels may appear as Apps, Connectors, or New Plugin depending on the workspace surface." steps={[
+                'Open ChatGPT Settings, go to Apps & Connectors, open Advanced settings, and turn on Developer mode.',
+                'Return to Apps & Connectors and choose Create app or New Plugin.',
+                'Set the name to OpenADA and paste https://openada.us/mcp into Server URL. Use /mcp, not an /sse URL.',
+                'For the public OpenADA demo, choose None or No authentication if that option is available. Leave OAuth credentials empty; protected deployments need their own OAuth setup.',
+                'Review the custom MCP server warning, check “I understand and want to continue,” then select Create.',
+                'Start a new chat, open the tools or connectors menu, enable OpenADA, and ask it to check a public page or start a scan.',
+              ]} code="https://openada.us/mcp" link="https://learn.chatgpt.com/docs/submit-plugins" linkText="Open the ChatGPT submission guide" />
+              <ClientCard number="02" title="OpenAI Codex CLI or IDE" description="Add the server from Codex MCP settings, or place this configuration in ~/.codex/config.toml." steps={[
+                'Add the remote MCP server in Codex settings.',
+                'Restart or refresh Codex, then approve the OpenADA tools when prompted.',
+              ]} code={'[mcp_servers.openada]\nurl = "https://openada.us/mcp"\ndefault_tools_approval_mode = "writes"'} link="https://developers.openai.com/codex/mcp" linkText="Read the Codex MCP guide" />
+              <ClientCard number="03" title="Claude custom connector" description="Claude uses a custom connector for remote MCP servers. Add OpenADA from the Claude settings UI, then enable it in a conversation." steps={[
+                'Open Claude Settings and choose Connectors.',
+                'Select Add custom connector.',
+                'Set the name to OpenADA and paste https://openada.us/mcp into Remote MCP server URL.',
+                'Leave the optional OAuth Client ID and OAuth Client Secret blank for the public OpenADA demo, then select Add.',
+                'Enable OpenADA in a conversation and ask it to check a public page or inspect scan history.',
+              ]} code="https://openada.us/mcp" link="https://code.claude.com/docs/en/mcp" linkText="Read the Claude MCP guide" />
             </div>
           </section>
 
@@ -63,8 +79,8 @@ function ToolCard({ title, detail }: { title: string; detail: string }) {
   return <article className="mcp-tool-card"><Bot size={18} aria-hidden /><h3>{title}</h3><p>{detail}</p></article>
 }
 
-function ClientCard({ number, title, description, code, link, linkText }: { number: string; title: string; description: string; code: string; link: string; linkText: string }) {
-  return <article className="mcp-client-card"><span className="mcp-card-number">{number}</span><div><h3>{title}</h3><p>{description}</p><pre><code>{code}</code></pre><a href={link} target="_blank" rel="noreferrer">{linkText} <ExternalLink size={14} aria-hidden /></a></div></article>
+function ClientCard({ number, title, description, steps, code, link, linkText }: { number: string; title: string; description: string; steps: string[]; code: string; link: string; linkText: string }) {
+  return <article className="mcp-client-card"><span className="mcp-card-number">{number}</span><div><h3>{title}</h3><p>{description}</p><ol className="mcp-client-steps">{steps.map((step) => <li key={step}>{step}</li>)}</ol><pre><code>{code}</code></pre><a href={link} target="_blank" rel="noreferrer">{linkText} <ExternalLink size={14} aria-hidden /></a></div></article>
 }
 
 const mcpStyles = `
@@ -93,6 +109,7 @@ const mcpStyles = `
   .mcp-client-card { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 20px; padding: 24px; border: 1px solid #d7e0e8; border-radius: 7px; background: #fff; }
   .mcp-card-number { color: #b85b13; font-size: 1.2rem; font-weight: 900; }
   .mcp-client-card h3 { font-size: 1.25rem; font-weight: 900; }
+  .mcp-client-steps { display: grid; gap: 8px; margin: 17px 0 0; padding-left: 22px; color: #526176; line-height: 1.55; }
   .mcp-client-card pre { overflow-x: auto; margin: 16px 0 13px; padding: 15px 17px; border-radius: 5px; background: #172033; color: #e7f2f3; font: .9rem/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; }
   .mcp-client-card a { display: inline-flex; align-items: center; gap: 5px; }
   .mcp-prompt-list { display: grid; gap: 10px; margin-top: 26px; }

@@ -20,7 +20,9 @@ The public demo is anonymous. A self-hosted or protected deployment can require 
 
 ### ChatGPT
 
-For a personal or workspace connection, open the Apps or Connectors settings available in ChatGPT, choose to add a remote MCP server, and enter `https://openada.us/mcp`. After the server is enabled, ask ChatGPT to check a public page or inspect the OpenADA directory.
+In ChatGPT, open **Settings > Apps & Connectors > Advanced settings**, turn on **Developer mode**, then return to Apps & Connectors and choose **Create app** or **New Plugin**. Set the name to `OpenADA` and enter `https://openada.us/mcp` in **Server URL**. Use `/mcp`, not an `/sse` URL.
+
+For the public demo, choose **None** or **No authentication** if that option is available and leave OAuth credentials empty. Review the custom MCP warning, check the acknowledgement, and choose **Create**. Start a new chat, enable OpenADA from the tools or connectors menu, and ask it to check a public page or inspect the directory.
 
 For the public app directory, submit the same MCP URL through the [OpenAI Apps submission guide](https://learn.chatgpt.com/docs/submit-plugins). This repository includes the draft metadata and test cases in [`chatgpt-app-submission.json`](../../chatgpt-app-submission.json). Review the publisher, privacy, terms, availability, and test details in the portal before submitting.
 
@@ -48,7 +50,9 @@ See the [official Codex MCP guide](https://developers.openai.com/codex/mcp) for 
 
 ### Claude Code
 
-Register the remote server from a project directory:
+Claude also supports a custom connector in its settings UI. Open **Settings > Connectors > Add custom connector**, set the name to `OpenADA`, and enter `https://openada.us/mcp` in **Remote MCP server URL**. Leave the optional OAuth Client ID and OAuth Client Secret blank for the public demo, then choose **Add** and enable OpenADA in a conversation.
+
+Claude Code can also register the remote server from a project directory:
 
 ```bash
 claude mcp add --transport http openada https://openada.us/mcp

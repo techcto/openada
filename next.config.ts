@@ -21,10 +21,6 @@ const nextConfig: NextConfig = {
   async rewrites() {
     const publicPageRewrites = [
       {
-        source: '/support',
-        destination: '/api-reference',
-      },
-      {
         source: '/privacy',
         destination: '/docs/privacy',
       },
