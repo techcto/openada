@@ -1,8 +1,12 @@
-# OpenADA deployment modes
+# OpenADA Private Quickstart
+
+Deploy OpenADA Private from AWS Marketplace as a complete web-accessibility
+service with a UI, API, asynchronous scan worker, Redis queue, and durable
+DynamoDB scan history.
+
+[Subscribe to OpenADA Private in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e), then choose the deployment mode that matches your AWS environment:
 
 OpenADA stores public directory metadata and asynchronous scan history in four on-demand DynamoDB tables: sites, pages, immutable scan summaries, and scan jobs. Site scans use BullMQ over Redis so the API returns immediately and the UI can reconnect to progress after a task restart.
-
-Choose one deployment mode:
 
 | Mode | Command | Creates | Reuses |
 | --- | --- | --- | --- |

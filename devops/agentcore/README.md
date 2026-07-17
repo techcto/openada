@@ -1,6 +1,10 @@
-# OpenADA MCP AgentCore
+# OpenADA MCP AgentCore Quickstart
 
-Marketplace listing draft and deployment handoff for **OpenADA MCP AgentCore**.
+Connect Amazon Bedrock AgentCore Runtime to OpenADA's accessibility, language-
+quality, public-scan, and improvement-history tools through a stateless MCP
+server.
+
+[Subscribe to OpenADA MCP AgentCore in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-2bjfvhksfwuwq), then follow the customer deployment steps below.
 
 Configure the private Marketplace product identifier as the
 `MP_AWS_AGENTCORE_PRODUCT_ID` repository variable. Marketplace product metadata
@@ -175,7 +179,7 @@ connectivity required by the selected AgentCore runtime configuration.
 - AgentCore MCP contract: https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/runtime-mcp-protocol-contract.html
 - AgentCore VPC configuration: https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/agentcore-vpc.html
 
-## Listing Copy
+## Marketplace Description
 
 ### Product Description
 
