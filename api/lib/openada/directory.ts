@@ -63,6 +63,11 @@ export type ScanRecord = ScanInput & {
   scannedAt: string
 }
 
+function siteDisplayName(hostname: string): string {
+  const label = hostname.replace(/^www\./i, '').split('.')[0] || hostname
+  return label.replace(/[-_]+/g, ' ').replace(/\b\w/g, (character) => character.toUpperCase())
+}
+
 const client = DynamoDBDocumentClient.from(new DynamoDBClient({}), {
   marshallOptions: { removeUndefinedValues: true },
 })
@@ -88,7 +93,7 @@ export async function recordScan(input: ScanInput): Promise<{ site: SiteRecord; 
   const site: SiteRecord = {
     id: siteId,
     hostname: siteId,
-    displayName: input.title?.trim() || siteId,
+    displayName: siteDisplayName(siteId),
     firstSeenAt: now,
     lastScanAt: now,
     scanCount: 1,
@@ -144,7 +149,7 @@ export async function recordScan(input: ScanInput): Promise<{ site: SiteRecord; 
     client.send(new UpdateCommand({
       TableName: table('OPENADA_SITES_TABLE'),
       Key: { id: siteId },
-      UpdateExpression: 'SET #hostname = :hostname, #displayName = if_not_exists(#displayName, :displayName), #firstSeenAt = if_not_exists(#firstSeenAt, :now), #lastScanAt = :now, #latestScore = :score, #latestGrade = :grade, #latestViolations = :violations, #latestLanguageErrors = :languageErrors, #pageCount = if_not_exists(#pageCount, :zero) + :pageIncrement ADD #scanCount :one',
+      UpdateExpression: 'SET #hostname = :hostname, #displayName = :displayName, #firstSeenAt = if_not_exists(#firstSeenAt, :now), #lastScanAt = :now, #latestScore = :score, #latestGrade = :grade, #latestViolations = :violations, #latestLanguageErrors = :languageErrors, #pageCount = if_not_exists(#pageCount, :zero) + :pageIncrement ADD #scanCount :one',
       ExpressionAttributeNames: {
         '#hostname': 'hostname',
         '#displayName': 'displayName',

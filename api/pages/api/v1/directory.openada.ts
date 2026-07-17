@@ -73,12 +73,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const pageWithLegacyDetails = !pageScan.details && isFirstPage
         ? { ...pageScan, details: { ada: jobResult?.ada || null, language: jobResult?.language || null } }
         : pageScan
+      const pageHistory = result.scans
+        .filter((scan) => scan.pageId === pageScan.pageId)
+        .map((scan) => ({ id: scan.id, scanJobId: scan.scanJobId || null, scannedAt: scan.scannedAt, score: scan.ada?.score ?? null, grade: scan.ada?.grade ?? null, languageErrors: scan.languageErrors }))
+        .sort((left, right) => right.scannedAt.localeCompare(left.scannedAt))
       res.status(200).json({
         site: result.site,
         scan: selectedJob
           ? jobSummary(selectedJob)
           : { id: pageScan.scanJobId || pageScan.id, jobId: pageScan.scanJobId || null, status: 'completed', createdAt: pageScan.scannedAt, completedAt: pageScan.scannedAt, pagesScanned: 1, maxPages: 1, score: pageScan.ada?.score ?? null, grade: pageScan.ada?.grade ?? null },
         page: pageWithLegacyDetails,
+        pageHistory,
       })
       return
     }
