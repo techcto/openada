@@ -50,7 +50,7 @@ const document = {
       HtmlRequest: { type: 'object', required: ['html'], properties: { html: { type: 'string' }, url: { type: 'string', format: 'uri' }, wcagTags: { type: 'array', items: { type: 'string' } } } },
       LanguageRequest: { type: 'object', required: ['text'], properties: { text: { type: 'string' }, language: { type: 'string', default: 'en-US' } } },
       CheckRequest: { type: 'object', properties: { html: { type: 'string' }, text: { type: 'string' }, url: { type: 'string', format: 'uri' }, language: { type: 'string', default: 'en-US' }, wcagTags: { type: 'array', items: { type: 'string' } } } },
-      ScanRequest: { type: 'object', required: ['url'], properties: { url: { type: 'string', format: 'uri' }, title: { type: 'string' }, language: { type: 'string', default: 'en-US' }, wcagTags: { type: 'array', items: { type: 'string' } } } },
+      ScanRequest: { type: 'object', required: ['url'], properties: { url: { type: 'string', format: 'uri' }, title: { type: 'string' }, crawl: { type: 'boolean', default: false, description: 'When true, scan same-host links discovered from the starting page.' }, maxPages: { type: 'integer', minimum: 1, maximum: 10, default: 5 }, language: { type: 'string', default: 'en-US' }, wcagTags: { type: 'array', items: { type: 'string' } } } },
     },
   },
 }

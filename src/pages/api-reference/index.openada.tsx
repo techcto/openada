@@ -9,7 +9,7 @@ const combinedExample = `curl -X POST https://openada.us/api/v1/check \\
   -d '{"html":"<main><h1>Hello</h1></main>","language":"en-US"}'`
 const scanExample = `curl -X POST https://openada.us/api/v1/scans \\
   -H 'Content-Type: application/json' \\
-  -d '{"url":"https://example.com"}'`
+  -d '{"url":"https://example.com","crawl":true,"maxPages":5}'`
 
 const ApiReferencePage: NextPage = () => {
   return (
@@ -29,7 +29,7 @@ const ApiReferencePage: NextPage = () => {
           <section className="endpoint-list" aria-labelledby="endpoints-heading">
             <div className="section-heading"><h2 id="endpoints-heading">Endpoints</h2><a href="/api/openapi" target="_blank" rel="noreferrer">OpenAPI JSON <ExternalLink size={15} aria-hidden /></a></div>
             <Endpoint method="POST" path="/api/v1/check" title="Combined check" description="Run axe-core accessibility checks and LanguageTool-compatible language checks against HTML, text, or a public URL." example={combinedExample} />
-            <Endpoint method="POST" path="/api/v1/scans" title="Public directory scan" description="Fetch a public page, run both checks, and publish its latest numeric score and letter grade to the OpenADA directory." example={scanExample} />
+            <Endpoint method="POST" path="/api/v1/scans" title="Public site scan" description="Fetch a public page, or crawl up to 10 same-host pages, run both checks, and publish numeric scores and letter grades to the OpenADA directory." example={scanExample} />
             <Endpoint method="GET" path="/api/v1/directory" title="Browse the directory" description="List public sites. Add ?site=example.com to retrieve its observed pages and scan history." />
             <Endpoint method="POST" path="/api/v1/ada/check" title="ADA only" description="Run axe-core WCAG checks against submitted HTML." />
             <Endpoint method="POST" path="/api/v2/check" title="LanguageTool compatible" description="Use OpenADA as a LanguageTool-compatible spelling and grammar provider." />
@@ -73,6 +73,7 @@ const ApiReferencePage: NextPage = () => {
           .endpoint p { margin-top: 5px; color: #64748b; line-height: 1.45; }
           .code-wrap { position: relative; margin-top: 12px; }
           pre { overflow-x: auto; margin: 0; border: 1px solid #dce3ea; border-radius: 6px; background: #172033; color: #d7f7ec; padding: 16px; font-size: .82rem; line-height: 1.55; }
+          pre code { display: block; margin: 0; padding: 0; border-radius: 0; background: transparent; color: inherit; font-size: inherit; }
           .copy-button { position: absolute; top: 8px; right: 8px; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #496078; border-radius: 5px; background: #26364d; color: #fff; cursor: pointer; }
           .copy-button:hover, .copy-button:focus-visible { background: #25635f; }
           .notes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 34px; border-top: 1px solid #dce3ea; padding-top: 24px; }

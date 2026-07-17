@@ -99,7 +99,24 @@ export async function recordScan(input: ScanInput): Promise<{ site: SiteRecord; 
     latestScore: score,
     latestGrade: grade,
   }
-  const scan: ScanRecord = { ...input, id: scanId, siteId, pageId, scannedAt: now }
+  // Persist the directory summary, not the full axe result. Axe can include
+  // class instances in incomplete results that DynamoDB cannot marshal.
+  const scan: ScanRecord = {
+    ...input,
+    ada: input.ada
+      ? {
+          score: input.ada.score,
+          grade: input.ada.grade,
+          violationsCount: input.ada.violationsCount,
+          passesCount: input.ada.passesCount,
+          incompleteCount: input.ada.incompleteCount,
+        }
+      : null,
+    id: scanId,
+    siteId,
+    pageId,
+    scannedAt: now,
+  }
 
   await Promise.all([
     client.send(new UpdateCommand({

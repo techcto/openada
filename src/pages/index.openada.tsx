@@ -12,6 +12,7 @@ import {
   Globe2,
   Languages,
   Play,
+  ScanSearch,
   ShieldCheck,
   Sparkles,
   Star,
@@ -46,6 +47,13 @@ type CheckResponse = {
     errors: number
     issues: Issue[]
   }
+  crawl?: {
+    enabled: boolean
+    maxPages: number
+    pagesScanned: number
+    queuedPages: number
+    errors: Array<{ url: string; message: string }>
+  }
   error?: {
     message: string
   }
@@ -74,6 +82,13 @@ const HomePage: NextPage = () => {
     if (!canCheck) return
 
     const submittedUrl = url.trim()
+    const submitter = (event.nativeEvent as SubmitEvent).submitter
+    const crawl = submitter instanceof HTMLButtonElement && submitter.value === 'site'
+    if (crawl && !submittedUrl) {
+      setError('Enter a public page URL to scan the site.')
+      return
+    }
+
     if (submittedUrl) {
       try {
         const parsed = new URL(submittedUrl)
@@ -94,7 +109,8 @@ const HomePage: NextPage = () => {
         body: JSON.stringify({
           html: submittedUrl ? '' : html,
           url: submittedUrl || undefined,
-          title: submittedUrl ? document.title : undefined,
+          crawl: crawl || undefined,
+          maxPages: crawl ? 5 : undefined,
           language: 'en-US',
           wcagTags: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'],
         }),
@@ -136,6 +152,10 @@ const HomePage: NextPage = () => {
               inputMode="url"
               autoComplete="url"
             />
+            <button className="url-submit" type="submit" form="checker-form" value="site" disabled={!url.trim() || isChecking} aria-label="Scan this site">
+              <ScanSearch size={16} aria-hidden />
+              <span>{isChecking ? 'Scanning' : 'Scan site'}</span>
+            </button>
             <p>OpenADA fetches public HTML pages. A URL takes priority over the editor content.</p>
           </div>
         </div>
@@ -189,6 +209,11 @@ const HomePage: NextPage = () => {
                 tone={languageIssues.length > 0 ? 'warn' : 'good'}
               />
             </div>
+            {result?.crawl?.enabled && (
+              <p className="crawl-summary" role="status">
+                <ScanSearch size={16} aria-hidden /> Scanned {result.crawl.pagesScanned} page{result.crawl.pagesScanned === 1 ? '' : 's'} on this site.
+              </p>
+            )}
 
             <div className="issues">
               <IssueSection
@@ -394,7 +419,7 @@ const HomePage: NextPage = () => {
 
         .url-field {
           display: grid;
-          grid-template-columns: auto minmax(0, 1fr);
+          grid-template-columns: auto minmax(0, 1fr) auto;
           align-items: center;
           gap: 8px 14px;
           padding: 15px 18px;
@@ -427,9 +452,27 @@ const HomePage: NextPage = () => {
           box-shadow: 0 0 0 3px rgba(37, 99, 95, 0.14);
         }
 
+        .url-submit {
+          grid-column: 3;
+          grid-row: 1;
+          min-height: 38px;
+          height: 38px;
+          padding: 0 13px;
+        }
+
         .url-field p {
+          grid-column: 2 / span 2;
           color: #64748b;
           font-size: 0.84rem;
+        }
+
+        .crawl-summary {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          color: #25635f;
+          font-size: 0.88rem;
+          font-weight: 800;
         }
 
         .editor-pane,
@@ -739,6 +782,12 @@ const HomePage: NextPage = () => {
           .url-field p {
             grid-column: 1;
             grid-row: auto;
+          }
+
+          .url-submit {
+            grid-column: 1;
+            grid-row: auto;
+            justify-self: start;
           }
 
           .editor-pane,

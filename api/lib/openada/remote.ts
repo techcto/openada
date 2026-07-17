@@ -1,5 +1,6 @@
 import { lookup } from 'node:dns/promises'
 import { isIP } from 'node:net'
+import { JSDOM } from 'jsdom'
 
 const MAX_HTML_BYTES = 2 * 1024 * 1024
 const MAX_REDIRECTS = 3
@@ -12,6 +13,39 @@ export type RemoteHtmlResult = {
 
 export async function fetchRemoteHtml(input: string): Promise<RemoteHtmlResult> {
   return fetchRemoteHtmlAtUrl(input, 0)
+}
+
+export function extractDocumentTitle(html: string): string {
+  const dom = new JSDOM(html)
+  try {
+    return dom.window.document.querySelector('title')?.textContent?.trim().slice(0, 240) || ''
+  } finally {
+    dom.window.close()
+  }
+}
+
+export function extractSameHostLinks(html: string, baseUrl: string): string[] {
+  const base = new URL(baseUrl)
+  const dom = new JSDOM(html, { url: baseUrl })
+  try {
+    const links = Array.from(dom.window.document.querySelectorAll('a[href]'))
+      .map((anchor) => anchor.getAttribute('href') || '')
+      .map((href) => {
+        try {
+          const url = new URL(href, base)
+          if (!['http:', 'https:'].includes(url.protocol) || url.hostname !== base.hostname) return ''
+          url.hash = ''
+          return url.toString()
+        } catch {
+          return ''
+        }
+      })
+      .filter(Boolean)
+
+    return Array.from(new Set(links))
+  } finally {
+    dom.window.close()
+  }
 }
 
 async function fetchRemoteHtmlAtUrl(input: string, redirectCount: number): Promise<RemoteHtmlResult> {
