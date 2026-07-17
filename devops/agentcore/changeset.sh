@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-: "${MP_AWS_AGENTCORE_PRODUCT_ID:?Set MP_AWS_AGENTCORE_PRODUCT_ID to the OpenADA MCP AgentCore Marketplace product ID.}"
 : "${RELEASE_VERSION:?Set RELEASE_VERSION to the version being submitted.}"
 
 ECR_REGISTRY="${MP_AWS_ECR:-709825985650.dkr.ecr.us-east-1.amazonaws.com}"
 AGENTCORE_REPOSITORY="${OPENADA_AGENTCORE_REPOSITORY:-solodev/openada-agentcore}"
+AGENTCORE_PRODUCT_ID="${MP_AWS_AGENTCORE_PRODUCT_ID:-prod-ragigipz4iidc}"
 IMAGE_URI="${ECR_REGISTRY}/${AGENTCORE_REPOSITORY}:${RELEASE_VERSION}"
 
 DETAILS_JSON=$(cat <<JSON
@@ -45,6 +45,6 @@ JSON
 aws marketplace-catalog start-change-set \
   --catalog AWSMarketplace \
   --change-set "$(jq -cn \
-    --arg product "$MP_AWS_AGENTCORE_PRODUCT_ID" \
+    --arg product "$AGENTCORE_PRODUCT_ID" \
     --argjson details "$DETAILS_JSON" \
     '[{"ChangeType":"AddDeliveryOptions","Entity":{"Identifier":$product,"Type":"ContainerProduct@1.0"},"Details":($details|tojson)}]')"

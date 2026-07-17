@@ -2,6 +2,15 @@
 
 Marketplace listing draft and deployment handoff for **OpenADA MCP AgentCore**.
 
+Marketplace identifiers for this product:
+
+- Product ID: `prod-ragigipz4iidc`
+- Product code: `6vwbup6herqqhb8o5rsp1eucz`
+
+The Product ID is used by the AgentCore Marketplace changeset. The Product code
+identifies the Marketplace listing but is not passed as a delivery-option
+changeset field.
+
 ## Product Name
 
 OpenADA MCP AgentCore

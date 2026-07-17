@@ -47,11 +47,10 @@ jobs:
         env:
           MP_AWS_ACCESS_KEY_ID: ${{ vars.MP_AWS_ACCESS_KEY_ID }}
           MP_AWS_SECRET_ACCESS_KEY: ${{ secrets.MP_AWS_SECRET_ACCESS_KEY }}
-          MP_AWS_AGENTCORE_PRODUCT_ID: ${{ vars.MP_AWS_AGENTCORE_PRODUCT_ID }}
+          MP_AWS_AGENTCORE_PRODUCT_ID: ${{ vars.MP_AWS_AGENTCORE_PRODUCT_ID || 'prod-ragigipz4iidc' }}
         run: |
           test -n "$MP_AWS_ACCESS_KEY_ID" || { echo 'Missing repository variable MP_AWS_ACCESS_KEY_ID.' >&2; exit 1; }
           test -n "$MP_AWS_SECRET_ACCESS_KEY" || { echo 'Missing repository secret MP_AWS_SECRET_ACCESS_KEY.' >&2; exit 1; }
-          test -n "$MP_AWS_AGENTCORE_PRODUCT_ID" || { echo 'Missing repository variable MP_AWS_AGENTCORE_PRODUCT_ID.' >&2; exit 1; }
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -97,7 +96,7 @@ jobs:
 
       - name: Submit AgentCore Marketplace changeset
         env:
-          MP_AWS_AGENTCORE_PRODUCT_ID: ${{ vars.MP_AWS_AGENTCORE_PRODUCT_ID }}
+          MP_AWS_AGENTCORE_PRODUCT_ID: ${{ vars.MP_AWS_AGENTCORE_PRODUCT_ID || 'prod-ragigipz4iidc' }}
           MP_AWS_ECR: ${{ env.MP_AWS_ECR }}
           OPENADA_AGENTCORE_REPOSITORY: ${{ env.AGENTCORE_REPOSITORY }}
           RELEASE_VERSION: ${{ steps.version.outputs.value }}
