@@ -21,8 +21,8 @@ Use the public CloudFormation launch links from the [root Quickstart](../../Quic
 
 <table>
   <tr>
-    <td width="50%"><strong>New ECS environment</strong><br />Provide <code>VpcId</code>, at least two public subnets for the ALB, and service subnets with NAT access to pull the Marketplace images and write CloudWatch logs.<br /><br /><a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada.yaml"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch a new OpenADA ECS environment" /></a></td>
-    <td width="50%"><strong>Existing ECS environment</strong><br />Provide <code>VpcId</code>, <code>Cluster</code>, <code>LoadBalancerSecurityGroup</code>, <code>ListenerArn</code>, <code>ServiceSubnets</code>, <code>HostHeader</code>, and a reachable <code>RedisHost</code>.<br /><br /><a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-existing.yaml"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch OpenADA in an existing ECS environment" /></a></td>
+    <td width="50%"><strong>New ECS environment</strong><br />Provide <code>VpcId</code>, at least two public subnets for the ALB, and service subnets with NAT access to pull the Marketplace images and write CloudWatch logs.<br /><br /><a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada.yaml&amp;stackName=openada"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch a new OpenADA ECS environment" /></a></td>
+    <td width="50%"><strong>Existing ECS environment</strong><br />Provide <code>VpcId</code>, <code>Cluster</code>, <code>LoadBalancerSecurityGroup</code>, <code>ListenerArn</code>, <code>ServiceSubnets</code>, <code>HostHeader</code>, and a reachable <code>RedisHost</code>.<br /><br /><a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-existing.yaml&amp;stackName=openada-existing"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch OpenADA in an existing ECS environment" /></a></td>
   </tr>
 </table>
 
@@ -32,7 +32,9 @@ Use the public CloudFormation launch links from the [root Quickstart](../../Quic
   in the same region and cover the hostname you will use.
 - Set `ApiKeys` to a long random value before enabling access beyond a trusted
   test. The parameter is hidden by CloudFormation and protects both REST and
-  MCP requests.
+  MCP requests. It is not an AWS access key, Marketplace product ID, or ECR
+  credential. Generate one with `openssl rand -hex 32`; use the same value as
+  `OpenAdaApiKey` when connecting the separate AgentCore product.
 - Leave `PublicScansEnabled` enabled for the public-directory experience, or
   set it to `false` and use `ScanAllowedHosts` for a restricted private service.
 

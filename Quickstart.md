@@ -34,8 +34,8 @@ for the Marketplace subscription and the CloudFormation launch.
 
 <table>
   <tr>
-    <td width="50%"><strong>New ECS environment</strong><br />Creates a complete standalone OpenADA stack.<br /><br /><a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada.yaml"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch a new OpenADA ECS environment" /></a></td>
-    <td width="50%"><strong>Existing ECS environment</strong><br />Adds OpenADA services to an existing environment.<br /><br /><a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-existing.yaml"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch OpenADA in an existing ECS environment" /></a></td>
+    <td width="50%"><strong>New ECS environment</strong><br />Creates a complete standalone OpenADA stack.<br /><br /><a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada.yaml&amp;stackName=openada"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch a new OpenADA ECS environment" /></a></td>
+    <td width="50%"><strong>Existing ECS environment</strong><br />Adds OpenADA services to an existing environment.<br /><br /><a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-existing.yaml&amp;stackName=openada-existing"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch OpenADA in an existing ECS environment" /></a></td>
   </tr>
 </table>
 
@@ -45,6 +45,18 @@ for the Marketplace subscription and the CloudFormation launch.
    shown by the selected template, then acknowledge IAM resource creation and
    create the stack.
 5. Open the `WebsiteUrl` output after the ECS services report healthy.
+
+For `ApiKeys`, leave the field blank only when intentionally running an
+anonymous public demo. For a private or production deployment, generate a
+random value and paste it into the hidden CloudFormation field:
+
+```bash
+openssl rand -hex 32
+```
+
+The resulting value becomes `OPENADA_API_KEYS`. Clients use it as
+`Authorization: Bearer <key>` or `X-API-Key: <key>`. If AgentCore connects to
+this private deployment, use the same value for its `OpenAdaApiKey` setting.
 
 The [OpenADA Private CloudFormation Quickstart](devops/cloudformation/README.md)
 lists the exact fields for both deployment modes, HTTPS, API keys, scan limits,
