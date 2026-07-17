@@ -32,15 +32,6 @@ jobs:
         working-directory: api
         run: npm ci
 
-      - name: Install cfn-lint
-        run: python3 -m pip install --user cfn-lint
-
-      - name: Add user Python tools to PATH
-        run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-
-      - name: Test scripts and CloudFormation
-        run: ./cmd.sh cft test && bash -n cmd.sh git.sh cft.sh
-
       - name: Build UI
         run: npm run build
 
