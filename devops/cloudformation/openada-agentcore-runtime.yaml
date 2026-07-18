@@ -127,32 +127,6 @@ Resources:
                   - logs:PutLogEvents
                 Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/bedrock-agentcore/*'
 
-  # ── Scoped IAM user + key for external callers to invoke this runtime
-  # directly, scoped to this stack's runtime ARN rather than '*'.
-  McpInvokerUser:
-    Type: AWS::IAM::User
-    Properties:
-      UserName: !Sub '${AWS::StackName}-mcp-invoker'
-      Policies:
-        - PolicyName: InvokeOpenAdaMcpRuntime
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Sid: AgentCoreInvoke
-                Effect: Allow
-                Action:
-                  - bedrock-agentcore:InvokeAgentRuntime
-                  - bedrock-agentcore:InvokeAgentRuntimeCommand
-                  - bedrock-agentcore:GetAgentCard
-                Resource:
-                  - !GetAtt AgentCoreRuntime.RuntimeArn
-                  - !Sub '${AgentCoreRuntime.RuntimeArn}/runtime-endpoint/*'
-
-  McpInvokerAccessKey:
-    Type: AWS::IAM::AccessKey
-    Properties:
-      UserName: !Ref McpInvokerUser
-
   # ── Lambda execution role (for the custom resource) ────────────────────────
   RuntimeProvisionerRole:
     Type: AWS::IAM::Role
@@ -248,7 +222,6 @@ Resources:
                       network_configuration['networkModeConfig'] = {
                           'subnets': vpc_subnets,
                           'securityGroups': vpc_groups,
-                          'requireServiceS3Endpoint': True,
                       }
 
                   # Ensure the AgentCore service-linked role exists before calling CreateAgentRuntime
@@ -332,14 +305,6 @@ Outputs:
   RuntimeArn:
     Description: AgentCore Runtime ARN for IAM/SigV4-authenticated MCP invocation.
     Value: !GetAtt AgentCoreRuntime.RuntimeArn
-
-  AccessKeyId:
-    Description: IAM access key ID for the scoped runtime invoker user. Prefer an IAM role or federation for production.
-    Value: !Ref McpInvokerAccessKey
-
-  SecretAccessKey:
-    Description: Secret key for the scoped runtime invoker user. Store it immediately and do not expose it in logs.
-    Value: !GetAtt McpInvokerAccessKey.SecretAccessKey
 
   Region:
     Description: AWS Region.

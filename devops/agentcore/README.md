@@ -56,8 +56,8 @@ The launch form contains these settings:
 | `VpcSecurityGroups` | VPC only | Comma-separated security groups that allow HTTPS traffic to OpenADA. |
 
 The template creates the AgentCore runtime, its execution role, a runtime
-provisioner, CloudWatch logging permissions, and a scoped invocation identity.
-It does not create the OpenADA ECS service, Redis queue, or DynamoDB archive.
+provisioner, and CloudWatch logging permissions. It does not create the
+OpenADA ECS service, Redis queue, or DynamoDB archive.
 
 ## Connecting To OpenADA Private
 
@@ -90,6 +90,98 @@ or another supported AgentCore client. The runtime exposes:
 - `POST /mcp` for stateless Streamable HTTP MCP requests; and
 - the OpenADA tools for page checks, site scans, scan progress, public
   directory results, and historical comparisons.
+
+## Test Without A Chat UI
+
+The AWS console's generic AgentCore example uses a `prompt` field. OpenADA is
+an MCP server, so send JSON-RPC messages instead. In the AgentCore test
+console, choose the runtime and `DEFAULT` endpoint, leave Session ID empty,
+and run these requests in order.
+
+Initialize the MCP connection:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "initialize",
+  "params": {
+    "protocolVersion": "2025-06-18",
+    "capabilities": {},
+    "clientInfo": {
+      "name": "aws-console",
+      "version": "1.0.0"
+    }
+  }
+}
+```
+
+List the available tools:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "tools/list",
+  "params": {}
+}
+```
+
+Check a public page:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "tools/call",
+  "params": {
+    "name": "openada_check_page",
+    "arguments": {
+      "url": "https://openada.us/"
+    }
+  }
+}
+```
+
+For a repeatable terminal smoke test, use the AWS CLI. The caller needs
+`bedrock-agentcore:InvokeAgentRuntime` for the runtime ARN. Replace the ARN
+and Region with the outputs from your stack:
+
+```bash
+export OPENADA_AGENTCORE_RUNTIME_ARN='arn:aws:bedrock-agentcore:REGION:ACCOUNT_ID:runtime/RUNTIME_ID'
+export AWS_REGION='us-east-1'
+
+aws bedrock-agentcore invoke-agent-runtime \
+  --agent-runtime-arn "$OPENADA_AGENTCORE_RUNTIME_ARN" \
+  --content-type 'application/json' \
+  --accept 'application/json, text/event-stream' \
+  --mcp-protocol-version '2025-06-18' \
+  --payload '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"openada-smoke-test","version":"1.0.0"}}}' \
+  /tmp/openada-agentcore-initialize.txt \
+  --cli-binary-format raw-in-base64-out
+
+cat /tmp/openada-agentcore-initialize.txt
+```
+
+Once initialization returns HTTP 200, repeat the command with this payload to
+discover tools:
+
+```json
+{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}
+```
+
+Then call `openada_check_page` with the page-check payload above. The response
+is Streamable HTTP SSE, so look for the `data:` line in the output file. A
+successful result contains `sourceUrl`, an ADA numeric score, a letter grade,
+and the accessibility and language findings. Site scans return a job ID
+immediately; call `openada_get_scan_status` with that job ID until the status
+is `completed` or `failed`.
+
+For a visual protocol inspector, run `npx @modelcontextprotocol/inspector` and
+connect it to the OpenADA MCP endpoint. Use `https://openada.us/mcp` for the
+hosted public service or the private deployment's MCP URL when testing the
+full private path. The AgentCore runtime itself is authenticated by AWS
+SigV4; do not put AWS credentials in the MCP JSON body.
 
 Example requests to an agent include:
 
