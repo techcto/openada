@@ -30,6 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       status: job.status,
       url: job.url,
       maxPages: job.maxPages,
+      visibility: job.isPrivate ? 'private' : 'public',
       progress: {
         pagesScanned: job.pagesScanned,
         pagesDiscovered: job.pagesDiscovered,

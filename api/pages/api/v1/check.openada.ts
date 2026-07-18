@@ -4,6 +4,7 @@ import {
   enforceApiKey,
   handleOptions,
   readStringParam,
+  readBooleanParam,
   requirePost,
 } from '@lib/openada/http'
 import { checkAda, htmlToText } from '@lib/openada/ada'
@@ -35,6 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .split(',')
       .map((tag) => tag.trim())
       .filter(Boolean)
+  const isPrivate = readBooleanParam(req.body?.private, false)
 
   if (!html.trim() && !text.trim() && !url) {
     res.status(400).json({
@@ -59,6 +61,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(200).json({
       sourceUrl: fetched?.url || undefined,
       ada,
+      visibility: isPrivate ? 'private' : 'public',
       language: {
         errors: languageResult.matches.length,
         issues: languageResult.matches.map((match) => ({

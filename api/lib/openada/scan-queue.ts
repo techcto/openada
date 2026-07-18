@@ -8,6 +8,7 @@ export type ScanQueueData = {
   language: string
   wcagTags: string[]
   maxPages: number
+  isPrivate?: boolean
 }
 
 function redisConnection() {

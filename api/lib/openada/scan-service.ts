@@ -7,10 +7,11 @@ export type QueuedScanOptions = {
   title?: string
   language: string
   wcagTags: string[]
+  isPrivate?: boolean
 }
 
 export async function startQueuedScan(options: QueuedScanOptions) {
-  const job = await createScanJob({ url: options.url, maxPages: options.maxPages })
+  const job = await createScanJob({ url: options.url, maxPages: options.maxPages, isPrivate: options.isPrivate })
   try {
     await getScanQueue().add(
       'site-scan',

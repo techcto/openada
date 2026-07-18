@@ -4,6 +4,7 @@ import {
   enforceApiKey,
   handleOptions,
   readStringParam,
+  readBooleanParam,
   requirePost,
 } from '@lib/openada/http'
 import { checkLanguage } from '@lib/openada/language'
@@ -25,6 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const text = readStringParam(req.body?.text).slice(0, 20000)
   const language = readStringParam(req.body?.language, 'en-US')
+  const isPrivate = readBooleanParam(req.body?.private, false)
 
   if (!text.trim()) {
     res.status(400).json({
@@ -37,5 +39,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const result = await checkLanguage(text, language)
-  res.status(200).json(result)
+  res.status(200).json({ ...result, visibility: isPrivate ? 'private' : 'public' })
 }

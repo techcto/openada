@@ -71,6 +71,14 @@ export function readStringParam(value: unknown, fallback = ''): string {
   return String(value)
 }
 
+export function readBooleanParam(value: unknown, fallback = false): boolean {
+  if (typeof value === 'boolean') return value
+  const normalized = readStringParam(value).trim().toLowerCase()
+  if (['1', 'true', 'yes', 'on'].includes(normalized)) return true
+  if (['0', 'false', 'no', 'off'].includes(normalized)) return false
+  return fallback
+}
+
 export function requirePost(req: NextApiRequest, res: NextApiResponse<ApiError>): boolean {
   if (req.method === 'POST') return true
 

@@ -30,7 +30,7 @@ function publicResult(result: Awaited<ReturnType<typeof runSiteScan>>): Record<s
     crawl: result.crawl,
     pages: result.pages.map((page) => ({
       sourceUrl: page.sourceUrl,
-      scanId: page.directory.scan.id,
+      scanId: page.directory?.scan.id || null,
       title: page.title,
       ada: {
         score: page.ada.score,
@@ -60,6 +60,7 @@ export async function processScanJob(job: Job<ScanQueueData>): Promise<void> {
       wcagTags: job.data.wcagTags,
       maxPages: job.data.maxPages,
       crawl: true,
+      publishToDirectory: job.data.isPrivate !== true,
       onProgress: async (progress) => {
         await job.updateProgress(progress.pagesScanned)
         await updateScanJob(jobId, {
@@ -75,14 +76,16 @@ export async function processScanJob(job: Job<ScanQueueData>): Promise<void> {
 
     const safeResult = publicResult(result)
     const completedAt = new Date().toISOString()
-    await recordSiteScanSummary({
-      hostname: new URL(result.sourceUrl).hostname,
-      scannedAt: completedAt,
-      ada: result.ada
-        ? { score: result.ada.score, grade: result.ada.grade, violationsCount: result.ada.violationsCount }
-        : null,
-      languageErrors: result.language.errors,
-    })
+    if (job.data.isPrivate !== true) {
+      await recordSiteScanSummary({
+        hostname: new URL(result.sourceUrl).hostname,
+        scannedAt: completedAt,
+        ada: result.ada
+          ? { score: result.ada.score, grade: result.ada.grade, violationsCount: result.ada.violationsCount }
+          : null,
+        languageErrors: result.language.errors,
+      })
+    }
     await updateScanJob(jobId, {
       status: 'completed',
       pagesScanned: result.crawl.pagesScanned,

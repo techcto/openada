@@ -66,6 +66,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const pageId = typeof req.query.page === 'string' ? req.query.page.trim() : ''
     const jobs = await listScanJobsForHost(siteId)
     const selectedJob = scanId ? await getScanJob(scanId) : null
+    if (selectedJob?.isPrivate) {
+      res.status(404).json({ error: { code: 'scan_not_found', message: 'That scan is not in the public directory.' } })
+      return
+    }
 
     if (pageId) {
       const pageScan = await getScan(pageId)

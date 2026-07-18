@@ -12,6 +12,7 @@ export type ScanJob = {
   status: ScanJobStatus
   url: string
   maxPages: number
+  isPrivate?: boolean
   pagesScanned: number
   pagesDiscovered: number
   queuedPages: number
@@ -39,7 +40,7 @@ function now(): string {
   return new Date().toISOString()
 }
 
-export async function createScanJob(input: Pick<ScanJob, 'url' | 'maxPages'>): Promise<ScanJob> {
+export async function createScanJob(input: Pick<ScanJob, 'url' | 'maxPages' | 'isPrivate'>): Promise<ScanJob> {
   const timestamp = now()
   const canonicalUrl = new URL(input.url).toString()
   const siteId = new URL(canonicalUrl).hostname.toLowerCase()
@@ -49,6 +50,7 @@ export async function createScanJob(input: Pick<ScanJob, 'url' | 'maxPages'>): P
     status: 'pending',
     url: canonicalUrl,
     maxPages: input.maxPages,
+    isPrivate: input.isPrivate === true,
     pagesScanned: 0,
     pagesDiscovered: 1,
     queuedPages: 1,
@@ -91,12 +93,15 @@ export async function listScanJobs(url: string): Promise<ScanJob[]> {
     Limit: 100,
   }))
 
-  return ((result.Items || []) as ScanJob[]).sort((left, right) => right.createdAt.localeCompare(left.createdAt))
+  return ((result.Items || []) as ScanJob[])
+    .filter((job) => job.isPrivate !== true)
+    .sort((left, right) => right.createdAt.localeCompare(left.createdAt))
 }
 
 export async function listScanJobsForHost(hostname: string): Promise<ScanJob[]> {
   const result = await client.send(new ScanCommand({ TableName: table(), Limit: 100 }))
   return ((result.Items || []) as ScanJob[])
+    .filter((job) => job.isPrivate !== true)
     .filter((job) => {
       if (job.siteId) return hostnamesMatch(job.siteId, hostname)
       try {

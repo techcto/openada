@@ -6,6 +6,7 @@ import {
   handleOptions,
   publicScansEnabled,
   readStringParam,
+  readBooleanParam,
   requirePost,
 } from '@lib/openada/http'
 import { listScanJobs } from '@lib/openada/scan-jobs'
@@ -36,7 +37,7 @@ function scanOptions(body: NextApiRequest['body']) {
       .map((tag) => tag.trim())
       .filter(Boolean)
 
-  return { url, title, language, maxPages, wcagTags }
+  return { url, title, language, maxPages, wcagTags, isPrivate: readBooleanParam(body?.private, false) }
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -100,12 +101,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         status: job.status,
         url: job.url,
         maxPages: job.maxPages,
+        visibility: options.isPrivate ? 'private' : 'public',
         statusUrl: `/api/v1/scans/${job.id}`,
       })
       return
     }
 
-    const result = await runSiteScan({ ...options, crawl: false, maxPages: 1 })
+    const result = await runSiteScan({ ...options, crawl: false, maxPages: 1, publishToDirectory: !options.isPrivate })
     res.status(201).json(result)
   } catch (error) {
     const message = error instanceof Error ? error.message : 'The public scan failed.'

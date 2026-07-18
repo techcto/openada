@@ -8,7 +8,7 @@ export type SiteScanPage = {
   title: string
   ada: Awaited<ReturnType<typeof checkAda>>
   language: { errors: number; issues: Array<Record<string, unknown>> }
-  directory: Awaited<ReturnType<typeof recordScan>>
+  directory: Awaited<ReturnType<typeof recordScan>> | null
 }
 
 export type SiteScanResult = {
@@ -43,6 +43,7 @@ type SiteScanInput = {
   wcagTags: string[]
   maxPages: number
   crawl: boolean
+  publishToDirectory?: boolean
   onProgress?: (progress: SiteScanProgress) => Promise<void> | void
 }
 
@@ -93,7 +94,7 @@ export async function runSiteScan(input: SiteScanInput): Promise<SiteScanResult>
         ruleId: match.rule.id,
       }))
       const pageTitle = input.title || extractDocumentTitle(sourceHtml) || fetchedHostname
-      const saved = await recordScan({
+      const saved = input.publishToDirectory === false ? null : await recordScan({
         url: fetched.url,
         sourceUrl: fetched.url,
         title: pageTitle,
