@@ -4,132 +4,149 @@ Deploy OpenADA Private from AWS Marketplace as a complete web-accessibility
 service with a UI, API, asynchronous scan worker, Redis queue, and durable
 DynamoDB scan history.
 
-[Subscribe to OpenADA Private in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e) in the same AWS account that will own the CloudFormation stack. Launch in `us-east-1`, where the current Marketplace delivery options and public templates are published.
+[Subscribe to OpenADA Private in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e)
+in the AWS account that will own the stack. Launch the CloudFormation stack in
+`us-east-1`, where the Marketplace delivery and public templates are published.
 
-OpenADA stores public directory metadata and asynchronous scan history in four on-demand DynamoDB tables: sites, pages, immutable scan summaries, and scan jobs. Site scans use BullMQ over Redis so the API returns immediately and the UI can reconnect to progress after a task restart.
+## Choose A Deployment
 
-| Mode | Command | Creates | Reuses |
-| --- | --- | --- | --- |
-| New standalone environment | `./cmd.sh cft-new deploy` | ECS cluster, ALB, Redis queue, worker, security groups, task services | Nothing |
-| Existing environment | `./cmd.sh cft-existing deploy` | OpenADA services, worker, target groups, rules, task roles, logs, scan-jobs table | ECS cluster, ALB, VPC, subnets, reachable Redis |
+Use **New ECS environment** when OpenADA should create its own ECS cluster,
+load balancer, Redis queue, services, and supporting resources.
 
-The standalone mode is implemented by `openada.yaml`. The existing-environment mode is implemented by `openada-existing.yaml`. The standalone template creates a small Redis queue; the existing-environment template expects a reachable Redis endpoint.
+Use **Existing ECS environment** when the account already has an ECS cluster,
+ALB, listener, service subnets, and a reachable Redis endpoint. OpenADA then
+adds its UI, API, worker, task definitions, target groups, listener rules,
+task roles, logs, and DynamoDB tables to that environment.
 
-## Customer Launch Checklist
+## Before You Launch
 
-Use the public CloudFormation launch links from the [root Quickstart](../../Quickstart.md):
-
-Before opening the launch form, confirm these prerequisites:
-
-- Your AWS account is subscribed to [OpenADA Private](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e), and the launch region is `us-east-1`.
-- The deployment identity can create the resources requested by the template,
-  including ECS, IAM roles, EC2 security groups, Elastic Load Balancing,
-  CloudWatch Logs, DynamoDB, and ElastiCache. Accept the IAM capability in the
-  CloudFormation launch flow.
+- Subscribe to [OpenADA Private](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e)
+  in the same AWS account that will run the stack.
+- Launch in `us-east-1`.
+- Use an AWS identity that can create the resources requested by the selected
+  template, including ECS, IAM roles, EC2 security groups, Elastic Load
+  Balancing, CloudWatch Logs, DynamoDB, and ElastiCache where applicable.
+- Accept the IAM capability in the CloudFormation launch flow.
 - For a new environment, have a VPC, public subnets in at least two
-  availability zones, and service subnets with a NAT route. The ECS tasks need
-  outbound access for Marketplace ECR image pulls, CloudWatch logs, and public
-  page scans.
+  availability zones, and service subnets with NAT or equivalent outbound
+  access. ECS needs outbound access for Marketplace image pulls, logs, and
+  public-page scans.
 - For an existing environment, have an ECS cluster, an ALB listener, an ALB
   security group, service subnets, and a Redis endpoint reachable from those
-  subnets. The listener priorities `100`, `101`, and `102` must be unused.
-- If using HTTPS, have an ACM certificate in `us-east-1` that covers the public
-  hostname. For an existing ALB, create the DNS record for `HostHeader` before
-  testing the service.
+  subnets. Listener priorities `100`, `101`, and `102` must be unused.
+- For HTTPS, have an ACM certificate in `us-east-1` that covers the hostname
+  you will use.
 
-<table>
-  <tr>
-    <td width="50%"><strong>New ECS environment</strong><br />Provide <code>VpcId</code>, at least two public subnets for the ALB, and service subnets with NAT access to pull the Marketplace images and write CloudWatch logs.<br /><br /><a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada.yaml&amp;stackName=openada"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch a new OpenADA ECS environment" /></a></td>
-    <td width="50%"><strong>Existing ECS environment</strong><br />Provide <code>VpcId</code>, <code>Cluster</code>, <code>LoadBalancerSecurityGroup</code>, <code>ListenerArn</code>, <code>ServiceSubnets</code>, <code>HostHeader</code>, and a reachable <code>RedisHost</code>.<br /><br /><a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-existing.yaml&amp;stackName=openada-existing"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch OpenADA in an existing ECS environment" /></a></td>
-  </tr>
-</table>
+## Launch A New ECS Environment
 
-- Keep the `UiImage`, `ApiImage`, and `WorkerImage` defaults supplied by the
-  launch template. They point to the subscribed Marketplace delivery.
-- Set `CertificateArn` for HTTPS on a new environment. The certificate must be
-  in the same region and cover the hostname you will use.
-- Set `ApiKeys` to a long random value before enabling access beyond a trusted
-  test. The parameter is hidden by CloudFormation and protects both REST and
-  MCP requests. It is not an AWS access key, Marketplace product ID, or ECR
-  credential. Generate one with `openssl rand -hex 32`; use the same value as
-  `OpenAdaApiKey` when connecting the separate AgentCore product.
-- Leave `PublicScansEnabled` enabled for the public-directory experience, or
-  set it to `false` and use `ScanAllowedHosts` for a restricted private service.
+Provide the VPC and subnet values requested by the form. The template creates
+the ECS cluster, ALB, Redis queue, security groups, task roles, UI/API/worker
+services, and DynamoDB directory tables.
 
-After creation, wait for the UI, API, and worker services to become healthy,
-then open the `WebsiteUrl` stack output. Verify the API with
-`<WebsiteUrl>/api/health`. If ECS cannot pull an image, confirm that the
-Marketplace subscription was completed in the same account, the service
-subnets have NAT or public IP egress, and the task execution role includes the
-standard ECS task execution policy.
+<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada.yaml&amp;stackName=openada"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch a new OpenADA ECS environment" /></a>
 
-## OpenADA MCP AgentCore
+Required network values include:
 
-The separate `OpenADA MCP AgentCore` product is a stateless ARM64 gateway for Amazon Bedrock AgentCore Runtime. It forwards MCP requests to the OpenADA MCP endpoint supplied at launch and does not replace the ECS UI, API, worker, Redis, or DynamoDB services.
+- `VpcId`
+- at least two public subnets for the ALB
+- service subnets with NAT or equivalent outbound access
 
-Use `devops/cloudformation/openada-agentcore-runtime.yaml` after the AgentCore container image has been published. Set `OpenAdaMcpUrl` to the private OpenADA MCP URL and `OpenAdaApiKey` to the same random value configured as `ApiKeys` on the private OpenADA stack. Select `NetworkMode=VPC` with private subnets and security groups when the OpenADA endpoint is internal to a VPC. AgentCore invocation uses AWS IAM/SigV4; the gateway does not need AWS access keys.
+Set `CertificateArn` for HTTPS. The certificate must be in `us-east-1` and
+cover the hostname that will point to the ALB.
 
-## Publish CloudFormation files
+## Add OpenADA To An Existing ECS Environment
 
-The release workflow publishes rendered, versioned templates to `openada-us`. For a manual upload, use the same bucket:
+Provide the existing environment values in the form. This template does not
+create or modify the existing ECS cluster, VPC, ALB, or Redis infrastructure.
 
-```bash
-export AWS_PROFILE=<your-aws-profile>
-export OPENADA_CFT_BUCKET=openada-us
-./cmd.sh cft-new publish
-```
+<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-existing.yaml&amp;stackName=openada-existing"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch OpenADA in an existing ECS environment" /></a>
 
-Both `cft-new deploy` and `cft-existing deploy` publish the CFT files before validating or deploying.
+Required existing-environment values include:
 
-The release templates resolve their defaults to the versioned Marketplace images in `709825985650.dkr.ecr.us-east-1.amazonaws.com/solodev/*`. You can still override `UiImage`, `ApiImage`, and `WorkerImage` for a local or alternate registry deployment. The publishing identity needs `s3:PutObject` and `s3:AbortMultipartUpload` for the CloudFormation and widget prefixes, plus `s3:GetBucketLocation` for the bucket. A ready-to-attach policy is included at `devops/iam/openada-cft-publish-policy.json`.
+- `VpcId`
+- `Cluster`
+- `LoadBalancerSecurityGroup`
+- `ListenerArn`
+- `ServiceSubnets`
+- `HostHeader`, using a hostname covered by the existing ALB certificate
+- `RedisHost`
 
-The deployment identity also needs DynamoDB table lifecycle permissions (`CreateTable`, `DeleteTable`, `DescribeTable`, `UpdateTable`, continuous-backup, and tag actions) because CloudFormation creates the directory tables. These are included in `devops/iam/openada-deploy-policy.json`.
+Create a DNS record for `HostHeader` that points to the existing ALB. If the
+default listener priorities are already in use, choose unused priorities in
+the CloudFormation form.
 
-## Existing ECS cluster
+## Security And API Keys
 
-Use `openada-existing.yaml` when the AWS account already has the VPC, ECS cluster, ALB, listener, and service subnets. This template creates only the OpenADA task definitions, ECS services, target groups, listener rules, task security group, IAM task roles, and log groups. It does not create a cluster, load balancer, RDS instance, Redis instance, or database schema.
+Keep the prefilled `UiImage`, `ApiImage`, and `WorkerImage` values unchanged.
+They identify the subscribed Marketplace container delivery.
 
-The OpenADA UI and API are routed by a dedicated host header. Use a hostname covered by the existing ALB certificate, such as `ada.example.com`, and create its DNS record pointing at the existing ALB.
+Set `ApiKeys` to a long random value before enabling access beyond a trusted
+test. The value protects REST and MCP requests. It is not an AWS access key or
+container registry credential.
 
-Public URL scans are enabled by default. Set `OPENADA_PUBLIC_SCANS_ENABLED=false` to disable them, or set `OPENADA_SCAN_ALLOWED_HOSTS` to a comma-separated hostname allowlist. Set `OPENADA_API_KEYS` when scan submissions should require a bearer token or `X-API-Key` header. The widget is opt-out: use `data-openada-auto="false"` and call `window.OpenADA.init()` manually when a site owner wants an explicit scan action.
-
-Run the offline check first:
+Generate a value locally with:
 
 ```bash
-./cmd.sh cft-existing test
+openssl rand -hex 32
 ```
 
-Then export the existing resource identifiers and published image URIs without committing them:
+OpenADA accepts the configured value as either:
 
-```bash
-export AWS_REGION=us-east-1
-export OPENADA_EXISTING_STACK_NAME=openada-existing-addon
-export OPENADA_EXISTING_VPC_ID=vpc-...
-export OPENADA_EXISTING_CLUSTER=existing-cluster
-export OPENADA_EXISTING_ALB_SG=sg-...
-export OPENADA_EXISTING_LISTENER_ARN=arn:aws:elasticloadbalancing:...
-export OPENADA_EXISTING_SUBNETS=subnet-...,subnet-...
-export OPENADA_HOST_HEADER=ada.example.com
-export OPENADA_UI_IMAGE=709825985650.dkr.ecr.us-east-1.amazonaws.com/solodev/openada-ui:<release-version>
-export OPENADA_API_IMAGE=709825985650.dkr.ecr.us-east-1.amazonaws.com/solodev/openada-api:<release-version>
-export OPENADA_WORKER_IMAGE=709825985650.dkr.ecr.us-east-1.amazonaws.com/solodev/openada-worker:<release-version>
-export OPENADA_REDIS_HOST=redis.internal.example
+```text
+Authorization: Bearer <key>
+X-API-Key: <key>
 ```
 
-Check the template against AWS, then deploy:
+The public directory experience is enabled by default. Set
+`PublicScansEnabled` to `false` for a private-only service, or set
+`ScanAllowedHosts` to a comma-separated allowlist of hosts that may be scanned.
 
-```bash
-./cmd.sh cft-existing validate
-./cmd.sh cft-existing deploy
-./cmd.sh cft-existing outputs
-```
+## After The Stack Is Created
 
-The listener priorities must be unused on the existing listener. Override them with `OPENADA_UI_LISTENER_PRIORITY` and `OPENADA_API_LISTENER_PRIORITY` when the defaults `100` and `101` are already occupied.
+1. Wait for the UI, API, and worker ECS services to become healthy.
+2. Open the `WebsiteUrl` stack output.
+3. Verify the API at `<WebsiteUrl>/api/health`.
+4. Open the public checker, paste a page or website URL, and choose a crawl
+   size.
+5. Use the directory to browse the latest completed score, dated scans, page
+   findings, and historical improvement.
 
-## Asynchronous site scans
+The API returns quickly when a site scan is submitted. The worker crawls
+bounded same-host pages through Redis, records progress and failures, runs the
+accessibility and language checks, and saves the completed report in DynamoDB.
 
-The homepage sends site scans to `/scan?url=...`. The scan page starts `POST /api/v1/scans`, receives a job id, and polls `GET /api/v1/scans/{jobId}`. The worker updates page counts, the current URL, queued pages, failures, and the final result in DynamoDB. Completed reports are available at `/report?jobId=...` and include a date picker for earlier scans of the same normalized URL. The Print / save PDF action uses the browser print dialog so the report can be archived without a PDF service in the stack.
+## What OpenADA Provides
 
-## Fresh standalone stack
+- A web UI for page checks and bounded website scans.
+- A combined REST API for accessibility and language-quality checks.
+- LanguageTool-compatible language checking.
+- axe-core accessibility findings.
+- An asynchronous crawler with progress updates.
+- A public directory of sites, scans, pages, scores, and findings.
+- Date-based scan history so teams can compare improvement over time.
+- MCP access for AI tools, including the separate
+  [OpenADA MCP AgentCore](../agentcore/README.md) product.
 
-Use `openada.yaml` only for a standalone environment. It creates its own ECS cluster, ALB, service discovery namespace, task roles, and security groups.
+Automated findings are engineering guidance. They do not constitute a legal
+opinion, ADA certification, or substitute for human accessibility testing.
+
+## Existing Environment Network Notes
+
+The UI and API are routed by the configured host header. The ECS service
+subnets need to reach Redis and the public internet or approved scan targets.
+The task execution role needs normal ECS image-pull and CloudWatch Logs access.
+The load balancer security group must allow the intended public HTTPS traffic,
+and the service security group must allow traffic from the load balancer.
+
+For a private OpenADA MCP deployment, use the stack's HTTPS hostname and the
+same `ApiKeys` value when configuring AgentCore's `OpenAdaMcpUrl` and
+`OpenAdaApiKey` parameters.
+
+## Support And Documentation
+
+- Product site: https://openada.us
+- MCP connection guide: https://openada.us/docs/mcp
+- API reference: https://openada.us/api-reference
+- Accessibility guidance: https://openada.us/docs
+- Source repository: https://github.com/techcto/openada
+- Issue tracking: https://github.com/techcto/openada/issues
