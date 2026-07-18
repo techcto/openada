@@ -265,7 +265,7 @@ service while keeping the public demo and private deployment on the same codebas
 
 ### Subscribe And Deploy On AWS
 
-[Subscribe to Private OpenADA on AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e) in the customer AWS account before launching the ECS stack. Choose a Region where the OpenADA Marketplace delivery is available and where you want the ECS services to run. The launch links open the CloudFormation console in `us-east-1` because the public templates are hosted there; switch to your target deployment Region before creating the stack when necessary. Keep the prefilled Marketplace image defaults. AWS Marketplace handles the subscription and billing relationship; OpenADA then deploys as three ECS services using the versioned UI, API, and scan-worker images.
+[Subscribe to Private OpenADA on AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e) in the customer AWS account before launching the ECS stack. Choose a Region where the OpenADA Marketplace delivery is available and where you want the ECS services to run. The launch links use the CloudFormation console's current Region and a global S3 URL for the public template. Select your target deployment Region before creating the stack. Keep the prefilled Marketplace image defaults. AWS Marketplace handles the subscription and billing relationship; OpenADA then deploys as three ECS services using the versioned UI, API, and scan-worker images.
 
 Choose a deployment path:
 
@@ -274,17 +274,17 @@ Choose a deployment path:
     <td width="50%">
       <strong>New ECS environment</strong><br />
       Creates the ECS cluster, ALB, Redis queue, services, and directory tables.<br /><br />
-      <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada.yaml&amp;stackName=openada"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch a new OpenADA ECS stack" /></a>
+      <a href="https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://openada-us.s3.amazonaws.com/cloudformation/openada.yaml&amp;stackName=openada"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch a new OpenADA ECS stack" /></a>
     </td>
     <td width="50%">
       <strong>Existing ECS environment</strong><br />
       Reuses an existing ECS cluster, ALB, VPC, subnets, and reachable Redis endpoint.<br /><br />
-      <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-existing.yaml&amp;stackName=openada-existing"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch OpenADA in an existing ECS environment" /></a>
+      <a href="https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://openada-us.s3.amazonaws.com/cloudformation/openada-existing.yaml&amp;stackName=openada-existing"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch OpenADA in an existing ECS environment" /></a>
     </td>
   </tr>
 </table>
 
-The CloudFormation launch form supplies the Marketplace image defaults for the latest published release. Provide the VPC, public and service subnets, Redis settings when using the existing-environment template, and an ACM certificate ARN from the target deployment Region when HTTPS is required. Service subnets need NAT access to pull the private ECR images and send logs unless public IP assignment is enabled. The public templates remain available at [`openada.yaml`](https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada.yaml) and [`openada-existing.yaml`](https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-existing.yaml).
+The CloudFormation launch form supplies the Marketplace image defaults for the latest published release. Provide the VPC, public and service subnets, Redis settings when using the existing-environment template, and an ACM certificate ARN from the target deployment Region when HTTPS is required. Service subnets need NAT access to pull the private ECR images and send logs unless public IP assignment is enabled. The public templates remain available at [`openada.yaml`](https://openada-us.s3.amazonaws.com/cloudformation/openada.yaml) and [`openada-existing.yaml`](https://openada-us.s3.amazonaws.com/cloudformation/openada-existing.yaml).
 
 ### OpenADA MCP AgentCore
 
@@ -292,7 +292,7 @@ The CloudFormation launch form supplies the Marketplace image defaults for the l
 
 Subscribe to [OpenADA MCP AgentCore on AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-2bjfvhksfwuwq) when you need the managed AgentCore Runtime front end. The AgentCore product has its own Marketplace identity and release workflow; configure its private Marketplace product identifier as the `MP_AWS_AGENTCORE_PRODUCT_ID` repository variable. It must not reuse the OpenADA Private ECS product identifier. Version tags build the AgentCore image, publish its CFT to `s3://openada-us/cloudformation/`, and submit its separate delivery-option changeset.
 
-<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-agentcore-runtime.yaml&amp;stackName=openada-agentcore"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch the OpenADA MCP AgentCore runtime stack" /></a>
+<a href="https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://openada-us.s3.amazonaws.com/cloudformation/openada-agentcore-runtime.yaml&amp;stackName=openada-agentcore"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch the OpenADA MCP AgentCore runtime stack" /></a>
 
 Use the separate [OpenADA Private Quickstart](devops/cloudformation/README.md) for the ECS product and the separate [OpenADA MCP AgentCore Quickstart](devops/agentcore/README.md) for the AgentCore product.
 

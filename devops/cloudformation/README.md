@@ -7,9 +7,9 @@ DynamoDB scan history.
 [Subscribe to OpenADA Private in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e)
 in the AWS account that will own the stack. Choose an AWS Region where the
 OpenADA Marketplace delivery is available and where you want the ECS services
-to run. The launch links open the CloudFormation console in `us-east-1` because
-the public templates are hosted there; switch the console to your target
-deployment Region before creating the stack when necessary.
+to run. The launch links use the CloudFormation console's current Region and a
+global S3 URL for the public template. Select your target deployment Region in
+the AWS console before creating the stack.
 
 ## Choose A Deployment
 
@@ -48,7 +48,7 @@ Provide the VPC and subnet values requested by the form. The template creates
 the ECS cluster, ALB, Redis queue, security groups, task roles, UI/API/worker
 services, and DynamoDB directory tables.
 
-<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada.yaml&amp;stackName=openada"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch a new OpenADA ECS environment" /></a>
+<a href="https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://openada-us.s3.amazonaws.com/cloudformation/openada.yaml&amp;stackName=openada"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch a new OpenADA ECS environment" /></a>
 
 Required network values include:
 
@@ -64,7 +64,7 @@ the stack and cover the hostname that will point to the ALB.
 Provide the existing environment values in the form. This template does not
 create or modify the existing ECS cluster, VPC, ALB, or Redis infrastructure.
 
-<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://openada-us.s3.us-east-1.amazonaws.com/cloudformation/openada-existing.yaml&amp;stackName=openada-existing"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch OpenADA in an existing ECS environment" /></a>
+<a href="https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://openada-us.s3.amazonaws.com/cloudformation/openada-existing.yaml&amp;stackName=openada-existing"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch OpenADA in an existing ECS environment" /></a>
 
 Required existing-environment values include:
 
