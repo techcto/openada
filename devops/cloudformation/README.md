@@ -5,8 +5,11 @@ service with a UI, API, asynchronous scan worker, Redis queue, and durable
 DynamoDB scan history.
 
 [Subscribe to OpenADA Private in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e)
-in the AWS account that will own the stack. Launch the CloudFormation stack in
-`us-east-1`, where the Marketplace delivery and public templates are published.
+in the AWS account that will own the stack. Choose an AWS Region where the
+OpenADA Marketplace delivery is available and where you want the ECS services
+to run. The launch links open the CloudFormation console in `us-east-1` because
+the public templates are hosted there; switch the console to your target
+deployment Region before creating the stack when necessary.
 
 ## Choose A Deployment
 
@@ -22,7 +25,9 @@ task roles, logs, and DynamoDB tables to that environment.
 
 - Subscribe to [OpenADA Private](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e)
   in the same AWS account that will run the stack.
-- Launch in `us-east-1`.
+- Choose a Marketplace-supported deployment Region and use it consistently for
+  the stack, ECS services, ALB, Redis, DynamoDB tables, logs, and ACM
+  certificate.
 - Use an AWS identity that can create the resources requested by the selected
   template, including ECS, IAM roles, EC2 security groups, Elastic Load
   Balancing, CloudWatch Logs, DynamoDB, and ElastiCache where applicable.
@@ -34,8 +39,8 @@ task roles, logs, and DynamoDB tables to that environment.
 - For an existing environment, have an ECS cluster, an ALB listener, an ALB
   security group, service subnets, and a Redis endpoint reachable from those
   subnets. Listener priorities `100`, `101`, and `102` must be unused.
-- For HTTPS, have an ACM certificate in `us-east-1` that covers the hostname
-  you will use.
+- For HTTPS, have an ACM certificate in the same Region as the ALB that covers
+  the hostname you will use.
 
 ## Launch A New ECS Environment
 
@@ -51,8 +56,8 @@ Required network values include:
 - at least two public subnets for the ALB
 - service subnets with NAT or equivalent outbound access
 
-Set `CertificateArn` for HTTPS. The certificate must be in `us-east-1` and
-cover the hostname that will point to the ALB.
+Set `CertificateArn` for HTTPS. The certificate must be in the same Region as
+the stack and cover the hostname that will point to the ALB.
 
 ## Add OpenADA To An Existing ECS Environment
 

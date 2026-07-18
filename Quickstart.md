@@ -30,7 +30,11 @@ OpenADA Private is the customer-deployed ECS product. Use the same AWS account
 for the Marketplace subscription and the CloudFormation launch.
 
 1. [Subscribe to OpenADA Private in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e).
-2. Stay in `us-east-1`, then choose the deployment that matches your account:
+2. Choose an AWS Region where the OpenADA Marketplace delivery is available,
+   then choose the deployment that matches your account. The launch links open
+   the CloudFormation console in `us-east-1` because the public templates are
+   hosted there; switch to your target deployment Region before creating the
+   stack when necessary:
 
 <table>
   <tr>
