@@ -93,6 +93,35 @@ endpoint and set `OPENADA_API_KEY` to the same value configured as the private
 stack's `ApiKeys` parameter. AgentCore handles IAM and SigV4 at the runtime
 boundary; the gateway does not need AWS access keys.
 
+### Test AgentCore Without A Chat UI
+
+In AWS, open **Amazon Bedrock AgentCore > Agents > Runtime**, select the
+runtime, choose `DEFAULT`, and select **Test**. The direct URL format is:
+
+```text
+https://<region>.console.aws.amazon.com/bedrock-agentcore/agents/<runtime-id>/test
+```
+
+Leave Session ID blank and paste these MCP JSON-RPC requests in order:
+
+```json
+{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"aws-console","version":"1.0.0"}}}
+```
+
+```json
+{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}
+```
+
+```json
+{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"openada_check_page","arguments":{"url":"https://openada.us/"}}}
+```
+
+The last request should return an ADA score, letter grade, and accessibility
+and language findings. For a site crawl, call `openada_scan_site`, save the
+returned job ID, and call `openada_get_scan_status` until the status is
+`completed` or `failed`. The full AgentCore walkthrough is in
+[`devops/agentcore/README.md`](devops/agentcore/README.md).
+
 ## API And MCP
 
 - [API reference](https://openada.us/api-reference)

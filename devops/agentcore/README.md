@@ -94,9 +94,15 @@ or another supported AgentCore client. The runtime exposes:
 ## Test Without A Chat UI
 
 The AWS console's generic AgentCore example uses a `prompt` field. OpenADA is
-an MCP server, so send JSON-RPC messages instead. In the AgentCore test
-console, choose the runtime and `DEFAULT` endpoint, leave Session ID empty,
-and run these requests in order.
+an MCP server, so send JSON-RPC messages instead. In AWS, open **Amazon
+Bedrock AgentCore > Agents > Runtime**, select the runtime, choose the
+`DEFAULT` endpoint, and select **Test**. The direct URL format is:
+
+```text
+https://<region>.console.aws.amazon.com/bedrock-agentcore/agents/<runtime-id>/test
+```
+
+Leave Session ID empty for the first request and run these requests in order.
 
 Initialize the MCP connection:
 
@@ -163,8 +169,8 @@ aws bedrock-agentcore invoke-agent-runtime \
 cat /tmp/openada-agentcore-initialize.txt
 ```
 
-Once initialization returns HTTP 200, repeat the command with this payload to
-discover tools:
+Once initialization returns HTTP 200, paste this payload into the same console
+input to discover tools:
 
 ```json
 {"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}

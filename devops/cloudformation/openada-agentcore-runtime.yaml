@@ -1,13 +1,8 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >
-  OpenADA MCP AgentCore -- Amazon Bedrock AgentCore Runtime stack.
-  Provisions an AgentCore Runtime pointed at the OpenADA MCP gateway container,
-  configured against a hosted or private OpenADA MCP endpoint. There is no native
-  CloudFormation resource type for AgentCore runtimes yet, so this stack uses
-  a Lambda-backed custom resource to call bedrock-agentcore-control directly
-  (same technique used by other AgentCore-provisioning stacks).
-  NAMING: The stack name is used as the base for the runtime name and IAM
-  role names. Use lowercase letters, numbers, and hyphens only.
+  OpenADA MCP on Amazon Bedrock AgentCore Runtime. Creates an AgentCore
+  runtime for the OpenADA container and connects it to a hosted or private
+  OpenADA MCP endpoint.
 
 Metadata:
   AWS::CloudFormation::Interface:
