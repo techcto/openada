@@ -76,6 +76,53 @@ MCP tools, creating the crawler and progress workflow, designing the archive
 experience, writing deployment infrastructure, debugging live behavior, and
 verifying the local and AWS paths.
 
+## How GPT-5.6 And Codex Accelerated The Work
+
+GPT-5.6 Luna in Codex was the primary engineering collaborator for this
+project, not just a source of copy or isolated code snippets. I used Codex to
+inspect the existing application shape, turn product ideas into small
+implementation steps, trace failures across the UI/API/worker boundary, and
+keep the public service, local Compose stack, CloudFormation templates, and
+Marketplace documentation aligned. The fast feedback loop was: describe a
+behavior, inspect the relevant code, implement the smallest complete change,
+run a focused test, exercise the live path, and revise from the observed
+result.
+
+The most important decisions made during that loop were:
+
+1. **Asynchronous crawling:** Codex helped identify that a site crawl could
+   not safely run inside one browser request. The final design separates job
+   creation, Redis/BullMQ delivery, worker progress, DynamoDB persistence, and
+   report rendering so the UI stays responsive while pages are checked.
+2. **A public archive instead of a one-time score:** We chose to store sites,
+   scans, pages, and findings so users can compare the same page across dates.
+   That decision turned an accessibility checker into a public improvement
+   record.
+3. **One service with multiple interfaces:** Codex helped implement the shared
+   checking core behind REST, OpenAPI, the browser UI, a public widget, and
+   stateless MCP tools. The same tools can be used by ChatGPT, Claude, Codex,
+   or Amazon Bedrock AgentCore rather than requiring a separate integration
+   for each client.
+4. **Public and private deployment paths:** We kept the free public service
+   simple for first-time users, while building a customer-owned ECS path and
+   an AgentCore path for private networking, API keys, IAM/SigV4, and AWS
+   operational controls. Codex carried those decisions through Docker,
+   CloudFormation, release workflows, and customer quickstarts.
+
+Codex also accelerated the less visible work that made the product runnable:
+API contract fixes, crawler limits and robots/sitemap handling, iframe fallback
+behavior, scan progress states, DynamoDB Local initialization, container health
+checks, ARM64/AMD64 release workflows, and production debugging. I still made
+the product and safety decisions: what the crawler is allowed to fetch, how
+destructive AI actions are excluded, how automated findings are described
+without claiming legal compliance, and which changes were accepted only after
+local or live verification.
+
+That combination is the core technical contribution of the project: GPT-5.6
+and Codex compressed the distance between an idea and a tested system, while
+the implementation remained grounded in explicit architecture, observable
+behavior, and human review.
+
 ## Challenges I Ran Into
 
 Accessibility cannot be completely automated. Some WCAG success criteria need
