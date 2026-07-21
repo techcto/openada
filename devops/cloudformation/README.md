@@ -1,15 +1,14 @@
 # OpenADA Private Quickstart
 
-Deploy OpenADA Private from AWS Marketplace as a complete web-accessibility
-service with a UI, API, asynchronous scan worker, Redis queue, and durable
-DynamoDB scan history.
+OpenADA Private is the prepared, upcoming customer-owned ECS deployment for a
+complete web-accessibility service with a UI, API, asynchronous scan worker,
+Redis queue, and durable DynamoDB scan history. Marketplace approval for this
+product is still pending.
 
-[Subscribe to OpenADA Private in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e?sr=0-1&ref_=ucaf&applicationId=AWSMPContessa)
-in the AWS account that will own the stack. Choose an AWS Region where the
-OpenADA Marketplace delivery is available and where you want the ECS services
-to run. The launch links use the CloudFormation console's current Region and a
-global S3 URL for the public template. Select your target deployment Region in
-the AWS console before creating the stack.
+Choose the AWS Region where you plan to run the ECS services. The launch links
+use the CloudFormation console's current Region and a global S3 URL for the
+public template. Select your target deployment Region in the AWS console before
+creating the stack.
 
 ## Choose A Deployment
 
@@ -23,9 +22,7 @@ task roles, logs, and DynamoDB tables to that environment.
 
 ## Before You Launch
 
-- Subscribe to [OpenADA Private](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e?sr=0-1&ref_=ucaf&applicationId=AWSMPContessa)
-  in the same AWS account that will run the stack.
-- Choose a Marketplace-supported deployment Region and use it consistently for
+- Choose a deployment Region and use it consistently for
   the stack, ECS services, ALB, Redis, DynamoDB tables, logs, and ACM
   certificate.
 - Use an AWS identity that can create the resources requested by the selected

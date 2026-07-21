@@ -40,8 +40,9 @@ integration.
    change it before creating the stack when necessary.
 3. Decide whether the runtime will connect to the hosted public service or a
    private OpenADA MCP endpoint.
-4. If using a private endpoint, subscribe to [OpenADA Private](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e?sr=0-1&ref_=ucaf&applicationId=AWSMPContessa)
-   and launch that ECS service first.
+4. If using a private endpoint, launch the prepared OpenADA Private ECS stack
+   first when that product becomes available. The public OpenADA endpoint is
+   ready to use today.
 5. Make sure the deployment identity can create the IAM roles, Lambda
    provisioner, CloudWatch log resources, and AgentCore runtime resources in
    the selected account.

@@ -24,14 +24,14 @@ docker compose up --build
 Open the UI at `http://localhost:3000` and the API at
 `http://localhost:3001/api/health`.
 
-## Deploy OpenADA Private
+## Prepare OpenADA Private
 
-OpenADA Private is the customer-deployed ECS product. Use the same AWS account
-for the Marketplace subscription and the CloudFormation launch.
+OpenADA Private is the planned customer-deployed ECS product. Its CloudFormation
+templates are prepared for a future Marketplace release; the currently live
+options are the public service/API and the approved AgentCore product.
 
-1. [Subscribe to OpenADA Private in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e?sr=0-1&ref_=ucaf&applicationId=AWSMPContessa).
-2. Choose an AWS Region where the OpenADA Marketplace delivery is available,
-   then choose the deployment that matches your account. The launch links use
+1. Choose an AWS Region where you plan to run the ECS deployment, then choose
+   the deployment that matches your account. The launch links use
    the CloudFormation console's current Region and a global S3 URL for the
    public template. Select your target deployment Region before creating the
    stack:

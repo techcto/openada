@@ -76,9 +76,10 @@ The project has two complementary deployment products:
 - **Public OpenADA:** a hosted, anonymous service for testing public pages,
   running bounded same-host scans, browsing dated reports, and trying the API or
   MCP tools without managing infrastructure.
-- **Private OpenADA:** an AWS Marketplace ECS deployment for organizations that
-  need their own UI, API, scan worker, Redis queue, DynamoDB archive, VPC, API
-  keys, allowed-host controls, and operational boundary.
+- **Private OpenADA:** an upcoming customer-owned ECS deployment for
+  organizations that need their own UI, API, scan worker, Redis queue,
+  DynamoDB archive, VPC, API keys, allowed-host controls, and operational
+  boundary.
 - **OpenADA MCP AgentCore:** a separate ARM64, stateless MCP gateway for Amazon
   Bedrock AgentCore Runtime. It connects an AI agent to either the hosted public
   service or a private OpenADA endpoint; AgentCore supplies the AWS IAM/SigV4
@@ -87,8 +88,8 @@ The project has two complementary deployment products:
 Choose the setup path that matches your test:
 
 - [Local Quickstart](Quickstart.md) for Docker Compose and the public demo.
-- [Private OpenADA Quickstart](devops/cloudformation/README.md) for the AWS
-  Marketplace ECS deployment.
+- [Private OpenADA Quickstart](devops/cloudformation/README.md) for the
+  upcoming customer-owned ECS deployment.
 - [OpenADA MCP AgentCore Quickstart](devops/agentcore/README.md) for the
   AgentCore Runtime deployment.
 
@@ -120,8 +121,9 @@ Codex helped accelerate four key decisions that shaped the product:
   the widget, and stateless MCP tools share the same service so ChatGPT,
   Claude, Codex, and AgentCore do not need separate implementations.
 - **Public and private operation:** the public service is easy to try, while
-  the Marketplace ECS stack and AgentCore runtime provide customer-owned
-  networking, authentication, IAM/SigV4, and operational controls.
+  the planned private ECS stack and approved AgentCore runtime provide
+  customer-owned networking, authentication, IAM/SigV4, and operational
+  controls.
 
 Codex also shortened the path through the less visible work: API contract
 fixes, crawl limits, robots and sitemap handling, iframe fallback behavior,
@@ -152,7 +154,9 @@ Most accessibility tools produce a private score and stop there. OpenADA combine
 - The API remains useful without the UI through `/api/v1/check`, `/api/v1/ada/check`, `/api/v2/check`, `/api/v1/scans`, and `/api/v1/directory`.
 - ChatGPT, Codex, and Claude can connect to the public `/mcp` endpoint using the documented client-specific setup paths.
 - The same MCP tools can point at a protected Private OpenADA endpoint through `OPENADA_API_KEY` or run behind the AgentCore IAM/SigV4 boundary.
-- Public OpenADA, Private OpenADA, and OpenADA MCP AgentCore are documented as separate deployment choices rather than one oversized installation.
+- Public OpenADA, planned Private OpenADA, and approved OpenADA MCP AgentCore
+  are documented as separate deployment choices rather than one oversized
+  installation.
 - The deployment can be reproduced from the repository with Docker, CloudFormation, and GitHub Actions.
 
 ## What It Does

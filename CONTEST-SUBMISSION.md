@@ -47,8 +47,9 @@ progress, or browse the public directory.
 
 For teams that need an AWS-native boundary, OpenADA has two deployment paths:
 
-- **Private OpenADA:** an AWS Marketplace ECS deployment with its own UI, API,
-  worker, Redis queue, DynamoDB archive, VPC, and API-key controls.
+- **Private OpenADA:** a prepared, upcoming customer-owned ECS deployment with
+  its own UI, API, worker, Redis queue, DynamoDB archive, VPC, and API-key
+  controls.
 - **OpenADA MCP AgentCore:** an approved AWS Marketplace product that places the
   MCP gateway in Amazon Bedrock AgentCore Runtime and connects it to the public
   service or a private OpenADA endpoint.
@@ -104,9 +105,9 @@ The most important decisions made during that loop were:
    or Amazon Bedrock AgentCore rather than requiring a separate integration
    for each client.
 4. **Public and private deployment paths:** We kept the free public service
-   simple for first-time users, while building a customer-owned ECS path and
-   an AgentCore path for private networking, API keys, IAM/SigV4, and AWS
-   operational controls. Codex carried those decisions through Docker,
+   simple for first-time users, while preparing a customer-owned ECS path and
+   an approved AgentCore path for private networking, API keys, IAM/SigV4, and
+   AWS operational controls. Codex carried those decisions through Docker,
    CloudFormation, release workflows, and customer quickstarts.
 
 Codex also accelerated the less visible work that made the product runnable:
@@ -152,7 +153,8 @@ browser, REST client, or AI agent.
   saving.
 - Exposed a real REST API, OpenAPI document, public widget, and MCP endpoint.
 - Verified custom MCP connections in ChatGPT Developer Mode and Claude.
-- Released a private ECS deployment path through AWS Marketplace.
+- Prepared the Private OpenADA ECS deployment path for a future Marketplace
+  release.
 - Released and received approval for the OpenADA MCP AgentCore Marketplace
   product: [subscribe in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-2bjfvhksfwuwq).
 - Made the complete local stack reproducible with one Compose command and an
@@ -174,9 +176,10 @@ explicit tool schemas, and durable scan jobs make those connections easier to
 reason about and safer to operate.
 
 Finally, I learned to separate public convenience from private control. A free
-public service can help teams start immediately, while an AWS Marketplace ECS
-deployment and an AgentCore runtime can provide customer-owned infrastructure,
-networking, authentication, and operational boundaries when needed.
+public service can help teams start immediately, while the planned Private
+OpenADA ECS deployment and approved AgentCore runtime can provide customer-owned
+infrastructure, networking, authentication, and operational boundaries when
+needed.
 
 ## What's Next for OpenADA
 
