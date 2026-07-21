@@ -85,14 +85,6 @@ The project has two complementary deployment products:
   service or a private OpenADA endpoint; AgentCore supplies the AWS IAM/SigV4
   runtime boundary while OpenADA performs the checks and scans.
 
-Choose the setup path that matches your test:
-
-- [Local Quickstart](Quickstart.md) for Docker Compose and the public demo.
-- [Private OpenADA Quickstart](devops/cloudformation/README.md) for the
-  upcoming customer-owned ECS deployment.
-- [OpenADA MCP AgentCore Quickstart](devops/agentcore/README.md) for the
-  AgentCore Runtime deployment.
-
 ## Judging Criteria
 
 ### Technological Implementation
