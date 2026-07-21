@@ -35,11 +35,11 @@ report with:
 
 The scan worker and Redis queue keep long crawls out of the web request. Scan
 jobs, pages, findings, and history are stored durably in DynamoDB. The public
-service is available at <a href="https://openada.us/" target="_blank" rel="noopener noreferrer">openada.us</a>, and the repository
+service is available at [openada.us](https://openada.us/), and the repository
 also runs locally with `docker compose up --build` using DynamoDB Local.
 
 OpenADA also exposes a stateless MCP endpoint at
-<a href="https://openada.us/mcp" target="_blank" rel="noopener noreferrer">https://openada.us/mcp</a>. We tested it as a custom MCP
+[https://openada.us/mcp](https://openada.us/mcp). We tested it as a custom MCP
 connection in both ChatGPT Developer Mode and Claude's **Add custom connector**
 flow. Codex CLI and other MCP clients can use the same endpoint. An AI client
 can ask OpenADA to check a public page, start a bounded site scan, read scan
@@ -107,7 +107,7 @@ browser, REST client, or AI agent.
 - Verified custom MCP connections in ChatGPT Developer Mode and Claude.
 - Released a private ECS deployment path through AWS Marketplace.
 - Released and received approval for the OpenADA MCP AgentCore Marketplace
-  product: <a href="https://aws.amazon.com/marketplace/pp/prodview-2bjfvhksfwuwq" target="_blank" rel="noopener noreferrer">subscribe in AWS Marketplace</a>.
+  product: [subscribe in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-2bjfvhksfwuwq).
 - Made the complete local stack reproducible with one Compose command and an
   automatically initialized local archive.
 - Published human-readable ADA guidance, MCP setup instructions, API examples,
@@ -151,10 +151,10 @@ path toward better, more accessible web services.
 
 ## Links
 
-- <a href="https://openada.us/" target="_blank" rel="noopener noreferrer">Live checker</a>
-- <a href="https://openada.us/directory" target="_blank" rel="noopener noreferrer">Public directory</a>
-- <a href="https://openada.us/api-reference" target="_blank" rel="noopener noreferrer">API reference</a>
-- <a href="https://openada.us/docs/mcp" target="_blank" rel="noopener noreferrer">MCP connection guide</a>
-- <a href="https://github.com/techcto/openada/blob/main/Quickstart.md" target="_blank" rel="noopener noreferrer">OpenADA Quickstart</a>
-- <a href="https://github.com/techcto/openada" target="_blank" rel="noopener noreferrer">Source repository</a>
-- <a href="https://openai.devpost.com/" target="_blank" rel="noopener noreferrer">OpenAI Build Week</a>
+- [Live checker](https://openada.us/)
+- [Public directory](https://openada.us/directory)
+- [API reference](https://openada.us/api-reference)
+- [MCP connection guide](https://openada.us/docs/mcp)
+- [OpenADA Quickstart](https://github.com/techcto/openada/blob/main/Quickstart.md)
+- [Source repository](https://github.com/techcto/openada)
+- [OpenAI Build Week](https://openai.devpost.com/)
