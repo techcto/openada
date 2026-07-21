@@ -2,11 +2,14 @@
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "PublicReadOpenADACloudFormationTemplates",
+      "Sid": "PublicReadOpenADAAssets",
       "Effect": "Allow",
       "Principal": "*",
       "Action": "s3:GetObject",
-      "Resource": "arn:aws:s3:::openada-us/cloudformation/*"
+      "Resource": [
+        "arn:aws:s3:::openada-us/cloudformation/*",
+        "arn:aws:s3:::openada-us/ada.sh"
+      ]
     }
   ]
 }

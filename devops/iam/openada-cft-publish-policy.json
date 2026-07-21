@@ -10,7 +10,8 @@
       ],
       "Resource": [
         "arn:aws:s3:::openada-us/cloudformation/*",
-        "arn:aws:s3:::openada-us/widgets/*"
+        "arn:aws:s3:::openada-us/widgets/*",
+        "arn:aws:s3:::openada-us/ada.sh"
       ]
     },
     {
