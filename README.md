@@ -305,20 +305,6 @@ ECS platform that is already operated by the customer.
 - Redis-backed scan queue and four on-demand DynamoDB tables for sites, pages, immutable scan records, and scan jobs
 - Optional ACM HTTPS listener
 
-Version tags publish rendered standalone and existing-cluster CFTs to
-`s3://openada-us/cloudformation/` with Marketplace image defaults for that
-release. The source templates use `{RELEASE_VERSION}` replacement tokens; local
-deployments can still override the image parameters. The template does not
-install Java LanguageTool, MySQL, or a local LanguageTool service. Redis is used
-only for asynchronous scan delivery; DynamoDB stores public directory metadata,
-page findings, immutable scan records, and durable job progress. OpenSearch
-remains an optional future search layer, not a requirement for the free service.
-
-The same release path builds the containers, publishes the CFT artifacts,
-submits the Marketplace delivery option, and records the versioned operational
-contract. That gives AWS customers a clear path from subscription to a running
-service while keeping the public demo and private deployment on the same codebase.
-
 ### OpenADA MCP AgentCore
 
 [OpenADA MCP AgentCore](devops/agentcore/README.md) is a separate Marketplace product for customers who want a serverless Amazon Bedrock AgentCore Runtime front end for a hosted or private OpenADA service. It uses the dedicated `openada-agentcore` ARM64 image and the [`openada-agentcore-runtime.yaml`](devops/cloudformation/openada-agentcore-runtime.yaml) template. Choose `PUBLIC` networking for an HTTPS OpenADA endpoint or `VPC` networking when AgentCore must reach an internal OpenADA ALB. AgentCore handles IAM/SigV4 at the runtime boundary; the gateway uses `OPENADA_API_KEY` only for the outbound request to the private OpenADA MCP endpoint.
