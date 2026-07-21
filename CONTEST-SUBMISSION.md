@@ -9,7 +9,7 @@ and small businesses often do not have the budget or staff for an enterprise
 accessibility platform.
 
 OpenADA was created to make the first step open and practical. Two days after
-the contest began, we received the contest email. On July 16, 2026, we bought
+the contest began, I received the contest email. On July 16, 2026, I bought
 the `OpenADA.us` domain through GoDaddy and started building a public-interest
 service with GPT-5.6 Luna and OpenAI Codex. The goal was simple: create useful,
 free accessibility infrastructure that can benefit many people.
@@ -35,11 +35,11 @@ report with:
 
 The scan worker and Redis queue keep long crawls out of the web request. Scan
 jobs, pages, findings, and history are stored durably in DynamoDB. The public
-service is available at [openada.us](https://openada.us/), and the repository
+service is available at <a href="https://openada.us/" target="_blank" rel="noopener noreferrer">openada.us</a>, and the repository
 also runs locally with `docker compose up --build` using DynamoDB Local.
 
 OpenADA also exposes a stateless MCP endpoint at
-[https://openada.us/mcp](https://openada.us/mcp). We tested it as a custom MCP
+<a href="https://openada.us/mcp" target="_blank" rel="noopener noreferrer">https://openada.us/mcp</a>. We tested it as a custom MCP
 connection in both ChatGPT Developer Mode and Claude's **Add custom connector**
 flow. Codex CLI and other MCP clients can use the same endpoint. An AI client
 can ask OpenADA to check a public page, start a bounded site scan, read scan
@@ -53,7 +53,7 @@ For teams that need an AWS-native boundary, OpenADA has two deployment paths:
   MCP gateway in Amazon Bedrock AgentCore Runtime and connects it to the public
   service or a private OpenADA endpoint.
 
-## How We Built It
+## How I Built It
 
 OpenADA combines established accessibility tooling, browser automation, an
 asynchronous scan architecture, and open integration protocols into one
@@ -76,7 +76,7 @@ MCP tools, creating the crawler and progress workflow, designing the archive
 experience, writing deployment infrastructure, debugging live behavior, and
 verifying the local and AWS paths.
 
-## Challenges We Ran Into
+## Challenges I Ran Into
 
 Accessibility cannot be completely automated. Some WCAG success criteria need
 human judgment, content understanding, visual context, keyboard testing, or
@@ -95,7 +95,7 @@ job creation, queue delivery, progress updates, page checks, durable storage,
 and final reporting. That architecture makes the same workflow useful from a
 browser, REST client, or AI agent.
 
-## Accomplishments We Are Proud Of
+## Accomplishments I Am Proud Of
 
 - Built and deployed a working public accessibility and language-quality service
   during the contest.
@@ -107,26 +107,26 @@ browser, REST client, or AI agent.
 - Verified custom MCP connections in ChatGPT Developer Mode and Claude.
 - Released a private ECS deployment path through AWS Marketplace.
 - Released and received approval for the OpenADA MCP AgentCore Marketplace
-  product: [subscribe in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-2bjfvhksfwuwq).
+  product: <a href="https://aws.amazon.com/marketplace/pp/prodview-2bjfvhksfwuwq" target="_blank" rel="noopener noreferrer">subscribe in AWS Marketplace</a>.
 - Made the complete local stack reproducible with one Compose command and an
   automatically initialized local archive.
 - Published human-readable ADA guidance, MCP setup instructions, API examples,
   and customer deployment quickstarts.
 
-## What We Learned
+## What I Learned
 
-We learned that the most useful accessibility product is not necessarily the
+I learned that the most useful accessibility product is not necessarily the
 one with the largest report. It is the one that helps a team decide what to do
 next, keeps work from disappearing between scans, and makes progress visible to
 the people responsible for a public website.
 
-We also learned that interoperability matters. A stable MCP endpoint lets the
+I also learned that interoperability matters. A stable MCP endpoint lets the
 same OpenADA tools work in ChatGPT, Claude, Codex, and AWS AgentCore without
 building a separate integration for each client. Stateless protocol handling,
 explicit tool schemas, and durable scan jobs make those connections easier to
 reason about and safer to operate.
 
-Finally, we learned to separate public convenience from private control. A free
+Finally, I learned to separate public convenience from private control. A free
 public service can help teams start immediately, while an AWS Marketplace ECS
 deployment and an AgentCore runtime can provide customer-owned infrastructure,
 networking, authentication, and operational boundaries when needed.
@@ -151,13 +151,10 @@ path toward better, more accessible web services.
 
 ## Links
 
-- [Live checker](https://openada.us/)
-- [Public directory](https://openada.us/directory)
-- [API reference](https://openada.us/api-reference)
-- [MCP connection guide](https://openada.us/docs/mcp)
-- [Command-line demo](ada.sh)
-- [Downloadable CLI demo](https://openada-us.s3.amazonaws.com/ada.sh)
-- [OpenADA Quickstart](Quickstart.md)
-- [Contest demo recording script](CONTEST-DEMO-SCRIPT.md)
-- [Source repository](https://github.com/techcto/openada)
-- [OpenAI Build Week](https://openai.devpost.com/)
+- <a href="https://openada.us/" target="_blank" rel="noopener noreferrer">Live checker</a>
+- <a href="https://openada.us/directory" target="_blank" rel="noopener noreferrer">Public directory</a>
+- <a href="https://openada.us/api-reference" target="_blank" rel="noopener noreferrer">API reference</a>
+- <a href="https://openada.us/docs/mcp" target="_blank" rel="noopener noreferrer">MCP connection guide</a>
+- <a href="https://github.com/techcto/openada/blob/main/Quickstart.md" target="_blank" rel="noopener noreferrer">OpenADA Quickstart</a>
+- <a href="https://github.com/techcto/openada" target="_blank" rel="noopener noreferrer">Source repository</a>
+- <a href="https://openai.devpost.com/" target="_blank" rel="noopener noreferrer">OpenAI Build Week</a>
