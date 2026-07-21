@@ -4,7 +4,7 @@ Connect Amazon Bedrock AgentCore Runtime to OpenADA's accessibility,
 language-quality, public-scan, and improvement-history tools through a
 stateless Model Context Protocol server.
 
-[Subscribe to OpenADA MCP AgentCore in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-2bjfvhksfwuwq)
+[Subscribe to OpenADA MCP AgentCore in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-2bjfvhksfwuwq?sr=0-1&ref_=ucaf&applicationId=AWSMPContessa)
 in the AWS account where you will run the service. The public launch template
 is hosted in the product's S3 distribution bucket; choose an AWS Region where
 Amazon Bedrock AgentCore Runtime is available and where the OpenADA endpoint
@@ -34,13 +34,13 @@ integration.
 
 ## Before You Launch
 
-1. Subscribe to [OpenADA MCP AgentCore in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-2bjfvhksfwuwq).
+1. Subscribe to [OpenADA MCP AgentCore in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-2bjfvhksfwuwq?sr=0-1&ref_=ucaf&applicationId=AWSMPContessa).
 2. Choose the AWS Region where you want the AgentCore runtime and OpenADA
    connection to run. The CloudFormation console opens in its current Region;
    change it before creating the stack when necessary.
 3. Decide whether the runtime will connect to the hosted public service or a
    private OpenADA MCP endpoint.
-4. If using a private endpoint, subscribe to [OpenADA Private](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e)
+4. If using a private endpoint, subscribe to [OpenADA Private](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e?sr=0-1&ref_=ucaf&applicationId=AWSMPContessa)
    and launch that ECS service first.
 5. Make sure the deployment identity can create the IAM roles, Lambda
    provisioner, CloudWatch log resources, and AgentCore runtime resources in
@@ -65,7 +65,7 @@ OpenADA ECS service, Redis queue, or DynamoDB archive.
 
 ## Connecting To OpenADA Private
 
-When launching [OpenADA Private](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e),
+When launching [OpenADA Private](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e?sr=0-1&ref_=ucaf&applicationId=AWSMPContessa),
 set its `ApiKeys` parameter to a long random value. Use the same value as
 `OpenAdaApiKey` in this stack. OpenADA accepts that value as either:
 
@@ -108,13 +108,8 @@ https://<region>.console.aws.amazon.com/bedrock-agentcore/agents/<runtime-id>/te
 
 Leave Session ID empty for the first request and run these requests in order.
 
-For the current OpenADA smoke-test runtime, the direct AWS console test page is:
 
-<https://us-east-1.console.aws.amazon.com/bedrock-agentcore/agents/openada_agentcore_test-J7KdSNCs5r/test>
-
-Use the runtime created in your own account for a customer deployment; this
-link is provided so an AWS Marketplace reviewer can follow the exact console
-workflow without searching for the test runtime.
+Use the runtime created in your own account for a customer deployment.
 
 Initialize the MCP connection:
 

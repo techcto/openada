@@ -13,15 +13,13 @@
 [![Open in GitHub](https://img.shields.io/badge/Open%20in-GitHub-181717?logo=github)](https://github.com/techcto/openada)
 [![100% built with GPT-5.6 Luna](https://img.shields.io/badge/100%25%20built%20with-GPT--5.6%20Luna-10b981?logo=openai&logoColor=white)](https://openai.devpost.com/)
 
-This is a brand-new project built 100% for [OpenAI Build Week](https://openai.devpost.com/), the OpenAI Codex challenge. GPT-5.6 is here, and Codex is now available in ChatGPT; this project explores what is possible when a coding agent helps turn a public-interest idea into a complete, deployed service. Submissions are due Tuesday, July 21 at 5:00 PM PT. The [contest submission narrative](CONTEST-SUBMISSION.md) is the concise version for review.
+OpenADA is a hosted accessibility and language-quality service for the web. It gives web developers, agencies, public entities, and site owners one stable API for WCAG audits and LanguageTool-compatible spelling and grammar checks, then turns public site scans into a transparent, date-based archive anyone can browse.
 
-**Final submission status:** OpenADA's custom MCP connection was tested successfully in both ChatGPT Developer Mode and Claude's custom connector flow. The OpenAI app submission is currently under review, and the AWS AgentCore product is approved and available through [AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-2bjfvhksfwuwq). The [contest demo recording script](CONTEST-DEMO-SCRIPT.md) captures the working product path without exposing credentials.
+This is a brand-new project built 100% for [OpenAI Build Week](https://openai.devpost.com/), the OpenAI Codex challenge. GPT-5.6 is here, and Codex is now available in ChatGPT; this project explores what is possible when a coding agent helps turn a public-interest idea into a complete, deployed service.
 
 ## Why We Built OpenADA
 
-Two days after the contest began, we received the contest email. On July 16,
-2026, we purchased the OpenADA.us domain through GoDaddy and started building
-with a simple goal: do something good for the world and give back by creating
+We started building with a simple goal: do something good for the world and give back by creating
 free accessibility infrastructure that can benefit many people, powered by
 OpenAI Codex.
 
@@ -31,9 +29,7 @@ that people and AI agents could query, compare, and improve over time. The
 contest gave us the spark, and working with GPT-5.6 Luna in Codex helped turn
 that unexpected idea into a deployed, turnkey platform.
 
-Start with the [OpenADA Quickstart](Quickstart.md) for local testing, AWS Marketplace deployment, and AgentCore setup. Review the [contest demo recording script](CONTEST-DEMO-SCRIPT.md) for the final walkthrough.
-
-OpenADA is a hosted accessibility and language-quality service for the web. It gives web developers, agencies, public entities, and site owners one stable API for WCAG audits and LanguageTool-compatible spelling and grammar checks, then turns public site scans into a transparent, date-based archive anyone can browse.
+Start with the [OpenADA Quickstart](Quickstart.md) for local testing
 
 ## The Problem
 
@@ -286,7 +282,7 @@ service while keeping the public demo and private deployment on the same codebas
 
 ### Subscribe And Deploy On AWS
 
-[Subscribe to Private OpenADA on AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e) in the customer AWS account before launching the ECS stack. Choose a Region where the OpenADA Marketplace delivery is available and where you want the ECS services to run. The launch links use the CloudFormation console's current Region and a global S3 URL for the public template. Select your target deployment Region before creating the stack. Keep the prefilled Marketplace image defaults. AWS Marketplace handles the subscription and billing relationship; OpenADA then deploys as three ECS services using the versioned UI, API, and scan-worker images.
+Subscribe to Private OpenADA on AWS Marketplace in the customer AWS account before launching the ECS stack. Choose a Region where the OpenADA Marketplace delivery is available and where you want the ECS services to run. The launch links use the CloudFormation console's current Region and a global S3 URL for the public template. Select your target deployment Region before creating the stack. Keep the prefilled Marketplace image defaults. AWS Marketplace handles the subscription and billing relationship; OpenADA then deploys as three ECS services using the versioned UI, API, and scan-worker images.
 
 Choose a deployment path:
 
@@ -311,7 +307,7 @@ The CloudFormation launch form supplies the Marketplace image defaults for the l
 
 [OpenADA MCP AgentCore](devops/agentcore/README.md) is a separate Marketplace product for customers who want a serverless Amazon Bedrock AgentCore Runtime front end for a hosted or private OpenADA service. It uses the dedicated `openada-agentcore` ARM64 image and the [`openada-agentcore-runtime.yaml`](devops/cloudformation/openada-agentcore-runtime.yaml) template. Choose `PUBLIC` networking for an HTTPS OpenADA endpoint or `VPC` networking when AgentCore must reach an internal OpenADA ALB. AgentCore handles IAM/SigV4 at the runtime boundary; the gateway uses `OPENADA_API_KEY` only for the outbound request to the private OpenADA MCP endpoint.
 
-Subscribe to [OpenADA MCP AgentCore on AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-2bjfvhksfwuwq) when you need the managed AgentCore Runtime front end. The AgentCore product has its own Marketplace identity and release workflow; configure its private Marketplace product identifier as the `MP_AWS_AGENTCORE_PRODUCT_ID` repository variable. It must not reuse the OpenADA Private ECS product identifier. Version tags build the AgentCore image, publish its CFT to `s3://openada-us/cloudformation/`, and submit its separate delivery-option changeset.
+Subscribe to [OpenADA MCP AgentCore on AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-2bjfvhksfwuwq?sr=0-1&ref_=ucaf&applicationId=AWSMPContessa) when you need the managed AgentCore Runtime front end. The AgentCore product has its own Marketplace identity and release workflow; configure its private Marketplace product identifier as the `MP_AWS_AGENTCORE_PRODUCT_ID` repository variable. It must not reuse the OpenADA Private ECS product identifier. Version tags build the AgentCore image, publish its CFT to `s3://openada-us/cloudformation/`, and submit its separate delivery-option changeset.
 
 <a href="https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://openada-us.s3.amazonaws.com/cloudformation/openada-agentcore-runtime.yaml&amp;stackName=openada-agentcore"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch the OpenADA MCP AgentCore runtime stack" /></a>
 

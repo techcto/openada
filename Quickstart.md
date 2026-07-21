@@ -29,7 +29,7 @@ Open the UI at `http://localhost:3000` and the API at
 OpenADA Private is the customer-deployed ECS product. Use the same AWS account
 for the Marketplace subscription and the CloudFormation launch.
 
-1. [Subscribe to OpenADA Private in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e).
+1. [Subscribe to OpenADA Private in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-uggjdlrhsme2e?sr=0-1&ref_=ucaf&applicationId=AWSMPContessa).
 2. Choose an AWS Region where the OpenADA Marketplace delivery is available,
    then choose the deployment that matches your account. The launch links use
    the CloudFormation console's current Region and a global S3 URL for the
@@ -72,7 +72,7 @@ Balancer. Private deployments can require API keys and restrict crawl hosts.
 
 ## Connect AgentCore
 
-[Subscribe to OpenADA MCP AgentCore in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-2bjfvhksfwuwq), then use the
+[Subscribe to OpenADA MCP AgentCore in AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-2bjfvhksfwuwq?sr=0-1&ref_=ucaf&applicationId=AWSMPContessa), then use the
 [OpenADA MCP AgentCore Quickstart](devops/agentcore/README.md).
 
 <a href="https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://openada-us.s3.amazonaws.com/cloudformation/openada-agentcore-runtime.yaml&amp;stackName=openada-agentcore"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch the OpenADA MCP AgentCore runtime stack" /></a>
