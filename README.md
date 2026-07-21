@@ -13,7 +13,7 @@
 [![Open in GitHub](https://img.shields.io/badge/Open%20in-GitHub-181717?logo=github)](https://github.com/techcto/openada)
 [![100% built with GPT-5.6 Luna](https://img.shields.io/badge/100%25%20built%20with-GPT--5.6%20Luna-10b981?logo=openai&logoColor=white)](https://openai.devpost.com/)
 
-This is a brand-new project built 100% for [OpenAI Build Week](https://openai.devpost.com/), the OpenAI Codex challenge. GPT-5.6 is here, and Codex is now available in ChatGPT; this project explores what is possible when a coding agent helps turn a public-interest idea into a complete, deployed service. Submissions are due Tuesday, July 21 at 5:00 PM PT.
+This is a brand-new project built 100% for [OpenAI Build Week](https://openai.devpost.com/), the OpenAI Codex challenge. GPT-5.6 is here, and Codex is now available in ChatGPT; this project explores what is possible when a coding agent helps turn a public-interest idea into a complete, deployed service. Submissions are due Tuesday, July 21 at 5:00 PM PT. The [contest submission narrative](CONTEST-SUBMISSION.md) is the concise version for review.
 
 **Final submission status:** OpenADA's custom MCP connection was tested successfully in both ChatGPT Developer Mode and Claude's custom connector flow. The OpenAI app submission is currently under review, and the AWS AgentCore product is approved and available through [AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-2bjfvhksfwuwq). The [contest demo recording script](CONTEST-DEMO-SCRIPT.md) captures the working product path without exposing credentials.
 
