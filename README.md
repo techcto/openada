@@ -29,9 +29,6 @@ that people and AI agents could query, compare, and improve over time. The
 contest gave us the spark, and working with GPT-5.6 Luna in Codex helped turn
 that unexpected idea into a deployed, turnkey platform.
 
-Start with the [OpenADA Quickstart](Quickstart.md) for local testing, AWS
-Marketplace deployment, and AgentCore setup.
-
 ## The Problem
 
 The Department of Justice's April 20, 2026 interim final rule extended the Title II compliance date to April 26, 2027 for covered public entities with populations of 50,000 or more, and to April 26, 2028 for smaller public entities and special district governments. The extension acknowledges the practical burden; it does not make accessible public services optional. Read the [Federal Register rule](https://www.federalregister.gov/documents/2026/04/20/2026-07663/extension-of-compliance-dates-for-nondiscrimination-on-the-basis-of-disability-accessibility-of-web).
@@ -87,9 +84,13 @@ The project has two complementary deployment products:
   service or a private OpenADA endpoint; AgentCore supplies the AWS IAM/SigV4
   runtime boundary while OpenADA performs the checks and scans.
 
-The [root Quickstart](Quickstart.md), [Private OpenADA Quickstart](devops/cloudformation/README.md),
-and [AgentCore Quickstart](devops/agentcore/README.md) explain which path to
-choose and how to launch it.
+Choose the setup path that matches your test:
+
+- [Local Quickstart](Quickstart.md) for Docker Compose and the public demo.
+- [Private OpenADA Quickstart](devops/cloudformation/README.md) for the AWS
+  Marketplace ECS deployment.
+- [OpenADA MCP AgentCore Quickstart](devops/agentcore/README.md) for the
+  AgentCore Runtime deployment.
 
 ## Judging Criteria
 
@@ -313,29 +314,6 @@ The same release path builds the containers, publishes the CFT artifacts,
 submits the Marketplace delivery option, and records the versioned operational
 contract. That gives AWS customers a clear path from subscription to a running
 service while keeping the public demo and private deployment on the same codebase.
-
-### Subscribe And Deploy On AWS
-
-Subscribe to Private OpenADA on AWS Marketplace in the customer AWS account before launching the ECS stack. Choose a Region where the OpenADA Marketplace delivery is available and where you want the ECS services to run. The launch links use the CloudFormation console's current Region and a global S3 URL for the public template. Select your target deployment Region before creating the stack. Keep the prefilled Marketplace image defaults. AWS Marketplace handles the subscription and billing relationship; OpenADA then deploys as three ECS services using the versioned UI, API, and scan-worker images.
-
-Choose a deployment path:
-
-<table>
-  <tr>
-    <td width="50%">
-      <strong>New ECS environment</strong><br />
-      Creates the ECS cluster, ALB, Redis queue, services, and directory tables.<br /><br />
-      <a href="https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://openada-us.s3.amazonaws.com/cloudformation/openada.yaml&amp;stackName=openada"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch a new OpenADA ECS stack" /></a>
-    </td>
-    <td width="50%">
-      <strong>Existing ECS environment</strong><br />
-      Reuses an existing ECS cluster, ALB, VPC, subnets, and reachable Redis endpoint.<br /><br />
-      <a href="https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://openada-us.s3.amazonaws.com/cloudformation/openada-existing.yaml&amp;stackName=openada-existing"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" alt="Launch OpenADA in an existing ECS environment" /></a>
-    </td>
-  </tr>
-</table>
-
-The CloudFormation launch form supplies the Marketplace image defaults for the latest published release. Provide the VPC, public and service subnets, Redis settings when using the existing-environment template, and an ACM certificate ARN from the target deployment Region when HTTPS is required. Service subnets need NAT access to pull the private ECR images and send logs unless public IP assignment is enabled. The public templates remain available at [`openada.yaml`](https://openada-us.s3.amazonaws.com/cloudformation/openada.yaml) and [`openada-existing.yaml`](https://openada-us.s3.amazonaws.com/cloudformation/openada-existing.yaml).
 
 ### OpenADA MCP AgentCore
 
