@@ -1,6 +1,6 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocumentClient, GetCommand, PutCommand, ScanCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb'
 import { randomUUID } from 'node:crypto'
+import { createDynamoDocumentClient } from '@lib/openada/dynamodb'
 
 export type ScanInput = {
   url: string
@@ -77,9 +77,7 @@ function siteDisplayName(hostname: string): string {
   return label.replace(/[-_]+/g, ' ').replace(/\b\w/g, (character) => character.toUpperCase())
 }
 
-const client = DynamoDBDocumentClient.from(new DynamoDBClient({}), {
-  marshallOptions: { removeUndefinedValues: true },
-})
+const client: DynamoDBDocumentClient = createDynamoDocumentClient()
 
 function table(name: string): string {
   const value = String(process.env[name] || '').trim()

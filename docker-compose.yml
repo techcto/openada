@@ -40,10 +40,14 @@ services:
       NODE_ENV: development
       OPENADA_CORS_ORIGINS: ${OPENADA_CORS_ORIGINS:-http://localhost:3000}
       OPENADA_API_KEYS: ${OPENADA_API_KEYS:-}
-      OPENADA_SCAN_JOBS_TABLE: ${OPENADA_SCAN_JOBS_TABLE:-}
-      OPENADA_SITES_TABLE: ${OPENADA_SITES_TABLE:-}
-      OPENADA_PAGES_TABLE: ${OPENADA_PAGES_TABLE:-}
-      OPENADA_SCANS_TABLE: ${OPENADA_SCANS_TABLE:-}
+      OPENADA_DYNAMODB_ENDPOINT: http://dynamodb:8000
+      OPENADA_SCAN_JOBS_TABLE: ${OPENADA_SCAN_JOBS_TABLE:-openada-local-scan-jobs}
+      OPENADA_SITES_TABLE: ${OPENADA_SITES_TABLE:-openada-local-sites}
+      OPENADA_PAGES_TABLE: ${OPENADA_PAGES_TABLE:-openada-local-pages}
+      OPENADA_SCANS_TABLE: ${OPENADA_SCANS_TABLE:-openada-local-scans}
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: local
+      AWS_SECRET_ACCESS_KEY: local
       OPENADA_REDIS_HOST: redis
       OPENADA_REDIS_PORT: 6379
       OPENADA_REDIS_TLS: 'false'
@@ -53,6 +57,7 @@ services:
     volumes:
       - ./api/lib:/app/lib
       - ./api/pages:/app/pages
+    command: ["sh", "-c", "node /app/scripts/init-local-dynamodb.mjs && npm run dev"]
     ports:
       - '${API_PORT:-3001}:3001'
     healthcheck:
@@ -64,6 +69,8 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      dynamodb:
+        condition: service_started
 
   redis:
     image: redis:7-alpine
@@ -76,6 +83,14 @@ services:
       timeout: 3s
       retries: 10
 
+  dynamodb:
+    image: amazon/dynamodb-local:2.6.1
+    command: ["-jar", "DynamoDBLocal.jar", "-sharedDb", "-dbPath", "/home/dynamodblocal"]
+    volumes:
+      - openada-dynamodb:/home/dynamodblocal
+    ports:
+      - '${DYNAMODB_PORT:-8000}:8000'
+
   worker:
     init: true
     build:
@@ -87,10 +102,14 @@ services:
       OPENADA_REDIS_PORT: 6379
       OPENADA_REDIS_TLS: 'false'
       OPENADA_SCAN_WORKER_CONCURRENCY: ${OPENADA_SCAN_WORKER_CONCURRENCY:-1}
-      OPENADA_SITES_TABLE: ${OPENADA_SITES_TABLE:-}
-      OPENADA_PAGES_TABLE: ${OPENADA_PAGES_TABLE:-}
-      OPENADA_SCANS_TABLE: ${OPENADA_SCANS_TABLE:-}
-      OPENADA_SCAN_JOBS_TABLE: ${OPENADA_SCAN_JOBS_TABLE:-}
+      OPENADA_DYNAMODB_ENDPOINT: http://dynamodb:8000
+      OPENADA_SITES_TABLE: ${OPENADA_SITES_TABLE:-openada-local-sites}
+      OPENADA_PAGES_TABLE: ${OPENADA_PAGES_TABLE:-openada-local-pages}
+      OPENADA_SCANS_TABLE: ${OPENADA_SCANS_TABLE:-openada-local-scans}
+      OPENADA_SCAN_JOBS_TABLE: ${OPENADA_SCAN_JOBS_TABLE:-openada-local-scan-jobs}
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: local
+      AWS_SECRET_ACCESS_KEY: local
       LANGUAGETOOL_UPSTREAM_URL: ${LANGUAGETOOL_UPSTREAM_URL:-}
     volumes:
       - ./api/lib:/app/lib
@@ -98,6 +117,9 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      dynamodb:
+        condition: service_started
 
 volumes:
   openada-redis:
+  openada-dynamodb:

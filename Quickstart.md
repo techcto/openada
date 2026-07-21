@@ -81,6 +81,11 @@ Use [OpenADA Private Quickstart](devops/cloudformation/README.md) for the ECS
 service, or [OpenADA MCP AgentCore Quickstart](devops/agentcore/README.md) for
 the stateless AI-agent gateway.
 
+The public MCP endpoint has also been verified as a custom connection in
+ChatGPT Developer Mode and Claude's **Add custom connector** flow. Use
+`https://openada.us/mcp` and follow the client-specific steps in the
+[MCP connection guide](https://openada.us/docs/mcp).
+
 Configure:
 
 ```text

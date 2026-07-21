@@ -15,6 +15,8 @@
 
 This is a brand-new project built 100% for [OpenAI Build Week](https://openai.devpost.com/), the OpenAI Codex challenge. GPT-5.6 is here, and Codex is now available in ChatGPT; this project explores what is possible when a coding agent helps turn a public-interest idea into a complete, deployed service. Submissions are due Tuesday, July 21 at 5:00 PM PT.
 
+**Final submission status:** OpenADA's custom MCP connection was tested successfully in both ChatGPT Developer Mode and Claude's custom connector flow. The OpenAI app submission is currently under review, and the AWS AgentCore product is approved and available through [AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-2bjfvhksfwuwq). The [contest demo recording script](CONTEST-DEMO-SCRIPT.md) captures the working product path without exposing credentials.
+
 ## Why We Built OpenADA
 
 Two days after the contest began, we received the contest email. On July 16,
@@ -29,7 +31,7 @@ that people and AI agents could query, compare, and improve over time. The
 contest gave us the spark, and working with GPT-5.6 Luna in Codex helped turn
 that unexpected idea into a deployed, turnkey platform.
 
-Start with the [OpenADA Quickstart](Quickstart.md) for local testing, AWS Marketplace deployment, and AgentCore setup.
+Start with the [OpenADA Quickstart](Quickstart.md) for local testing, AWS Marketplace deployment, and AgentCore setup. Review the [contest demo recording script](CONTEST-DEMO-SCRIPT.md) for the final walkthrough.
 
 OpenADA is a hosted accessibility and language-quality service for the web. It gives web developers, agencies, public entities, and site owners one stable API for WCAG audits and LanguageTool-compatible spelling and grammar checks, then turns public site scans into a transparent, date-based archive anyone can browse.
 
@@ -162,10 +164,10 @@ agent without rebuilding the core application.
 Install Docker Desktop, then run the full local stack from the repository root:
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
-Docker Compose builds the UI, API, worker, Redis, and LanguageTool-compatible services. Stop the stack with `docker-compose down`.
+Docker Compose builds the UI, API, asynchronous worker, Redis queue, and DynamoDB Local archive. The local archive tables are created automatically, so a local AWS account and `OPENADA_*_TABLE` values are not required. The hosted LanguageTool-compatible upstream remains optional; set `LANGUAGETOOL_UPSTREAM_URL` only when you want language checks backed by a managed service. Stop the stack with `docker compose down`.
 
 For an automated local container smoke test, run `./cmd.sh compose-test`. It builds the application containers, waits for the API health check, verifies the UI, sends a combined ADA/language request, and tears the stack down afterward.
 

@@ -1,7 +1,7 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocumentClient, GetCommand, PutCommand, ScanCommand } from '@aws-sdk/lib-dynamodb'
 import { randomUUID } from 'node:crypto'
 import { hostnamesMatch } from '@lib/openada/host'
+import { createDynamoDocumentClient } from '@lib/openada/dynamodb'
 
 // Durable scan state lives in DynamoDB so the UI can reconnect after a task restart.
 export type ScanJobStatus = 'pending' | 'running' | 'completed' | 'failed'
@@ -26,9 +26,7 @@ export type ScanJob = {
   completedAt?: string
 }
 
-const client = DynamoDBDocumentClient.from(new DynamoDBClient({}), {
-  marshallOptions: { removeUndefinedValues: true },
-})
+const client: DynamoDBDocumentClient = createDynamoDocumentClient()
 
 function table(): string {
   const value = String(process.env.OPENADA_SCAN_JOBS_TABLE || '').trim()

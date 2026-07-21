@@ -10,6 +10,7 @@ COPY api/tsconfig.json ./tsconfig.json
 COPY api/next.config.js ./next.config.js
 COPY api/next-env.d.ts ./next-env.d.ts
 COPY api/lib/openada/*.ts ./lib/openada/
+COPY api/scripts/init-local-dynamodb.mjs ./scripts/init-local-dynamodb.mjs
 COPY api/pages/api/health.openada.ts ./pages/api/
 COPY api/pages/api/mcp.openada.ts ./pages/api/
 COPY api/pages/api/openai-apps-challenge.openada.ts ./pages/api/
@@ -39,6 +40,7 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/next.config.js ./next.config.js
 COPY --from=base /usr/local/bin/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY --from=base /app/scripts/init-local-dynamodb.mjs ./scripts/init-local-dynamodb.mjs
 
 EXPOSE 3001
 CMD ["/usr/local/bin/docker-entrypoint.sh", "prod"]
