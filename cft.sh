@@ -102,6 +102,11 @@ publish() {
   aws s3 cp "$ROOT_DIR/devops/cloudformation/README.md" \
     "s3://${CFT_BUCKET}/cloudformation/README.md" \
     --region "$AWS_REGION" --no-progress
+  aws s3 cp "$ROOT_DIR/ada.sh" \
+    "s3://${CFT_BUCKET}/ada.sh" \
+    --content-type text/plain \
+    --cache-control 'public,max-age=300' \
+    --region "$AWS_REGION" --no-progress
   aws s3 cp "$ROOT_DIR/devops/widget/openada-widget.js" \
     "s3://${CFT_BUCKET}/widgets/openada-widget.js" \
     --content-type application/javascript \

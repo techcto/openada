@@ -155,6 +155,8 @@ path toward better, more accessible web services.
 - [Public directory](https://openada.us/directory)
 - [API reference](https://openada.us/api-reference)
 - [MCP connection guide](https://openada.us/docs/mcp)
+- [Command-line demo](ada.sh)
+- [Downloadable CLI demo](https://openada-us.s3.amazonaws.com/ada.sh)
 - [OpenADA Quickstart](Quickstart.md)
 - [Contest demo recording script](CONTEST-DEMO-SCRIPT.md)
 - [Source repository](https://github.com/techcto/openada)

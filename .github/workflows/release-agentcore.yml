@@ -94,6 +94,9 @@ jobs:
           aws s3 cp "$rendered" \
             "s3://$OPENADA_CFT_BUCKET/cloudformation/openada-agentcore-runtime-${RELEASE_VERSION}.yaml" \
             --content-type text/yaml --cache-control no-cache --region "$AWS_REGION" --no-progress
+          aws s3 cp ada.sh \
+            "s3://$OPENADA_CFT_BUCKET/ada.sh" \
+            --content-type text/plain --cache-control no-cache --region "$AWS_REGION" --no-progress
 
       - name: Submit AgentCore Marketplace changeset
         env:

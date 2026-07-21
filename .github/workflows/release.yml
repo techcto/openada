@@ -138,6 +138,9 @@ jobs:
           aws s3 cp devops/cloudformation/README.md \
             "s3://$OPENADA_CFT_BUCKET/cloudformation/README.md" \
             --content-type text/markdown --cache-control no-cache --region "$AWS_REGION" --no-progress
+          aws s3 cp ada.sh \
+            "s3://$OPENADA_CFT_BUCKET/ada.sh" \
+            --content-type text/plain --cache-control no-cache --region "$AWS_REGION" --no-progress
 
       - name: Submit AWS Marketplace changeset
         env:

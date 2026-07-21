@@ -171,6 +171,25 @@ Docker Compose builds the UI, API, asynchronous worker, Redis queue, and DynamoD
 
 For an automated local container smoke test, run `./cmd.sh compose-test`. It builds the application containers, waits for the API health check, verifies the UI, sends a combined ADA/language request, and tears the stack down afterward.
 
+For a terminal demonstration against the hosted public service, run:
+
+```bash
+./ada.sh
+./ada.sh scan https://example.com 5
+```
+
+The script requires `curl` and Node.js, checks health, runs the combined API,
+discovers MCP tools, performs one MCP page check, and optionally queues a scan
+and polls its progress. Set
+`OPENADA_URL` for a private deployment and `OPENADA_API_KEY` when that
+deployment requires authentication.
+
+Opt in to the hosted command-line demo with one line:
+
+```bash
+curl -fsSL https://openada-us.s3.amazonaws.com/ada.sh -o ada.sh && chmod +x ada.sh && ./ada.sh
+```
+
 Open `http://localhost:3000`. The API health check is `http://localhost:3001/api/health`.
 The human-readable ADA guide is available at `http://localhost:3000/docs`.
 The public scan directory is available at `http://localhost:3000/directory`, and the API reference is at `http://localhost:3000/api-reference`. The homepage starts site crawls at five pages by default; the selector supports 25, 50, and 100 pages.
