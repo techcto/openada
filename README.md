@@ -29,7 +29,8 @@ that people and AI agents could query, compare, and improve over time. The
 contest gave us the spark, and working with GPT-5.6 Luna in Codex helped turn
 that unexpected idea into a deployed, turnkey platform.
 
-Start with the [OpenADA Quickstart](Quickstart.md) for local testing
+Start with the [OpenADA Quickstart](Quickstart.md) for local testing, AWS
+Marketplace deployment, and AgentCore setup.
 
 ## The Problem
 
@@ -95,6 +96,39 @@ choose and how to launch it.
 ### Technological Implementation
 
 OpenADA is a real, deployed service rather than a static demo. Codex was used as an engineering collaborator across the full loop: shaping the API and MCP tools, building the crawler and durable scan workflow, iterating on the UI, writing CloudFormation and container workflows, debugging production behavior, and verifying the live AWS deployment. The result is a working Next.js UI, API service, asynchronous scan worker, Redis-backed queue, DynamoDB archive, public widget, OpenAPI document, stateless AgentCore gateway, and GitHub Actions Marketplace release path.
+
+#### How GPT-5.6 And Codex Accelerated The Workflow
+
+GPT-5.6 Luna in Codex was used as an active engineering collaborator, not just
+for writing copy or generating isolated snippets. I used Codex to inspect the
+application, turn product ideas into implementation steps, trace failures
+across the UI/API/worker boundary, update related infrastructure and docs, and
+run focused checks after each change. The working loop was: describe the
+behavior, inspect the relevant code, implement the smallest complete change,
+test locally or against the live path, observe the result, and iterate.
+
+Codex helped accelerate four key decisions that shaped the product:
+
+- **Asynchronous crawling:** site scans became queued jobs with Redis/BullMQ,
+  worker progress, DynamoDB persistence, and a report route instead of one
+  blocking browser request.
+- **A dated public archive:** sites, scans, pages, and findings are retained so
+  users can compare the same page over time instead of receiving one disposable
+  score.
+- **One checking core, multiple interfaces:** REST, OpenAPI, the browser UI,
+  the widget, and stateless MCP tools share the same service so ChatGPT,
+  Claude, Codex, and AgentCore do not need separate implementations.
+- **Public and private operation:** the public service is easy to try, while
+  the Marketplace ECS stack and AgentCore runtime provide customer-owned
+  networking, authentication, IAM/SigV4, and operational controls.
+
+Codex also shortened the path through the less visible work: API contract
+fixes, crawl limits, robots and sitemap handling, iframe fallback behavior,
+scan progress states, DynamoDB Local initialization, container health checks,
+ARM64/AMD64 release workflows, and production debugging. I made the product
+and safety decisions, including crawl boundaries, non-destructive AI behavior,
+the distinction between automated guidance and legal compliance, and which
+changes were accepted only after verification.
 
 ### Design
 
@@ -318,3 +352,7 @@ Use the separate [OpenADA Private Quickstart](devops/cloudformation/README.md) f
 OpenADA is intentionally focused: it contains only the UI, API, scan worker, deployment, documentation, and public widget needed to make the service real. It does not carry unrelated application modules or a local LanguageTool runtime.
 
 See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for the open-source notices for axe-core, LanguageTool, and Playwright.
+
+## License
+
+OpenADA is released under the [MIT License](LICENSE).
