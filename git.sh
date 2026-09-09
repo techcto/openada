@@ -31,14 +31,18 @@ status() {
 }
 
 audit() {
-  local files matches
-  files="$({
-    git -C "$ROOT_DIR" status --porcelain --untracked-files=all | sed -n 's/^?? //p'
-    git -C "$ROOT_DIR" ls-files
-  } | sort -u | grep -v '^git.sh$' || true)"
+  local file result status matches=''
+  local pattern='AKIA[0-9A-Z]{16}|ASIA[0-9A-Z]{16}|sk-[A-Za-z0-9]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----'
 
-  matches="$(printf '%s\n' "$files" | xargs -r rg -n -i \
-    'osirus|appstudio|app studio|AKIA[0-9A-Z]{16}|ASIA[0-9A-Z]{16}|sk-[A-Za-z0-9]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----' || true)"
+  while IFS= read -r -d '' file; do
+    [[ "$file" == 'git.sh' || ! -f "$ROOT_DIR/$file" ]] && continue
+    if result="$(grep -IEni -- "$pattern" "$ROOT_DIR/$file")"; then
+      matches+="${result}"$'\n'
+    else
+      status=$?
+      [[ "$status" == 1 ]] || die "Audit could not read $file."
+    fi
+  done < <(git -C "$ROOT_DIR" ls-files --cached --others --exclude-standard -z)
 
   if [[ -n "$matches" ]]; then
     printf '%s\n' "$matches"
@@ -54,8 +58,14 @@ tag() {
   version="${version#v}"
   [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]] ||
     die "Version must look like 1.2.3, 1.2.3-rc.1, or 1.2.3.beta."
-  git -C "$ROOT_DIR" diff --quiet && git -C "$ROOT_DIR" diff --cached --quiet ||
-    die "Commit tracked changes before tagging."
+  [[ -z "$(git -C "$ROOT_DIR" status --porcelain)" ]] ||
+    die "Commit or remove all working-tree changes before tagging."
+  local branch
+  branch="$(git -C "$ROOT_DIR" branch --show-current)"
+  [[ -n "$branch" ]] || die "Tagging from detached HEAD is not allowed."
+  git -C "$ROOT_DIR" fetch "$REMOTE" "$branch" --quiet
+  [[ "$(git -C "$ROOT_DIR" rev-parse HEAD)" == "$(git -C "$ROOT_DIR" rev-parse "$REMOTE/$branch")" ]] ||
+    die "Push $branch and ensure it matches $REMOTE/$branch before tagging."
   git -C "$ROOT_DIR" rev-parse --verify --quiet "refs/tags/v${version}" >/dev/null &&
     die "Tag v${version} already exists."
   audit
