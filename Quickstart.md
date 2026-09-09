@@ -75,7 +75,7 @@ and post-launch checks.
 
 The standalone product includes the UI, API, asynchronous scan worker, Redis
 queue, DynamoDB directory archive, CloudWatch logs, and an Application Load
-Balancer. It also runs LanguageTool as a private Fargate service by default.
+Balancer. It also runs LanguageTool as private API and worker sidecars by default.
 Private deployments can require API keys and restrict crawl hosts.
 
 ## Connect AgentCore

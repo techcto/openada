@@ -65,7 +65,6 @@ offline_test() {
   for required in \
     'AWS::ECS::TaskDefinition' \
     'AWS::ECS::Service' \
-    'AWS::ServiceDiscovery::PrivateDnsNamespace' \
     'AWS::ElasticLoadBalancingV2::ListenerRule' \
     'Cluster' \
     'ListenerArn' \

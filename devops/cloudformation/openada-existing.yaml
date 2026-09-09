@@ -112,11 +112,11 @@ Parameters:
   LanguageToolUpstreamUrl:
     Type: String
     Default: ''
-    Description: Optional external LanguageTool base URL. When empty, the stack creates its own private LanguageTool service.
+    Description: Optional external LanguageTool base URL. When empty, LanguageTool runs as a task-local API and worker sidecar.
   LanguageToolImage:
     Type: String
     Default: 'techcto/languagetool:latest'
-    Description: Public LanguageTool image used by the private Fargate service.
+    Description: Public LanguageTool image used by the task-local sidecars.
   CorsAllowedOrigins:
     Type: String
     Default: '*'
@@ -192,37 +192,6 @@ Resources:
       FromPort: 3001
       ToPort: 3001
       SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
-
-  LanguageToolIngressFromServices:
-    Type: AWS::EC2::SecurityGroupIngress
-    Condition: UseBundledLanguageTool
-    Properties:
-      GroupId: !Ref ServiceSecurityGroup
-      IpProtocol: tcp
-      FromPort: 8010
-      ToPort: 8010
-      SourceSecurityGroupId: !Ref ServiceSecurityGroup
-
-  ServiceDiscoveryNamespace:
-    Type: AWS::ServiceDiscovery::PrivateDnsNamespace
-    Condition: UseBundledLanguageTool
-    Properties:
-      Name: !Sub '${EnvironmentName}.local'
-      Vpc: !Ref VpcId
-
-  LanguageToolDiscoveryService:
-    Type: AWS::ServiceDiscovery::Service
-    Condition: UseBundledLanguageTool
-    Properties:
-      Name: languagetool
-      NamespaceId: !Ref ServiceDiscoveryNamespace
-      DnsConfig:
-        DnsRecords:
-          - Type: A
-            TTL: 10
-        RoutingPolicy: MULTIVALUE
-      HealthCheckCustomConfig:
-        FailureThreshold: 1
 
   ExecutionRole:
     Type: AWS::IAM::Role
@@ -391,8 +360,8 @@ Resources:
     Type: AWS::ECS::TaskDefinition
     Properties:
       Family: !Sub '${EnvironmentName}-api'
-      Cpu: '512'
-      Memory: '1024'
+      Cpu: !If [UseBundledLanguageTool, '1024', '512']
+      Memory: !If [UseBundledLanguageTool, '3072', '1024']
       NetworkMode: awsvpc
       RequiresCompatibilities: [FARGATE]
       ExecutionRoleArn: !GetAtt ExecutionRole.Arn
@@ -401,6 +370,11 @@ Resources:
         - Name: api
           Image: !Ref ApiImage
           Essential: true
+          DependsOn: !If
+            - UseBundledLanguageTool
+            - - ContainerName: languagetool
+                Condition: HEALTHY
+            - !Ref AWS::NoValue
           PortMappings:
             - ContainerPort: 3001
               Protocol: tcp
@@ -418,7 +392,7 @@ Resources:
             - Name: LANGUAGETOOL_UPSTREAM_URL
               Value: !If
                 - UseBundledLanguageTool
-                - !Sub 'http://languagetool.${EnvironmentName}.local:8010'
+                - 'http://127.0.0.1:8010'
                 - !Ref LanguageToolUpstreamUrl
             - Name: OPENADA_SITES_TABLE
               Value: !Ref SitesTable
@@ -446,6 +420,29 @@ Resources:
               awslogs-group: !Ref ApiLogGroup
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: api
+        - !If
+          - UseBundledLanguageTool
+          - Name: languagetool
+            Image: !Ref LanguageToolImage
+            Essential: true
+            Environment:
+              - Name: Java_Xms
+                Value: 256m
+              - Name: Java_Xmx
+                Value: 1g
+            HealthCheck:
+              Command: [CMD-SHELL, 'curl --fail --data "language=en-US&text=healthcheck" http://127.0.0.1:8010/v2/check || exit 1']
+              Interval: 30
+              Timeout: 10
+              Retries: 3
+              StartPeriod: 60
+            LogConfiguration:
+              LogDriver: awslogs
+              Options:
+                awslogs-group: !Ref ApiLogGroup
+                awslogs-region: !Ref AWS::Region
+                awslogs-stream-prefix: languagetool
+          - !Ref AWS::NoValue
 
   UiService:
     Type: AWS::ECS::Service
@@ -495,8 +492,8 @@ Resources:
     Type: AWS::ECS::TaskDefinition
     Properties:
       Family: !Sub '${EnvironmentName}-worker'
-      Cpu: '512'
-      Memory: '1024'
+      Cpu: !If [UseBundledLanguageTool, '1024', '512']
+      Memory: !If [UseBundledLanguageTool, '3072', '1024']
       NetworkMode: awsvpc
       RequiresCompatibilities: [FARGATE]
       ExecutionRoleArn: !GetAtt ExecutionRole.Arn
@@ -505,6 +502,11 @@ Resources:
         - Name: worker
           Image: !Ref WorkerImage
           Essential: true
+          DependsOn: !If
+            - UseBundledLanguageTool
+            - - ContainerName: languagetool
+                Condition: HEALTHY
+            - !Ref AWS::NoValue
           Environment:
             - Name: NODE_ENV
               Value: production
@@ -519,7 +521,7 @@ Resources:
             - Name: LANGUAGETOOL_UPSTREAM_URL
               Value: !If
                 - UseBundledLanguageTool
-                - !Sub 'http://languagetool.${EnvironmentName}.local:8010'
+                - 'http://127.0.0.1:8010'
                 - !Ref LanguageToolUpstreamUrl
             - Name: OPENADA_REDIS_HOST
               Value: !Ref RedisHost
@@ -537,6 +539,29 @@ Resources:
               awslogs-group: !Ref WorkerLogGroup
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: worker
+        - !If
+          - UseBundledLanguageTool
+          - Name: languagetool
+            Image: !Ref LanguageToolImage
+            Essential: true
+            Environment:
+              - Name: Java_Xms
+                Value: 256m
+              - Name: Java_Xmx
+                Value: 1g
+            HealthCheck:
+              Command: [CMD-SHELL, 'curl --fail --data "language=en-US&text=healthcheck" http://127.0.0.1:8010/v2/check || exit 1']
+              Interval: 30
+              Timeout: 10
+              Retries: 3
+              StartPeriod: 60
+            LogConfiguration:
+              LogDriver: awslogs
+              Options:
+                awslogs-group: !Ref WorkerLogGroup
+                awslogs-region: !Ref AWS::Region
+                awslogs-stream-prefix: languagetool
+          - !Ref AWS::NoValue
 
   WorkerService:
     Type: AWS::ECS::Service
@@ -547,65 +572,6 @@ Resources:
       TaskDefinition: !Ref WorkerTaskDefinition
       DesiredCount: !Ref DesiredCount
       LaunchType: FARGATE
-      NetworkConfiguration:
-        AwsvpcConfiguration:
-          AssignPublicIp: !Ref AssignPublicIp
-          SecurityGroups: [!Ref ServiceSecurityGroup]
-          Subnets: !Ref ServiceSubnets
-
-  LanguageToolLogGroup:
-    Type: AWS::Logs::LogGroup
-    Condition: UseBundledLanguageTool
-    Properties:
-      LogGroupName: !Sub '/ecs/${EnvironmentName}/languagetool'
-      RetentionInDays: 30
-
-  LanguageToolTaskDefinition:
-    Type: AWS::ECS::TaskDefinition
-    Condition: UseBundledLanguageTool
-    Properties:
-      Family: !Sub '${EnvironmentName}-languagetool'
-      Cpu: '1024'
-      Memory: '2048'
-      NetworkMode: awsvpc
-      RequiresCompatibilities: [FARGATE]
-      ExecutionRoleArn: !GetAtt ExecutionRole.Arn
-      ContainerDefinitions:
-        - Name: languagetool
-          Image: !Ref LanguageToolImage
-          Essential: true
-          PortMappings:
-            - ContainerPort: 8010
-              Protocol: tcp
-          Environment:
-            - Name: Java_Xms
-              Value: 256m
-            - Name: Java_Xmx
-              Value: 1g
-          HealthCheck:
-            Command: [CMD-SHELL, 'curl --fail --data "language=en-US&text=healthcheck" http://127.0.0.1:8010/v2/check || exit 1']
-            Interval: 30
-            Timeout: 10
-            Retries: 3
-            StartPeriod: 60
-          LogConfiguration:
-            LogDriver: awslogs
-            Options:
-              awslogs-group: !Ref LanguageToolLogGroup
-              awslogs-region: !Ref AWS::Region
-              awslogs-stream-prefix: languagetool
-
-  LanguageToolService:
-    Type: AWS::ECS::Service
-    Condition: UseBundledLanguageTool
-    Properties:
-      ServiceName: !Sub '${EnvironmentName}-languagetool'
-      Cluster: !Ref Cluster
-      TaskDefinition: !Ref LanguageToolTaskDefinition
-      DesiredCount: 1
-      LaunchType: FARGATE
-      ServiceRegistries:
-        - RegistryArn: !GetAtt LanguageToolDiscoveryService.Arn
       NetworkConfiguration:
         AwsvpcConfiguration:
           AssignPublicIp: !Ref AssignPublicIp
@@ -668,9 +634,3 @@ Outputs:
     Value: !Ref UiService
   ApiServiceName:
     Value: !Ref ApiService
-  LanguageToolEndpoint:
-    Description: Internal LanguageTool endpoint, or the configured external override.
-    Value: !If
-      - UseBundledLanguageTool
-      - !Sub 'http://languagetool.${EnvironmentName}.local:8010'
-      - !Ref LanguageToolUpstreamUrl

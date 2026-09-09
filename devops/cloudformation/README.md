@@ -119,20 +119,20 @@ The API returns quickly when a site scan is submitted. The worker crawls
 bounded same-host pages through Redis, records progress and failures, runs the
 accessibility and language checks, and saves the completed report in DynamoDB.
 
-By default, both templates create one private LanguageTool Fargate task and a
-Cloud Map endpoint at `http://languagetool.<environment>.local:8010`. Port 8010
-is available only between OpenADA tasks in the service security group; it is
-not attached to the public load balancer. Set `LanguageToolImage` to pin a
-different published image. Set `LanguageToolUpstreamUrl` only when using an
-external provider; doing so skips the bundled task and service-discovery
-resources.
+By default, both templates run LanguageTool as a task-local sidecar in the API
+and worker task definitions. Each OpenADA container connects to its sidecar at
+`http://127.0.0.1:8010`; the port is never exposed through the task security
+group or public load balancer. ECS waits for the sidecar health check before
+starting the API or worker. Set `LanguageToolImage` to choose a different
+published image. Set `LanguageToolUpstreamUrl` only when using an external
+provider; doing so omits the sidecars and retains the smaller task sizes.
 
 ## What OpenADA Provides
 
 - A web UI for page checks and bounded website scans.
 - A combined REST API for accessibility and language-quality checks.
 - LanguageTool-compatible language checking.
-- A private LanguageTool Fargate service with internal service discovery.
+- Task-local LanguageTool sidecars for the API and scan worker.
 - axe-core accessibility findings.
 - An asynchronous crawler with progress updates.
 - A public directory of sites, scans, pages, scores, and findings.

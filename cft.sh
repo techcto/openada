@@ -65,7 +65,6 @@ offline_test() {
     'AWS::ECS::Cluster' \
     'AWS::ECS::TaskDefinition' \
     'AWS::ECS::Service' \
-    'AWS::ServiceDiscovery::PrivateDnsNamespace' \
     'AWS::ElasticLoadBalancingV2::LoadBalancer' \
     'AWS::ElasticLoadBalancingV2::Listener' \
     'UiImage' \
