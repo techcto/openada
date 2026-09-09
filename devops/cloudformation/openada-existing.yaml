@@ -28,6 +28,7 @@ Metadata:
           - ScanAllowedHosts
           - CorsAllowedOrigins
           - LanguageToolUpstreamUrl
+          - LanguageToolImage
           - RedisHost
           - RedisPort
           - RedisPassword
@@ -51,6 +52,8 @@ Metadata:
         default: Marketplace API image (leave unchanged)
       WorkerImage:
         default: Marketplace worker image (leave unchanged)
+      LanguageToolImage:
+        default: LanguageTool image
 
 Parameters:
   EnvironmentName:
@@ -109,7 +112,11 @@ Parameters:
   LanguageToolUpstreamUrl:
     Type: String
     Default: ''
-    Description: Optional managed LanguageTool-compatible upstream URL.
+    Description: Optional external LanguageTool base URL. When empty, the stack creates its own private LanguageTool service.
+  LanguageToolImage:
+    Type: String
+    Default: 'techcto/languagetool:6.8.0'
+    Description: Public LanguageTool image used by the private Fargate service.
   CorsAllowedOrigins:
     Type: String
     Default: '*'
@@ -155,6 +162,9 @@ Parameters:
     MaxValue: 49999
     Description: Priority for the OpenAI Apps challenge host and path rule.
 
+Conditions:
+  UseBundledLanguageTool: !Equals [!Ref LanguageToolUpstreamUrl, '']
+
 Resources:
   ServiceSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -182,6 +192,37 @@ Resources:
       FromPort: 3001
       ToPort: 3001
       SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
+
+  LanguageToolIngressFromServices:
+    Type: AWS::EC2::SecurityGroupIngress
+    Condition: UseBundledLanguageTool
+    Properties:
+      GroupId: !Ref ServiceSecurityGroup
+      IpProtocol: tcp
+      FromPort: 8010
+      ToPort: 8010
+      SourceSecurityGroupId: !Ref ServiceSecurityGroup
+
+  ServiceDiscoveryNamespace:
+    Type: AWS::ServiceDiscovery::PrivateDnsNamespace
+    Condition: UseBundledLanguageTool
+    Properties:
+      Name: !Sub '${EnvironmentName}.local'
+      Vpc: !Ref VpcId
+
+  LanguageToolDiscoveryService:
+    Type: AWS::ServiceDiscovery::Service
+    Condition: UseBundledLanguageTool
+    Properties:
+      Name: languagetool
+      NamespaceId: !Ref ServiceDiscoveryNamespace
+      DnsConfig:
+        DnsRecords:
+          - Type: A
+            TTL: 10
+        RoutingPolicy: MULTIVALUE
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
 
   ExecutionRole:
     Type: AWS::IAM::Role
@@ -375,7 +416,10 @@ Resources:
             - Name: OPENADA_CORS_ORIGINS
               Value: !Ref CorsAllowedOrigins
             - Name: LANGUAGETOOL_UPSTREAM_URL
-              Value: !Ref LanguageToolUpstreamUrl
+              Value: !If
+                - UseBundledLanguageTool
+                - !Sub 'http://languagetool.${EnvironmentName}.local:8010'
+                - !Ref LanguageToolUpstreamUrl
             - Name: OPENADA_SITES_TABLE
               Value: !Ref SitesTable
             - Name: OPENADA_PAGES_TABLE
@@ -473,7 +517,10 @@ Resources:
             - Name: OPENADA_SCANS_TABLE
               Value: !Ref ScansTable
             - Name: LANGUAGETOOL_UPSTREAM_URL
-              Value: !Ref LanguageToolUpstreamUrl
+              Value: !If
+                - UseBundledLanguageTool
+                - !Sub 'http://languagetool.${EnvironmentName}.local:8010'
+                - !Ref LanguageToolUpstreamUrl
             - Name: OPENADA_REDIS_HOST
               Value: !Ref RedisHost
             - Name: OPENADA_REDIS_PORT
@@ -500,6 +547,65 @@ Resources:
       TaskDefinition: !Ref WorkerTaskDefinition
       DesiredCount: !Ref DesiredCount
       LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: !Ref AssignPublicIp
+          SecurityGroups: [!Ref ServiceSecurityGroup]
+          Subnets: !Ref ServiceSubnets
+
+  LanguageToolLogGroup:
+    Type: AWS::Logs::LogGroup
+    Condition: UseBundledLanguageTool
+    Properties:
+      LogGroupName: !Sub '/ecs/${EnvironmentName}/languagetool'
+      RetentionInDays: 30
+
+  LanguageToolTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Condition: UseBundledLanguageTool
+    Properties:
+      Family: !Sub '${EnvironmentName}-languagetool'
+      Cpu: '1024'
+      Memory: '2048'
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      ExecutionRoleArn: !GetAtt ExecutionRole.Arn
+      ContainerDefinitions:
+        - Name: languagetool
+          Image: !Ref LanguageToolImage
+          Essential: true
+          PortMappings:
+            - ContainerPort: 8010
+              Protocol: tcp
+          Environment:
+            - Name: Java_Xms
+              Value: 256m
+            - Name: Java_Xmx
+              Value: 1g
+          HealthCheck:
+            Command: [CMD-SHELL, 'curl --fail --data "language=en-US&text=healthcheck" http://127.0.0.1:8010/v2/check || exit 1']
+            Interval: 30
+            Timeout: 10
+            Retries: 3
+            StartPeriod: 60
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref LanguageToolLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: languagetool
+
+  LanguageToolService:
+    Type: AWS::ECS::Service
+    Condition: UseBundledLanguageTool
+    Properties:
+      ServiceName: !Sub '${EnvironmentName}-languagetool'
+      Cluster: !Ref Cluster
+      TaskDefinition: !Ref LanguageToolTaskDefinition
+      DesiredCount: 1
+      LaunchType: FARGATE
+      ServiceRegistries:
+        - RegistryArn: !GetAtt LanguageToolDiscoveryService.Arn
       NetworkConfiguration:
         AwsvpcConfiguration:
           AssignPublicIp: !Ref AssignPublicIp
@@ -562,3 +668,9 @@ Outputs:
     Value: !Ref UiService
   ApiServiceName:
     Value: !Ref ApiService
+  LanguageToolEndpoint:
+    Description: Internal LanguageTool endpoint, or the configured external override.
+    Value: !If
+      - UseBundledLanguageTool
+      - !Sub 'http://languagetool.${EnvironmentName}.local:8010'
+      - !Ref LanguageToolUpstreamUrl

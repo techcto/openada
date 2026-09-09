@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEMPLATE="${OPENADA_EXISTING_CFT_TEMPLATE:-$ROOT_DIR/devops/cloudformation/openada-existing.yaml}"
 STACK_NAME="${OPENADA_EXISTING_STACK_NAME:-openada-existing-addon}"
 AWS_REGION="${AWS_REGION:-us-east-1}"
+AWS_PROFILE="${AWS_PROFILE:-}"
 
 usage() {
   cat <<'EOF'
@@ -29,9 +30,10 @@ Required deployment values:
 
 Optional values:
   OPENADA_DESIRED_COUNT
+  OPENADA_LANGUAGETOOL_IMAGE      LanguageTool image (default: techcto/languagetool:6.8.0)
   OPENADA_ASSIGN_PUBLIC_IP        ENABLED or DISABLED
   OPENADA_API_KEYS
-  LANGUAGETOOL_UPSTREAM_URL
+  LANGUAGETOOL_UPSTREAM_URL       Optional external override; skips the private Fargate service
   OPENADA_CORS_ORIGINS
   OPENADA_PUBLIC_SCANS_ENABLED
   OPENADA_SCAN_ALLOWED_HOSTS
@@ -41,12 +43,19 @@ Optional values:
   OPENADA_REDIS_PORT              Existing Redis port (default: 6379)
   OPENADA_REDIS_PASSWORD          Optional Redis password
   OPENADA_REDIS_TLS               true or false (default: false)
+  AWS_PROFILE                     Optional AWS CLI profile
 EOF
 }
 
 die() {
   printf 'Error: %s\n' "$*" >&2
   exit 1
+}
+
+aws_cli() {
+  local command=(aws)
+  [[ -n "$AWS_PROFILE" ]] && command+=(--profile "$AWS_PROFILE")
+  "${command[@]}" "$@"
 }
 
 offline_test() {
@@ -56,13 +65,15 @@ offline_test() {
   for required in \
     'AWS::ECS::TaskDefinition' \
     'AWS::ECS::Service' \
+    'AWS::ServiceDiscovery::PrivateDnsNamespace' \
     'AWS::ElasticLoadBalancingV2::ListenerRule' \
     'Cluster' \
     'ListenerArn' \
     'HostHeader' \
     'UiImage' \
     'ApiImage' \
-    'WorkerImage'; do
+    'WorkerImage' \
+    'LanguageToolImage'; do
     rg -q "$required" "$TEMPLATE" || die "Template check failed: missing $required"
   done
 
@@ -77,7 +88,7 @@ offline_test() {
 
 validate() {
   offline_test
-  aws cloudformation validate-template \
+  aws_cli cloudformation validate-template \
     --template-body "file://$TEMPLATE" \
     --region "$AWS_REGION"
 }
@@ -115,6 +126,7 @@ deploy() {
   )
 
   [[ -n "${OPENADA_DESIRED_COUNT:-}" ]] && parameters+=("DesiredCount=$OPENADA_DESIRED_COUNT")
+  [[ -n "${OPENADA_LANGUAGETOOL_IMAGE:-}" ]] && parameters+=("LanguageToolImage=$OPENADA_LANGUAGETOOL_IMAGE")
   [[ -n "${OPENADA_ASSIGN_PUBLIC_IP:-}" ]] && parameters+=("AssignPublicIp=$OPENADA_ASSIGN_PUBLIC_IP")
   [[ -n "${OPENADA_API_KEYS:-}" ]] && parameters+=("ApiKeys=$OPENADA_API_KEYS")
   [[ -n "${LANGUAGETOOL_UPSTREAM_URL:-}" ]] && parameters+=("LanguageToolUpstreamUrl=$LANGUAGETOOL_UPSTREAM_URL")
@@ -128,7 +140,7 @@ deploy() {
   [[ -n "${OPENADA_REDIS_PASSWORD:-}" ]] && parameters+=("RedisPassword=$OPENADA_REDIS_PASSWORD")
   [[ -n "${OPENADA_REDIS_TLS:-}" ]] && parameters+=("RedisTls=$OPENADA_REDIS_TLS")
 
-  aws cloudformation deploy \
+  aws_cli cloudformation deploy \
     --template-file "$TEMPLATE" \
     --stack-name "$STACK_NAME" \
     --region "$AWS_REGION" \
@@ -142,8 +154,8 @@ case "${1:-test}" in
   publish) publish ;;
   validate) validate ;;
   deploy) deploy ;;
-  events) aws cloudformation describe-stack-events --stack-name "$STACK_NAME" --region "$AWS_REGION" ;;
-  outputs) aws cloudformation describe-stacks --stack-name "$STACK_NAME" --region "$AWS_REGION" --query 'Stacks[0].Outputs' ;;
+  events) aws_cli cloudformation describe-stack-events --stack-name "$STACK_NAME" --region "$AWS_REGION" ;;
+  outputs) aws_cli cloudformation describe-stacks --stack-name "$STACK_NAME" --region "$AWS_REGION" --query 'Stacks[0].Outputs' ;;
   -h|--help|help) usage ;;
   *) usage >&2; exit 2 ;;
 esac

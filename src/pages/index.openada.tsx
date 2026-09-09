@@ -62,7 +62,7 @@ type CheckResponse = {
 }
 
 const sampleHtml = `<main>
-  <h1>OpenADA demo page</h1>
+  <h1>OpenADA sample page</h1>
   <img src="/logo.png">
   <p>This langauge sample should of been checked before publish.</p>
   <a href="/docs">click here</a>
@@ -223,8 +223,6 @@ const HomePage: NextPage = () => {
             )}
           </div>
         </div>
-
-        <ContestBanner />
 
         <div className="work-grid">
           <form id="checker-form" className="editor-pane" onSubmit={handleSubmit}>
@@ -453,80 +451,6 @@ const HomePage: NextPage = () => {
           justify-content: center;
           text-align: center;
         }
-
-        .contest-banner {
-          display: grid;
-          grid-template-columns: auto minmax(0, 1fr) auto;
-          align-items: center;
-          gap: 18px;
-          margin: 0 auto 22px;
-          border: 1px solid #b8e7d9;
-          border-radius: 8px;
-          background: #eaf8f3;
-          padding: 18px 20px;
-        }
-
-        .contest-banner-mark {
-          width: 42px;
-          height: 42px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          border: 2px solid #172033;
-          border-radius: 12px 12px 12px 4px;
-          background: #b8e7d9;
-          color: #172033;
-          box-shadow: 3px 3px 0 #172033;
-        }
-
-        .contest-kicker {
-          color: #25635f;
-          font-size: .75rem;
-          font-weight: 900;
-          letter-spacing: .08em;
-          text-transform: uppercase;
-        }
-
-        .contest-banner h2 {
-          margin-top: 3px;
-          color: #172033;
-          font-size: 1.15rem;
-        }
-
-        .contest-banner-copy > p:last-of-type {
-          max-width: 800px;
-          margin-top: 6px;
-          color: #42566b;
-          font-size: .88rem;
-          line-height: 1.45;
-        }
-
-        .contest-banner-copy a,
-        .contest-banner-proof a {
-          display: inline-flex;
-          align-items: center;
-          gap: 5px;
-          margin-top: 8px;
-          color: #25635f;
-          font-size: .82rem;
-          font-weight: 850;
-          text-decoration: none;
-        }
-
-        .contest-banner-copy a:hover,
-        .contest-banner-copy a:focus-visible { text-decoration: underline; }
-
-        .contest-banner-proof {
-          max-width: 180px;
-          border-left: 1px solid #b8e7d9;
-          padding-left: 18px;
-          color: #25635f;
-          font-size: .8rem;
-          font-weight: 800;
-          line-height: 1.45;
-        }
-
-        .contest-banner-proof strong { display: block; color: #172033; font-size: 1rem; }
 
         h2 {
           font-size: 1rem;
@@ -1035,18 +959,6 @@ const HomePage: NextPage = () => {
             padding-inline: 16px;
           }
 
-          .contest-banner {
-            grid-template-columns: auto minmax(0, 1fr);
-          }
-
-          .contest-banner-proof {
-            grid-column: 2;
-            max-width: none;
-            border-left: 0;
-            border-top: 1px solid #b8e7d9;
-            padding: 12px 0 0;
-          }
-
           .url-field {
             padding-inline: 16px;
           }
@@ -1112,22 +1024,6 @@ function PoweredBy() {
       <a className="powered-item" href="https://github.com/languagetool-org/languagetool" target="_blank" rel="noreferrer"><Languages size={17} aria-hidden /> LanguageTool</a>
       <a className="powered-item" href="https://github.com/microsoft/playwright" target="_blank" rel="noreferrer"><ScanSearch size={17} aria-hidden /> Playwright</a>
       <a className="powered-item" href="https://aws.amazon.com/" target="_blank" rel="noreferrer"><Cloud size={17} aria-hidden /> AWS</a>
-    </section>
-  )
-}
-
-function ContestBanner() {
-  return (
-    <section className="contest-banner" aria-labelledby="contest-banner-heading">
-      <div className="contest-banner-mark"><Sparkles size={21} aria-hidden /></div>
-      <div className="contest-banner-copy">
-        <p className="contest-kicker">Built 100% for the OpenAI Codex contest</p>
-        <h2 id="contest-banner-heading">Free accessibility infrastructure for every public service.</h2>
-        <p>Federal web-accessibility compliance dates have been extended, not erased. OpenADA gives governments and small organizations a free way to scan, prioritize, and track improvements while expensive enterprise tooling remains out of reach.</p>
-        <a href="https://www.federalregister.gov/documents/2026/04/20/2026-07663/extension-of-compliance-dates-for-nondiscrimination-on-the-basis-of-disability-accessibility-of-web" target="_blank" rel="noreferrer">Read the Federal Register extension <ExternalLink size={13} aria-hidden /></a>
-        <a href="https://openai.devpost.com" target="_blank" rel="noreferrer">See the Codex contest project <ExternalLink size={13} aria-hidden /></a>
-      </div>
-      <div className="contest-banner-proof"><strong>Open public utility</strong>Free scans for public agencies today; future enterprise API tokens can help fund continued public access.</div>
     </section>
   )
 }

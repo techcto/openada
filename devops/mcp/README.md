@@ -16,13 +16,13 @@ OpenADA is deliberately a remote, stateless Streamable HTTP server. You do not n
 https://openada.us/mcp
 ```
 
-The public demo is anonymous. A self-hosted or protected deployment can require `Authorization: Bearer <key>` or `X-API-Key: <key>` through `OPENADA_API_KEYS`.
+The public service is anonymous. A self-hosted or protected deployment can require `Authorization: Bearer <key>` or `X-API-Key: <key>` through `OPENADA_API_KEYS`.
 
 ### ChatGPT
 
 In ChatGPT, open **Settings > Apps & Connectors > Advanced settings**, turn on **Developer mode**, then return to Apps & Connectors and choose **Create app** or **New Plugin**. Set the name to `OpenADA` and enter `https://openada.us/mcp` in **Server URL**. Use `/mcp`, not an `/sse` URL.
 
-For the public demo, choose **None** or **No authentication** if that option is available and leave OAuth credentials empty. Review the custom MCP warning, check the acknowledgement, and choose **Create**. Start a new chat, enable OpenADA from the tools or connectors menu, and ask it to check a public page or inspect the directory.
+For the public service, choose **None** or **No authentication** if that option is available and leave OAuth credentials empty. Review the custom MCP warning, check the acknowledgement, and choose **Create**. Start a new chat, enable OpenADA from the tools or connectors menu, and ask it to check a public page or inspect the directory.
 
 For the public app directory, submit the same MCP URL through the [OpenAI Apps submission guide](https://learn.chatgpt.com/docs/submit-plugins). This repository includes the draft metadata and test cases in [`chatgpt-app-submission.json`](../../chatgpt-app-submission.json). Review the publisher, privacy, terms, availability, and test details in the portal before submitting.
 
@@ -50,7 +50,7 @@ See the [official Codex MCP guide](https://developers.openai.com/codex/mcp) for 
 
 ### Claude Code
 
-Claude also supports a custom connector in its settings UI. Open **Settings > Connectors > Add custom connector**, set the name to `OpenADA`, and enter `https://openada.us/mcp` in **Remote MCP server URL**. Leave the optional OAuth Client ID and OAuth Client Secret blank for the public demo, then choose **Add** and enable OpenADA in a conversation.
+Claude also supports a custom connector in its settings UI. Open **Settings > Connectors > Add custom connector**, set the name to `OpenADA`, and enter `https://openada.us/mcp` in **Remote MCP server URL**. Leave the optional OAuth Client ID and OAuth Client Secret blank for the public service, then choose **Add** and enable OpenADA in a conversation.
 
 Claude Code can also register the remote server from a project directory:
 
@@ -107,9 +107,9 @@ Site scans are asynchronous. The MCP client should call `openada_get_scan_status
 
 ## Authentication
 
-### Hosted public demo
+### Hosted public service
 
-The public endpoint at `https://openada.us/mcp` is intentionally anonymous so people can try OpenADA from ChatGPT, Codex, Claude, or another MCP client. Choose **None** or **No authentication** when the client offers that option. Do not add an API key to the hosted demo connection.
+The public endpoint at `https://openada.us/mcp` is intentionally anonymous so people can try OpenADA from ChatGPT, Codex, Claude, or another MCP client. Choose **None** or **No authentication** when the client offers that option. Do not add an API key to the hosted service connection.
 
 ### Self-hosted or protected deployments
 

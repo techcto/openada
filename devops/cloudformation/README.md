@@ -38,6 +38,8 @@ task roles, logs, and DynamoDB tables to that environment.
   subnets. Listener priorities `100`, `101`, and `102` must be unused.
 - For HTTPS, have an ACM certificate in the same Region as the ALB that covers
   the hostname you will use.
+- Private service subnets must have outbound access to pull the public
+  `techcto/languagetool:6.8.0` image from Docker Hub.
 
 ## Launch A New ECS Environment
 
@@ -117,11 +119,20 @@ The API returns quickly when a site scan is submitted. The worker crawls
 bounded same-host pages through Redis, records progress and failures, runs the
 accessibility and language checks, and saves the completed report in DynamoDB.
 
+By default, both templates create one private LanguageTool Fargate task and a
+Cloud Map endpoint at `http://languagetool.<environment>.local:8010`. Port 8010
+is available only between OpenADA tasks in the service security group; it is
+not attached to the public load balancer. Set `LanguageToolImage` to pin a
+different published image. Set `LanguageToolUpstreamUrl` only when using an
+external provider; doing so skips the bundled task and service-discovery
+resources.
+
 ## What OpenADA Provides
 
 - A web UI for page checks and bounded website scans.
 - A combined REST API for accessibility and language-quality checks.
 - LanguageTool-compatible language checking.
+- A private LanguageTool 6.8 Fargate service with internal service discovery.
 - axe-core accessibility findings.
 - An asynchronous crawler with progress updates.
 - A public directory of sites, scans, pages, scores, and findings.
@@ -143,6 +154,22 @@ and the service security group must allow traffic from the load balancer.
 For a private OpenADA MCP deployment, use the stack's HTTPS hostname and the
 same `ApiKeys` value when configuring AgentCore's `OpenAdaMcpUrl` and
 `OpenAdaApiKey` parameters.
+
+## Managing The OpenADA Test Stack
+
+The repository command wrapper targets the `openada-test` standalone stack in
+`us-east-1` with the local `osirus.ai` AWS profile:
+
+```bash
+./cmd.sh cft-live outputs
+./cmd.sh cft-live events
+```
+
+Override those defaults with `OPENADA_AWS_PROFILE` or
+`OPENADA_LIVE_STACK_NAME`. After publishing a new OpenADA release, provide its
+UI, API, and worker image URIs and run `./cmd.sh cft-live deploy` to update the
+stack. That command changes live AWS resources; the read-only commands above do
+not.
 
 ## Support And Documentation
 

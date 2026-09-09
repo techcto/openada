@@ -34,13 +34,13 @@ const McpDocsPage: NextPage = () => (
           </section>
 
           <section className="mcp-section" aria-labelledby="clients-title">
-            <div className="mcp-section-heading"><p className="mcp-eyebrow">Connect a client</p><h2 id="clients-title">ChatGPT, Codex, and Claude</h2><p>Use the instructions for the tool you already work in. The public demo is anonymous; protected deployments can require a bearer token or API key.</p></div>
+            <div className="mcp-section-heading"><p className="mcp-eyebrow">Connect a client</p><h2 id="clients-title">ChatGPT, Codex, and Claude</h2><p>Use the instructions for the tool you already work in. The public service is anonymous; protected deployments can require a bearer token or API key.</p></div>
             <div className="mcp-client-list">
               <ClientCard number="01" title="ChatGPT" description="ChatGPT custom MCP servers are added from Developer Mode. The labels may appear as Apps, Connectors, or New Plugin depending on the workspace surface." steps={[
                 'Open ChatGPT Settings, go to Apps & Connectors, open Advanced settings, and turn on Developer mode.',
                 'Return to Apps & Connectors and choose Create app or New Plugin.',
                 'Set the name to OpenADA and paste https://openada.us/mcp into Server URL. Use /mcp, not an /sse URL.',
-                'For the public OpenADA demo, choose None or No authentication if that option is available. Leave OAuth credentials empty; protected deployments need their own OAuth setup.',
+                'For the public OpenADA service, choose None or No authentication if that option is available. Leave OAuth credentials empty; protected deployments need their own OAuth setup.',
                 'Review the custom MCP server warning, check “I understand and want to continue,” then select Create.',
                 'Start a new chat, open the tools or connectors menu, enable OpenADA, and ask it to check a public page or start a scan.',
               ]} code="https://openada.us/mcp" link="https://learn.chatgpt.com/docs/submit-plugins" linkText="Open the ChatGPT submission guide" />
@@ -52,7 +52,7 @@ const McpDocsPage: NextPage = () => (
                 'Open Claude Settings and choose Connectors.',
                 'Select Add custom connector.',
                 'Set the name to OpenADA and paste https://openada.us/mcp into Remote MCP server URL.',
-                'Leave the optional OAuth Client ID and OAuth Client Secret blank for the public OpenADA demo, then select Add.',
+                'Leave the optional OAuth Client ID and OAuth Client Secret blank for the public OpenADA service, then select Add.',
                 'Enable OpenADA in a conversation and ask it to check a public page or inspect scan history.',
               ]} code="https://openada.us/mcp" link="https://code.claude.com/docs/en/mcp" linkText="Read the Claude MCP guide" />
             </div>

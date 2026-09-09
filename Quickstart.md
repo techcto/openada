@@ -10,19 +10,26 @@ websites, APIs, and AI-agent workflows.
 3. Choose the number of same-site pages to crawl.
 4. Select **Scan site** and follow the progress page to the dated report.
 
-The hosted MCP endpoint is `https://openada.us/mcp`. The public demo is
+The hosted MCP endpoint is `https://openada.us/mcp`. The public service is
 anonymous and is intended for public-page testing.
 
 ## Run Locally
 
-Requirements: Docker Desktop with Compose.
+Requirements: Git and Docker Desktop with Compose.
 
 ```bash
+git clone --recurse-submodules https://github.com/techcto/openada.git
+cd openada
 docker compose up --build
 ```
 
 Open the UI at `http://localhost:3000` and the API at
 `http://localhost:3001/api/health`.
+
+The stack builds the pinned `docker-languagetool` submodule and routes API and
+worker language checks to it. Existing clones can initialize it with
+`git submodule update --init --recursive`. Set `LANGUAGETOOL_UPSTREAM_URL` only
+to override the local server with a separately managed provider.
 
 ## Prepare OpenADA Private
 
@@ -51,7 +58,7 @@ options are the public service/API and the approved AgentCore product.
 5. Open the `WebsiteUrl` output after the ECS services report healthy.
 
 For `ApiKeys`, leave the field blank only when intentionally running an
-anonymous public demo. For a private or production deployment, generate a
+anonymous public service. For a private or production deployment, generate a
 random value and paste it into the hidden CloudFormation field:
 
 ```bash
@@ -68,7 +75,8 @@ and post-launch checks.
 
 The standalone product includes the UI, API, asynchronous scan worker, Redis
 queue, DynamoDB directory archive, CloudWatch logs, and an Application Load
-Balancer. Private deployments can require API keys and restrict crawl hosts.
+Balancer. It also runs LanguageTool as a private Fargate service by default.
+Private deployments can require API keys and restrict crawl hosts.
 
 ## Connect AgentCore
 

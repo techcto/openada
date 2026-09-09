@@ -14,9 +14,10 @@ and its `LICENSE` and `LICENSE-3RD-PARTY.txt` files.
 
 ## LanguageTool
 
-OpenADA exposes a LanguageTool-compatible API and can call a separately
-managed LanguageTool-compatible upstream. The LanguageTool server is not
-bundled in the OpenADA container. The LanguageTool core is distributed under
+OpenADA exposes a LanguageTool-compatible API and includes the container build
+source as the `submodules/docker-languagetool` git submodule. Docker Compose
+builds that server as a separate container; deployments may instead use a
+separately managed upstream. The LanguageTool core is distributed under
 the GNU Lesser General Public License 2.1 or later. If a deployment bundles
 or modifies LanguageTool, distribute the applicable license and source/notices
 under the LGPL terms. See the [LanguageTool repository](https://github.com/languagetool-org/languagetool)

@@ -64,7 +64,7 @@ print_banner() {
  \___/|_|   |_____|_| \_/_/   \_\____/_/   \_\
         OPEN ACCESS FOR THE PUBLIC WEB
 EOF
-  printf '%s%s%s%s\n' "$RESET" "$MUTED" "OpenADA command-line demo - $BASE_URL" "$RESET"
+  printf '%s%s%s%s\n' "$RESET" "$MUTED" "OpenADA command-line client - $BASE_URL" "$RESET"
 }
 
 run_mcp() {

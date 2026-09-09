@@ -15,6 +15,7 @@ Usage:
   ./cmd.sh cft-new <command>    Test/deploy a new standalone ECS cluster and ALB
   ./cmd.sh cft-existing <cmd>   Test/deploy into an existing ECS cluster and ALB
   ./cmd.sh cft <command>        Compatibility alias for cft-new
+  ./cmd.sh cft-live <command>   Manage openada-test with the osirus.ai profile
   ./cmd.sh docker build [tag]   Build production images locally
   ./cmd.sh docker push [tag]    Build and push production images to AWS ECR
   ./cmd.sh git <command>        Run git.sh (status, audit, tag, ...)
@@ -78,6 +79,12 @@ case "${1:-help}" in
   cft-existing)
     shift
     "$ROOT_DIR/cft-existing.sh" "${1:-test}"
+    ;;
+  cft-live)
+    shift
+    AWS_PROFILE="${OPENADA_AWS_PROFILE:-osirus.ai}" \
+      OPENADA_STACK_NAME="${OPENADA_LIVE_STACK_NAME:-openada-test}" \
+      "$ROOT_DIR/cft.sh" "${1:-outputs}"
     ;;
   docker)
     docker_action="${2:-push}"

@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEMPLATE="${OPENADA_CFT_TEMPLATE:-$ROOT_DIR/devops/cloudformation/openada.yaml}"
 STACK_NAME="${OPENADA_STACK_NAME:-openada}"
 AWS_REGION="${AWS_REGION:-us-east-1}"
+AWS_PROFILE="${AWS_PROFILE:-}"
 CFT_BUCKET="${OPENADA_CFT_BUCKET:-openada-us}"
 
 usage() {
@@ -25,6 +26,7 @@ Deploy parameters:
   OPENADA_UI_IMAGE               UI ECR image URI
   OPENADA_API_IMAGE              API ECR image URI
   OPENADA_WORKER_IMAGE           Scan worker ECR image URI
+  OPENADA_LANGUAGETOOL_IMAGE     LanguageTool image (default: techcto/languagetool:6.8.0)
   OPENADA_DESIRED_COUNT          Optional ECS desired count
   OPENADA_CERTIFICATE_ARN        Optional ACM certificate ARN
   OPENADA_API_KEYS               Optional comma-separated API keys
@@ -33,14 +35,21 @@ Deploy parameters:
   OPENADA_SCAN_ALLOWED_HOSTS       Optional comma-separated scan host allowlist
   OPENADA_REDIS_AUTH_TOKEN         Optional Redis AUTH token for a new standalone stack
   OPENADA_OPENAI_APPS_CHALLENGE_TOKEN Optional OpenAI Apps domain verification token
-  LANGUAGETOOL_UPSTREAM_URL       Optional LanguageTool-compatible upstream
+  LANGUAGETOOL_UPSTREAM_URL       Optional external override; skips the private Fargate service
   OPENADA_CFT_BUCKET              S3 bucket for CFT uploads (default: openada-us)
+  AWS_PROFILE                     Optional AWS CLI profile
 EOF
 }
 
 die() {
   printf 'Error: %s\n' "$*" >&2
   exit 1
+}
+
+aws_cli() {
+  local command=(aws)
+  [[ -n "$AWS_PROFILE" ]] && command+=(--profile "$AWS_PROFILE")
+  "${command[@]}" "$@"
 }
 
 require_template() {
@@ -56,11 +65,13 @@ offline_test() {
     'AWS::ECS::Cluster' \
     'AWS::ECS::TaskDefinition' \
     'AWS::ECS::Service' \
+    'AWS::ServiceDiscovery::PrivateDnsNamespace' \
     'AWS::ElasticLoadBalancingV2::LoadBalancer' \
     'AWS::ElasticLoadBalancingV2::Listener' \
     'UiImage' \
     'ApiImage' \
-    'WorkerImage'; do
+    'WorkerImage' \
+    'LanguageToolImage'; do
     rg -q "$required" "$TEMPLATE" || die "Template check failed: missing $required"
   done
 
@@ -84,7 +95,7 @@ offline_test() {
 
 validate() {
   offline_test
-  aws cloudformation validate-template \
+  aws_cli cloudformation validate-template \
     --template-body "file://$TEMPLATE" \
     --region "$AWS_REGION"
 }
@@ -93,21 +104,21 @@ publish() {
   require_template
   : "${CFT_BUCKET:?Set OPENADA_CFT_BUCKET before publishing CFT files.}"
 
-  aws s3 cp "$ROOT_DIR/devops/cloudformation/openada.yaml" \
+  aws_cli s3 cp "$ROOT_DIR/devops/cloudformation/openada.yaml" \
     "s3://${CFT_BUCKET}/cloudformation/openada.yaml" \
     --region "$AWS_REGION" --no-progress
-  aws s3 cp "$ROOT_DIR/devops/cloudformation/openada-existing.yaml" \
+  aws_cli s3 cp "$ROOT_DIR/devops/cloudformation/openada-existing.yaml" \
     "s3://${CFT_BUCKET}/cloudformation/openada-existing.yaml" \
     --region "$AWS_REGION" --no-progress
-  aws s3 cp "$ROOT_DIR/devops/cloudformation/README.md" \
+  aws_cli s3 cp "$ROOT_DIR/devops/cloudformation/README.md" \
     "s3://${CFT_BUCKET}/cloudformation/README.md" \
     --region "$AWS_REGION" --no-progress
-  aws s3 cp "$ROOT_DIR/ada.sh" \
+  aws_cli s3 cp "$ROOT_DIR/ada.sh" \
     "s3://${CFT_BUCKET}/ada.sh" \
     --content-type text/plain \
     --cache-control 'public,max-age=300' \
     --region "$AWS_REGION" --no-progress
-  aws s3 cp "$ROOT_DIR/devops/widget/openada-widget.js" \
+  aws_cli s3 cp "$ROOT_DIR/devops/widget/openada-widget.js" \
     "s3://${CFT_BUCKET}/widgets/openada-widget.js" \
     --content-type application/javascript \
     --cache-control 'public,max-age=300' \
@@ -136,6 +147,7 @@ deploy() {
   )
 
   [[ -n "${OPENADA_DESIRED_COUNT:-}" ]] && parameters+=("DesiredCount=$OPENADA_DESIRED_COUNT")
+  [[ -n "${OPENADA_LANGUAGETOOL_IMAGE:-}" ]] && parameters+=("LanguageToolImage=$OPENADA_LANGUAGETOOL_IMAGE")
   [[ -n "${OPENADA_CERTIFICATE_ARN:-}" ]] && parameters+=("CertificateArn=$OPENADA_CERTIFICATE_ARN")
   [[ -n "${OPENADA_API_KEYS:-}" ]] && parameters+=("ApiKeys=$OPENADA_API_KEYS")
   [[ -n "${OPENADA_CORS_ORIGINS:-}" ]] && parameters+=("CorsAllowedOrigins=$OPENADA_CORS_ORIGINS")
@@ -145,7 +157,7 @@ deploy() {
   [[ -n "${OPENADA_REDIS_AUTH_TOKEN:-}" ]] && parameters+=("RedisAuthToken=$OPENADA_REDIS_AUTH_TOKEN")
   [[ -n "${OPENADA_OPENAI_APPS_CHALLENGE_TOKEN:-}" ]] && parameters+=("OpenAiAppsChallengeToken=$OPENADA_OPENAI_APPS_CHALLENGE_TOKEN")
 
-  aws cloudformation deploy \
+  aws_cli cloudformation deploy \
     --template-file "$TEMPLATE" \
     --stack-name "$STACK_NAME" \
     --region "$AWS_REGION" \
@@ -160,9 +172,9 @@ case "${1:-test}" in
   publish) publish ;;
   validate) validate ;;
   deploy) deploy ;;
-  events) aws cloudformation describe-stack-events --stack-name "$STACK_NAME" --region "$AWS_REGION" ;;
-  outputs) aws cloudformation describe-stacks --stack-name "$STACK_NAME" --region "$AWS_REGION" --query 'Stacks[0].Outputs' ;;
-  destroy) aws cloudformation delete-stack --stack-name "$STACK_NAME" --region "$AWS_REGION"; aws cloudformation wait stack-delete-complete --stack-name "$STACK_NAME" --region "$AWS_REGION" ;;
+  events) aws_cli cloudformation describe-stack-events --stack-name "$STACK_NAME" --region "$AWS_REGION" ;;
+  outputs) aws_cli cloudformation describe-stacks --stack-name "$STACK_NAME" --region "$AWS_REGION" --query 'Stacks[0].Outputs' ;;
+  destroy) aws_cli cloudformation delete-stack --stack-name "$STACK_NAME" --region "$AWS_REGION"; aws_cli cloudformation wait stack-delete-complete --stack-name "$STACK_NAME" --region "$AWS_REGION" ;;
   -h|--help|help) usage ;;
   *) usage >&2; exit 2 ;;
 esac
