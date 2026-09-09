@@ -30,7 +30,7 @@ Required deployment values:
 
 Optional values:
   OPENADA_DESIRED_COUNT
-  OPENADA_LANGUAGETOOL_IMAGE      LanguageTool image (default: techcto/languagetool:6.8.0)
+  OPENADA_LANGUAGETOOL_IMAGE      LanguageTool image (default: techcto/languagetool:latest)
   OPENADA_ASSIGN_PUBLIC_IP        ENABLED or DISABLED
   OPENADA_API_KEYS
   LANGUAGETOOL_UPSTREAM_URL       Optional external override; skips the private Fargate service

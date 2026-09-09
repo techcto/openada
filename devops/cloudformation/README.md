@@ -39,7 +39,7 @@ task roles, logs, and DynamoDB tables to that environment.
 - For HTTPS, have an ACM certificate in the same Region as the ALB that covers
   the hostname you will use.
 - Private service subnets must have outbound access to pull the public
-  `techcto/languagetool:6.8.0` image from Docker Hub.
+  `techcto/languagetool:latest` image from Docker Hub.
 
 ## Launch A New ECS Environment
 
@@ -132,7 +132,7 @@ resources.
 - A web UI for page checks and bounded website scans.
 - A combined REST API for accessibility and language-quality checks.
 - LanguageTool-compatible language checking.
-- A private LanguageTool 6.8 Fargate service with internal service discovery.
+- A private LanguageTool Fargate service with internal service discovery.
 - axe-core accessibility findings.
 - An asynchronous crawler with progress updates.
 - A public directory of sites, scans, pages, scores, and findings.

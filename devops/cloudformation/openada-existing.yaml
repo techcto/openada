@@ -115,7 +115,7 @@ Parameters:
     Description: Optional external LanguageTool base URL. When empty, the stack creates its own private LanguageTool service.
   LanguageToolImage:
     Type: String
-    Default: 'techcto/languagetool:6.8.0'
+    Default: 'techcto/languagetool:latest'
     Description: Public LanguageTool image used by the private Fargate service.
   CorsAllowedOrigins:
     Type: String

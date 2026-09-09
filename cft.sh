@@ -26,7 +26,7 @@ Deploy parameters:
   OPENADA_UI_IMAGE               UI ECR image URI
   OPENADA_API_IMAGE              API ECR image URI
   OPENADA_WORKER_IMAGE           Scan worker ECR image URI
-  OPENADA_LANGUAGETOOL_IMAGE     LanguageTool image (default: techcto/languagetool:6.8.0)
+  OPENADA_LANGUAGETOOL_IMAGE     LanguageTool image (default: techcto/languagetool:latest)
   OPENADA_DESIRED_COUNT          Optional ECS desired count
   OPENADA_CERTIFICATE_ARN        Optional ACM certificate ARN
   OPENADA_API_KEYS               Optional comma-separated API keys
