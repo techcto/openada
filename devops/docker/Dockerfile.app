@@ -24,7 +24,6 @@ COPY src/pages/docs/privacy.openada.tsx ./src/pages/docs/privacy.openada.tsx
 COPY src/pages/docs/terms.openada.tsx ./src/pages/docs/terms.openada.tsx
 COPY src/pages/docs/mcp.openada.tsx ./src/pages/docs/mcp.openada.tsx
 COPY src/pages/support.openada.tsx ./src/pages/support.openada.tsx
-COPY src/pages/directory/index.openada.tsx ./src/pages/directory/index.openada.tsx
 COPY src/pages/api-reference/index.openada.tsx ./src/pages/api-reference/index.openada.tsx
 COPY src/sass/app.scss ./src/sass/app.scss
 COPY devops/widget/openada-widget.js ./public/openada-widget.js

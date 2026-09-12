@@ -31,5 +31,12 @@ Apache License 2.0 notice and any third-party browser/dependency notices. The
 current OpenADA fetch path does not bundle Playwright. See the
 [Playwright repository](https://github.com/microsoft/playwright) and `LICENSE`.
 
+## veraPDF
+
+OpenADA's PDF/UA sidecar is based on the official veraPDF CLI image and adds a
+small HTTP wrapper. veraPDF is dual-licensed under GPLv3+ and MPLv2+. Preserve
+the applicable upstream license and notices when redistributing the sidecar.
+See the [veraPDF applications repository](https://github.com/veraPDF/veraPDF-apps).
+
 This notice is not legal advice. Review the exact files shipped in a release
 before redistributing a container or derivative product.

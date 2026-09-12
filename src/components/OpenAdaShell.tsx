@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { BookOpen, Bot, Code2, ExternalLink, Globe2, Github, Star } from 'lucide-react'
+import { BookOpen, Bot, Code2, ExternalLink, Github, Star } from 'lucide-react'
 
 type CurrentPage = 'home' | 'directory' | 'api' | 'docs' | 'mcp' | 'support' | 'scan' | 'report'
 
@@ -13,7 +13,6 @@ export function OpenAdaShell({ children, current }: { children: ReactNode; curre
             <span className="global-brand-name">OpenADA</span>
           </a>
           <nav className="global-nav" aria-label="Primary navigation">
-            <a className={current === 'directory' ? 'global-nav-link current' : 'global-nav-link'} href="/directory" aria-current={current === 'directory' ? 'page' : undefined}><Globe2 size={16} aria-hidden /> Directory</a>
             <a className={current === 'docs' ? 'global-nav-link current' : 'global-nav-link'} href="/docs" aria-current={current === 'docs' ? 'page' : undefined}><BookOpen size={16} aria-hidden /> ADA guidance</a>
             <a className={current === 'api' ? 'global-nav-link current' : 'global-nav-link'} href="/api-reference" aria-current={current === 'api' ? 'page' : undefined}><Code2 size={16} aria-hidden /> Public API</a>
             <a className={current === 'mcp' ? 'global-nav-link current' : 'global-nav-link'} href="/docs/mcp" aria-current={current === 'mcp' ? 'page' : undefined}><Bot size={16} aria-hidden /> MCP</a>
@@ -24,9 +23,9 @@ export function OpenAdaShell({ children, current }: { children: ReactNode; curre
       {children}
       <footer className="global-footer">
         <div className="global-footer-inner">
-          <div className="footer-intro"><a className="footer-brand" href="/"><span className="footer-brand-mark"><Star size={16} fill="currentColor" aria-hidden /></span><strong>OpenADA</strong></a><p>Open accessibility and language checks for the public web.</p><small>Automated results are a starting point, not a legal determination.</small></div>
+          <div className="footer-intro"><a className="footer-brand" href="/"><span className="footer-brand-mark"><Star size={16} fill="currentColor" aria-hidden /></span><strong>OpenADA</strong></a><p>Open accessibility, PDF/UA, and language-quality checks.</p><small>Automated results are a starting point, not a legal determination.</small></div>
           <div className="footer-link-grid">
-            <div><strong className="footer-heading">Explore</strong><a href="/">Checker</a><a href="/directory">Directory</a><a href="/scan">Site scans</a></div>
+            <div><strong className="footer-heading">Explore</strong><a href="/">Checker</a><a href="/scan">Site scans</a><a href="/api-reference">API reference</a></div>
             <div><strong className="footer-heading">Build</strong><a href="/api-reference">Public API</a><a href="/api/openapi">OpenAPI JSON</a><a href="/docs">ADA guidance</a></div>
             <div><strong className="footer-heading">Standards</strong><a href="https://www.ada.gov/law-and-regs/" target="_blank" rel="noreferrer">ADA.gov <ExternalLink size={12} aria-hidden /></a><a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noreferrer">WCAG <ExternalLink size={12} aria-hidden /></a><a href="/support">Support</a><a href="/docs/privacy">Privacy</a><a href="/docs/terms">Terms</a><a href="https://github.com/techcto/openada" target="_blank" rel="noreferrer"><Github size={13} aria-hidden /> Source <ExternalLink size={12} aria-hidden /></a></div>
           </div>

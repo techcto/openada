@@ -96,6 +96,10 @@ export function publicScansEnabled(): boolean {
   return String(process.env.OPENADA_PUBLIC_SCANS_ENABLED || 'true').toLowerCase() !== 'false'
 }
 
+export function publicDirectoryEnabled(): boolean {
+  return String(process.env.OPENADA_PUBLIC_DIRECTORY_ENABLED || 'false').toLowerCase() === 'true'
+}
+
 export function enforceScanHost(url: string, res: NextApiResponse<ApiError>): boolean {
   const allowedHosts = String(process.env.OPENADA_SCAN_ALLOWED_HOSTS || '')
     .split(',')

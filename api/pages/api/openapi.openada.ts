@@ -6,7 +6,7 @@ const document = {
   info: {
     title: 'OpenADA API',
     version: '0.1.0',
-    description: 'Accessibility, language, public URL scanning, and directory APIs.',
+    description: 'Web accessibility, PDF/UA-1, language-quality, and URL scanning APIs.',
   },
   servers: [{ url: 'https://openada.us' }],
   paths: {
@@ -36,17 +36,18 @@ const document = {
         responses: { '200': { description: 'Scan progress or report' }, '404': { description: 'Scan job not found' } },
       },
     },
-    '/api/v1/directory': {
-      get: {
-        summary: 'List public sites or retrieve one site with ?site=hostname',
-        responses: { '200': { description: 'Directory records' } },
-      },
-    },
     '/api/v1/ada/check': {
       post: {
         summary: 'Run axe-core WCAG checks',
         requestBody: { required: true, content: { 'application/json': { schema: { '$ref': '#/components/schemas/HtmlRequest' } } } },
         responses: { '200': { description: 'ADA result' } },
+      },
+    },
+    '/api/v1/pdf/check': {
+      post: {
+        summary: 'Validate a PDF against PDF/UA-1 with veraPDF',
+        requestBody: { required: true, content: { 'application/json': { schema: { '$ref': '#/components/schemas/PdfRequest' } } } },
+        responses: { '200': { description: 'Normalized PDF/UA result and raw veraPDF report' }, '400': { description: 'Invalid PDF' }, '413': { description: 'Decoded PDF exceeds 10 MB' } },
       },
     },
     '/api/v2/check': {
@@ -61,6 +62,7 @@ const document = {
     schemas: {
       HtmlRequest: { type: 'object', required: ['html'], properties: { html: { type: 'string' }, url: { type: 'string', format: 'uri' }, wcagTags: { type: 'array', items: { type: 'string' } } } },
       LanguageRequest: { type: 'object', required: ['text'], properties: { text: { type: 'string' }, language: { type: 'string', default: 'en-US' } } },
+      PdfRequest: { type: 'object', required: ['file'], properties: { file: { type: 'string', contentEncoding: 'base64' }, filename: { type: 'string', default: 'document.pdf' }, private: { type: 'boolean', default: true } } },
       CheckRequest: { type: 'object', properties: { html: { type: 'string' }, text: { type: 'string' }, url: { type: 'string', format: 'uri' }, language: { type: 'string', default: 'en-US' }, wcagTags: { type: 'array', items: { type: 'string' } } } },
       ScanRequest: { type: 'object', required: ['url'], properties: { url: { type: 'string', format: 'uri' }, title: { type: 'string' }, crawl: { type: 'boolean', default: false, description: 'When true, enqueue a same-host scan and poll /api/v1/scans/{jobId} for progress.' }, maxPages: { type: 'integer', minimum: 1, maximum: 100, default: 50 }, language: { type: 'string', default: 'en-US' }, wcagTags: { type: 'array', items: { type: 'string' } } } },
     },

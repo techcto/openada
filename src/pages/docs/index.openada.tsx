@@ -156,12 +156,13 @@ const DocsPage: NextPage = () => {
             <section id="openada-workflow" className="docs-section workflow-section">
               <div className="section-kicker"><ShieldCheck size={17} aria-hidden /> OpenADA workflow</div>
               <h2>Where OpenADA fits</h2>
-              <p>OpenADA combines an axe-core scan with a LanguageTool-compatible language check so teams can put two repeatable review signals next to the content workflow. The service is a testing aid, not a compliance verdict.</p>
+              <p>OpenADA combines axe-core web checks, veraPDF PDF/UA-1 validation, and a real LanguageTool service so teams can put repeatable review signals next to the content workflow. The service is a testing aid, not a compliance verdict.</p>
               <div className="endpoint-list">
                 <Endpoint method="POST" path="/api/v1/check" detail="Run ADA and language checks together for HTML, text, or a public page URL." />
                 <Endpoint method="POST" path="/api/v1/ada/check" detail="Run an accessibility scan against submitted HTML." />
                 <Endpoint method="POST" path="/api/v1/language/check" detail="Return a compact language issue list for application integrations." />
                 <Endpoint method="POST" path="/api/v2/check" detail="Return a LanguageTool-compatible response for CMS provider integrations." />
+                <Endpoint method="POST" path="/api/v1/pdf/check" detail="Validate a base64-encoded PDF against PDF/UA-1 with veraPDF." />
                 <Endpoint method="GET" path="/api/health" detail="Check whether the API container is available." />
               </div>
               <a className="primary-link" href="/"><SearchCheck size={17} aria-hidden /><span>Try the live checker</span></a>

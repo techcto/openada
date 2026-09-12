@@ -38,8 +38,8 @@ task roles, logs, and DynamoDB tables to that environment.
   subnets. Listener priorities `100`, `101`, and `102` must be unused.
 - For HTTPS, have an ACM certificate in the same Region as the ALB that covers
   the hostname you will use.
-- Private service subnets must have outbound access to pull the public
-  `techcto/languagetool:latest` image from Docker Hub.
+- Private service subnets must reach Marketplace ECR for the OpenADA UI, API,
+  worker, LanguageTool, and veraPDF images.
 
 ## Launch A New ECS Environment
 
@@ -81,8 +81,9 @@ the CloudFormation form.
 
 ## Security And API Keys
 
-Keep the prefilled `UiImage`, `ApiImage`, and `WorkerImage` values unchanged.
-They identify the subscribed Marketplace container delivery.
+Keep the prefilled `UiImage`, `ApiImage`, `WorkerImage`, `LanguageToolImage`, and
+`VeraPdfImage` values unchanged. They identify the five version-matched images
+in the subscribed Marketplace container delivery.
 
 Set `ApiKeys` to a long random value before enabling access beyond a trusted
 test. The value protects REST and MCP requests. It is not an AWS access key or
@@ -101,8 +102,9 @@ Authorization: Bearer <key>
 X-API-Key: <key>
 ```
 
-The public directory experience is enabled by default. Set
-`PublicScansEnabled` to `false` for a private-only service, or set
+The public directory is disabled by default. Keep `PublicDirectoryEnabled` set
+to `false` unless the deployment deliberately operates a public scan archive.
+Set `PublicScansEnabled` to `false` to disable URL scanning entirely, or set
 `ScanAllowedHosts` to a comma-separated allowlist of hosts that may be scanned.
 
 ## After The Stack Is Created
@@ -110,10 +112,9 @@ The public directory experience is enabled by default. Set
 1. Wait for the UI, API, and worker ECS services to become healthy.
 2. Open the `WebsiteUrl` stack output.
 3. Verify the API at `<WebsiteUrl>/api/health`.
-4. Open the public checker, paste a page or website URL, and choose a crawl
+4. Open the checker, paste a page or website URL, and choose a crawl
    size.
-5. Use the directory to browse the latest completed score, dated scans, page
-   findings, and historical improvement.
+5. Open the direct report after the scan completes.
 
 The API returns quickly when a site scan is submitted. The worker crawls
 bounded same-host pages through Redis, records progress and failures, runs the
@@ -127,16 +128,23 @@ starting the API or worker. Set `LanguageToolImage` to choose a different
 published image. Set `LanguageToolUpstreamUrl` only when using an external
 provider; doing so omits the sidecars and retains the smaller task sizes.
 
+The API task also runs the OpenADA veraPDF sidecar by default and connects to it
+at `http://127.0.0.1:8011`. ECS waits for `/health` before starting the API.
+The sidecar validates PDF/UA-1 with veraPDF 1.30.2, enforces a 10 MB decoded
+file limit, and is never exposed through the load balancer. Set `VeraPdfImage`
+to a different published build or `VeraPdfUpstreamUrl` to use an external
+compatible wrapper.
+
 ## What OpenADA Provides
 
 - A web UI for page checks and bounded website scans.
 - A combined REST API for accessibility and language-quality checks.
 - LanguageTool-compatible language checking.
 - Task-local LanguageTool sidecars for the API and scan worker.
+- Task-local veraPDF PDF/UA-1 validation for the API.
 - axe-core accessibility findings.
 - An asynchronous crawler with progress updates.
-- A public directory of sites, scans, pages, scores, and findings.
-- Date-based scan history so teams can compare improvement over time.
+- Durable private scan jobs and direct reports.
 - MCP access for AI tools, including the separate
   [OpenADA MCP AgentCore](../agentcore/README.md) product.
 

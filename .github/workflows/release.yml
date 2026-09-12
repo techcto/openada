@@ -19,6 +19,8 @@ env:
   UI_REPOSITORY: ${{ vars.OPENADA_UI_REPOSITORY || 'solodev/openada-ui' }}
   API_REPOSITORY: ${{ vars.OPENADA_API_REPOSITORY || 'solodev/openada-api' }}
   WORKER_REPOSITORY: ${{ vars.OPENADA_WORKER_REPOSITORY || 'solodev/openada-worker' }}
+  LANGUAGETOOL_REPOSITORY: ${{ vars.OPENADA_LANGUAGETOOL_REPOSITORY || 'solodev/openada-languagetool' }}
+  VERAPDF_REPOSITORY: ${{ vars.OPENADA_VERAPDF_REPOSITORY || 'solodev/openada-verapdf' }}
   OPENADA_CFT_BUCKET: ${{ vars.OPENADA_CFT_BUCKET || 'openada-us' }}
 
 jobs:
@@ -27,6 +29,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Resolve release version
         id: version
@@ -95,6 +99,27 @@ jobs:
           sbom: false
           tags: ${{ env.MP_AWS_ECR }}/${{ env.WORKER_REPOSITORY }}:${{ steps.version.outputs.value }}
 
+      - name: Build and publish LanguageTool sidecar image
+        uses: docker/build-push-action@v6
+        with:
+          context: submodules/docker-languagetool
+          platforms: linux/amd64
+          push: true
+          provenance: false
+          sbom: false
+          tags: ${{ env.MP_AWS_ECR }}/${{ env.LANGUAGETOOL_REPOSITORY }}:${{ steps.version.outputs.value }}
+
+      - name: Build and publish veraPDF sidecar image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: devops/docker/Dockerfile.verapdf
+          platforms: linux/amd64
+          push: true
+          provenance: false
+          sbom: false
+          tags: ${{ env.MP_AWS_ECR }}/${{ env.VERAPDF_REPOSITORY }}:${{ steps.version.outputs.value }}
+
       - name: Publish versioned CloudFormation templates
         env:
           RELEASE_VERSION: ${{ steps.version.outputs.value }}
@@ -106,6 +131,8 @@ jobs:
               -e "s|{UI_REPOSITORY}|$UI_REPOSITORY|g" \
               -e "s|{API_REPOSITORY}|$API_REPOSITORY|g" \
               -e "s|{WORKER_REPOSITORY}|$WORKER_REPOSITORY|g" \
+              -e "s|{LANGUAGETOOL_REPOSITORY}|$LANGUAGETOOL_REPOSITORY|g" \
+              -e "s|{VERAPDF_REPOSITORY}|$VERAPDF_REPOSITORY|g" \
               -e "s|{RELEASE_VERSION}|$RELEASE_VERSION|g" \
               "devops/cloudformation/$template" > "$rendered"
             aws s3 cp "$rendered" \

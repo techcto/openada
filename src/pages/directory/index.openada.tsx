@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import type { NextPage } from 'next'
+import type { GetServerSideProps, NextPage } from 'next'
 import type { ReactNode } from 'react'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
@@ -400,3 +400,5 @@ function FindingSection({ title, count, empty, children }: { title: string; coun
 }
 
 export default DirectoryPage
+
+export const getServerSideProps: GetServerSideProps = async () => ({ notFound: true })

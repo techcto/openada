@@ -18,7 +18,7 @@ const ApiReferencePage: NextPage = () => {
     <>
       <Head>
         <title>OpenADA public API reference</title>
-        <meta name="description" content="OpenADA API reference for accessibility, language, URL scanning, and public directory integrations." />
+        <meta name="description" content="OpenADA API reference for web accessibility, PDF/UA, language, and URL scanning integrations." />
       </Head>
       <OpenAdaShell current="api">
       <main className="api-shell">
@@ -33,8 +33,8 @@ const ApiReferencePage: NextPage = () => {
             <Endpoint method="POST" path="/api/v1/check" title="Combined check" description="Run axe-core accessibility checks and LanguageTool-compatible language checks against HTML, text, or a public URL." example={combinedExample} />
             <Endpoint method="POST" path="/api/v1/scans" title="Queue a public site scan" description="Start an asynchronous crawl of up to 100 same-host pages. The response includes a job id for progress polling." example={scanExample} />
             <Endpoint method="GET" path="/api/v1/scans/{jobId}" title="Scan progress and report" description="Poll the queued scan, then use the completed result and scan history to build a report." example={scanStatusExample} />
-            <Endpoint method="GET" path="/api/v1/directory" title="Browse the directory" description="List public sites. Add ?site=example.com to retrieve its observed pages and scan history." />
             <Endpoint method="POST" path="/api/v1/ada/check" title="ADA only" description="Run axe-core WCAG checks against submitted HTML." />
+            <Endpoint method="POST" path="/api/v1/pdf/check" title="PDF/UA-1" description="Validate a base64-encoded PDF with veraPDF and return a normalized summary plus the raw report." />
             <Endpoint method="POST" path="/api/v2/check" title="LanguageTool compatible" description="Use OpenADA as a LanguageTool-compatible spelling and grammar provider." />
           </section>
 

@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { applyCors, handleOptions } from '@lib/openada/http'
+import { applyCors, handleOptions, publicDirectoryEnabled } from '@lib/openada/http'
 import { getScan, getSite, listSites } from '@lib/openada/directory'
 import { hostnamesMatch } from '@lib/openada/host'
 import { getScanJob, listScanJobsForHost } from '@lib/openada/scan-jobs'
@@ -35,6 +35,11 @@ function jobSummary(job: JobLike) {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (handleOptions(req, res)) return
   applyCors(req, res)
+
+  if (!publicDirectoryEnabled()) {
+    res.status(404).json({ error: { code: 'not_found', message: 'The public directory is disabled.' } })
+    return
+  }
 
   try {
     if (req.method !== 'GET') {

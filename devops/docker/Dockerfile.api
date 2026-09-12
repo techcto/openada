@@ -19,6 +19,7 @@ COPY api/pages/api/v1/*.openada.ts ./pages/api/v1/
 COPY api/pages/api/v1/scans/*.openada.ts ./pages/api/v1/scans/
 COPY api/pages/api/v1/ada/*.openada.ts ./pages/api/v1/ada/
 COPY api/pages/api/v1/language/*.openada.ts ./pages/api/v1/language/
+COPY api/pages/api/v1/pdf/*.openada.ts ./pages/api/v1/pdf/
 COPY api/pages/api/v2/*.openada.ts ./pages/api/v2/
 
 COPY ./devops/docker/entrypoint/api-docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh

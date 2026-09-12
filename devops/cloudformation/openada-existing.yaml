@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: OpenADA UI, API, and public scan directory on an existing ECS cluster and ALB.
+Description: OpenADA accessibility, language, and PDF/UA APIs on an existing ECS cluster and ALB.
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -25,10 +25,13 @@ Metadata:
           - EnvironmentName
           - ApiKeys
           - PublicScansEnabled
+          - PublicDirectoryEnabled
           - ScanAllowedHosts
           - CorsAllowedOrigins
           - LanguageToolUpstreamUrl
           - LanguageToolImage
+          - VeraPdfUpstreamUrl
+          - VeraPdfImage
           - RedisHost
           - RedisPort
           - RedisPassword
@@ -54,6 +57,8 @@ Metadata:
         default: Marketplace worker image (leave unchanged)
       LanguageToolImage:
         default: LanguageTool image
+      VeraPdfImage:
+        default: veraPDF sidecar image
 
 Parameters:
   EnvironmentName:
@@ -115,8 +120,16 @@ Parameters:
     Description: Optional external LanguageTool base URL. When empty, LanguageTool runs as a task-local API and worker sidecar.
   LanguageToolImage:
     Type: String
-    Default: 'techcto/languagetool:latest'
-    Description: Public LanguageTool image used by the task-local sidecars.
+    Default: '{MP_AWS_ECR}/{LANGUAGETOOL_REPOSITORY}:{RELEASE_VERSION}'
+    Description: Marketplace ECR LanguageTool image used by the task-local sidecars.
+  VeraPdfUpstreamUrl:
+    Type: String
+    Default: ''
+    Description: Optional external veraPDF wrapper URL. When empty, veraPDF runs as a task-local API sidecar.
+  VeraPdfImage:
+    Type: String
+    Default: '{MP_AWS_ECR}/{VERAPDF_REPOSITORY}:{RELEASE_VERSION}'
+    Description: OpenADA veraPDF PDF/UA sidecar image.
   CorsAllowedOrigins:
     Type: String
     Default: '*'
@@ -124,7 +137,12 @@ Parameters:
     Type: String
     Default: 'true'
     AllowedValues: ['true', 'false']
-    Description: Enable anonymous URL submissions to the public scan directory.
+    Description: Enable anonymous public URL scan submissions.
+  PublicDirectoryEnabled:
+    Type: String
+    Default: 'false'
+    AllowedValues: ['true', 'false']
+    Description: Enable read access to the legacy public scan directory API.
   ScanAllowedHosts:
     Type: String
     Default: ''
@@ -164,6 +182,7 @@ Parameters:
 
 Conditions:
   UseBundledLanguageTool: !Equals [!Ref LanguageToolUpstreamUrl, '']
+  UseBundledVeraPdf: !Equals [!Ref VeraPdfUpstreamUrl, '']
 
 Resources:
   ServiceSecurityGroup:
@@ -360,8 +379,8 @@ Resources:
     Type: AWS::ECS::TaskDefinition
     Properties:
       Family: !Sub '${EnvironmentName}-api'
-      Cpu: !If [UseBundledLanguageTool, '1024', '512']
-      Memory: !If [UseBundledLanguageTool, '3072', '1024']
+      Cpu: !If [UseBundledVeraPdf, '2048', !If [UseBundledLanguageTool, '1024', '512']]
+      Memory: !If [UseBundledVeraPdf, '4096', !If [UseBundledLanguageTool, '3072', '1024']]
       NetworkMode: awsvpc
       RequiresCompatibilities: [FARGATE]
       ExecutionRoleArn: !GetAtt ExecutionRole.Arn
@@ -370,11 +389,17 @@ Resources:
         - Name: api
           Image: !Ref ApiImage
           Essential: true
-          DependsOn: !If
-            - UseBundledLanguageTool
-            - - ContainerName: languagetool
+          DependsOn:
+            - !If
+              - UseBundledLanguageTool
+              - ContainerName: languagetool
                 Condition: HEALTHY
-            - !Ref AWS::NoValue
+              - !Ref AWS::NoValue
+            - !If
+              - UseBundledVeraPdf
+              - ContainerName: verapdf
+                Condition: HEALTHY
+              - !Ref AWS::NoValue
           PortMappings:
             - ContainerPort: 3001
               Protocol: tcp
@@ -394,6 +419,11 @@ Resources:
                 - UseBundledLanguageTool
                 - 'http://127.0.0.1:8010'
                 - !Ref LanguageToolUpstreamUrl
+            - Name: VERAPDF_UPSTREAM_URL
+              Value: !If
+                - UseBundledVeraPdf
+                - 'http://127.0.0.1:8011'
+                - !Ref VeraPdfUpstreamUrl
             - Name: OPENADA_SITES_TABLE
               Value: !Ref SitesTable
             - Name: OPENADA_PAGES_TABLE
@@ -412,6 +442,8 @@ Resources:
               Value: !Ref RedisPassword
             - Name: OPENADA_PUBLIC_SCANS_ENABLED
               Value: !Ref PublicScansEnabled
+            - Name: OPENADA_PUBLIC_DIRECTORY_ENABLED
+              Value: !Ref PublicDirectoryEnabled
             - Name: OPENADA_SCAN_ALLOWED_HOSTS
               Value: !Ref ScanAllowedHosts
           LogConfiguration:
@@ -442,6 +474,27 @@ Resources:
                 awslogs-group: !Ref ApiLogGroup
                 awslogs-region: !Ref AWS::Region
                 awslogs-stream-prefix: languagetool
+          - !Ref AWS::NoValue
+        - !If
+          - UseBundledVeraPdf
+          - Name: verapdf
+            Image: !Ref VeraPdfImage
+            Essential: true
+            Environment:
+              - Name: JAVA_OPTS
+                Value: '-Xms256m -Xmx1536m'
+            HealthCheck:
+              Command: [CMD-SHELL, "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8011/health', timeout=4)\" || exit 1"]
+              Interval: 30
+              Timeout: 10
+              Retries: 3
+              StartPeriod: 30
+            LogConfiguration:
+              LogDriver: awslogs
+              Options:
+                awslogs-group: !Ref ApiLogGroup
+                awslogs-region: !Ref AWS::Region
+                awslogs-stream-prefix: verapdf
           - !Ref AWS::NoValue
 
   UiService:

@@ -57,12 +57,7 @@ const ScanPage: NextPage = () => {
         if (cancelled) return
         setStatus(data)
         if (data.status === 'completed') {
-          const hostname = (() => {
-            try { return new URL(data.url).hostname } catch { return '' }
-          })()
-          await router.replace(hostname
-            ? `/directory/${encodeURIComponent(hostname)}/scans/${encodeURIComponent(jobId)}`
-            : `/directory?scan=${encodeURIComponent(jobId)}`)
+          await router.replace(`/report?jobId=${encodeURIComponent(jobId)}`)
           return
         }
         if (data.status === 'failed') {

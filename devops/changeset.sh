@@ -7,24 +7,28 @@ set -euo pipefail
 : "${UI_REPOSITORY:?Set UI_REPOSITORY to the UI ECR repository.}"
 : "${API_REPOSITORY:?Set API_REPOSITORY to the API ECR repository.}"
 : "${WORKER_REPOSITORY:?Set WORKER_REPOSITORY to the worker ECR repository.}"
+: "${LANGUAGETOOL_REPOSITORY:?Set LANGUAGETOOL_REPOSITORY to the LanguageTool ECR repository.}"
+: "${VERAPDF_REPOSITORY:?Set VERAPDF_REPOSITORY to the veraPDF ECR repository.}"
 
 DETAILS_JSON="$(jq -n \
   --arg version "$RELEASE_VERSION" \
   --arg ui "$MP_AWS_ECR/$UI_REPOSITORY:$RELEASE_VERSION" \
   --arg api "$MP_AWS_ECR/$API_REPOSITORY:$RELEASE_VERSION" \
   --arg worker "$MP_AWS_ECR/$WORKER_REPOSITORY:$RELEASE_VERSION" \
+  --arg languagetool "$MP_AWS_ECR/$LANGUAGETOOL_REPOSITORY:$RELEASE_VERSION" \
+  --arg verapdf "$MP_AWS_ECR/$VERAPDF_REPOSITORY:$RELEASE_VERSION" \
   '{
     Version: {
       VersionTitle: $version,
-      ReleaseNotes: ("OpenADA " + $version + ": accessibility API, public scan archive, MCP integration, and container updates.")
+      ReleaseNotes: ("OpenADA " + $version + ": web accessibility, LanguageTool, PDF/UA validation, MCP integration, and container updates.")
     },
     DeliveryOptions: [{
       DeliveryOptionTitle: "ECS container images",
       Details: {
         EcrDeliveryOptionDetails: {
-          ContainerImages: [$ui, $api, $worker],
+          ContainerImages: [$ui, $api, $worker, $languagetool, $verapdf],
           CompatibleServices: ["ECS"],
-          Description: "OpenADA UI, API, and asynchronous scan worker containers for Amazon ECS.",
+          Description: "OpenADA UI, API, scan worker, LanguageTool, and veraPDF sidecar containers for Amazon ECS.",
           UsageInstructions: "Deploy the OpenADA containers with the CloudFormation template and instructions at https://github.com/techcto/openada/tree/main/devops/cloudformation"
         }
       }

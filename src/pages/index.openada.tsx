@@ -330,7 +330,13 @@ const HomePage: NextPage = () => {
             icon={<Languages size={18} aria-hidden />}
             title="LanguageTool"
             path="POST /api/v2/check"
-            description="LanguageTool-compatible endpoint for CMS providers."
+            description="Real spelling and grammar analysis for CMS providers."
+          />
+          <EndpointCard
+            icon={<FileJson size={18} aria-hidden />}
+            title="PDF/UA"
+            path="POST /api/v1/pdf/check"
+            description="veraPDF structural validation for uploaded PDFs."
           />
         </section>
 

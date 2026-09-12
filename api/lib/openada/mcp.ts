@@ -6,6 +6,7 @@ import { checkLanguage } from '@lib/openada/language'
 import { fetchRemoteHtml } from '@lib/openada/remote'
 import { getScanJob, listScanJobsForHost } from '@lib/openada/scan-jobs'
 import { startQueuedScan } from '@lib/openada/scan-service'
+import { publicDirectoryEnabled } from '@lib/openada/http'
 
 const MAX_HTML = 200000
 const MAX_TEXT = 20000
@@ -189,6 +190,7 @@ export function createOpenAdaMcpServer(): McpServer {
         language,
         wcagTags: normalizeTags(wcagTags),
         title,
+        isPrivate: !publicDirectoryEnabled(),
       })
       return toolResult({
         jobId: job.id,
@@ -238,6 +240,7 @@ export function createOpenAdaMcpServer(): McpServer {
     outputSchema: directoryOutputSchema,
   }, async ({ site, scanId, pageId }) => {
     try {
+      if (!publicDirectoryEnabled()) return toolError('The public directory is disabled.')
       if (!site?.trim()) return toolResult({ sites: await listSites() })
       let siteId = site.trim().toLowerCase()
       let detail = await getSite(siteId)

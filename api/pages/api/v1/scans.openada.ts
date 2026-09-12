@@ -5,6 +5,7 @@ import {
   enforceScanHost,
   handleOptions,
   publicScansEnabled,
+  publicDirectoryEnabled,
   readStringParam,
   readBooleanParam,
   requirePost,
@@ -37,7 +38,7 @@ function scanOptions(body: NextApiRequest['body']) {
       .map((tag) => tag.trim())
       .filter(Boolean)
 
-  return { url, title, language, maxPages, wcagTags, isPrivate: readBooleanParam(body?.private, false) }
+  return { url, title, language, maxPages, wcagTags, isPrivate: readBooleanParam(body?.private, false) || !publicDirectoryEnabled() }
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

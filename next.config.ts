@@ -30,27 +30,11 @@ const nextConfig: NextConfig = {
       },
     ]
 
-    const directoryRewrites = [
-      {
-        source: '/directory/:site/scans/:scan/pages/:page',
-        destination: '/directory?site=:site&scan=:scan&page=:page',
-      },
-      {
-        source: '/directory/:site/scans/:scan',
-        destination: '/directory?site=:site&scan=:scan',
-      },
-      {
-        source: '/directory/:site',
-        destination: '/directory?site=:site',
-      },
-    ]
-
     // Production traffic stays same-origin so the ALB can route /api/* to ECS.
-    if (process.env.NODE_ENV === 'production') return [...publicPageRewrites, ...directoryRewrites]
+    if (process.env.NODE_ENV === 'production') return publicPageRewrites
 
     return [
       ...publicPageRewrites,
-      ...directoryRewrites,
       {
         source: '/api/:path*',
         destination: `${apiOrigin}/api/:path*`,

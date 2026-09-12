@@ -1,0 +1,36 @@
+FROM eclipse-temurin:21-jdk-alpine AS installer
+
+ARG VERAPDF_VERSION=1.30.2
+ARG VERAPDF_SHA256=6cc6341cb1af644044054b81f00a6590a7918abb18f762243de115258bcad838
+WORKDIR /tmp/verapdf
+COPY devops/verapdf/docker-install.xml ./docker-install.xml
+RUN wget -q -O installer.zip "https://software.verapdf.org/releases/1.30/verapdf-greenfield-${VERAPDF_VERSION}-installer.zip" \
+    && echo "${VERAPDF_SHA256}  installer.zip" | sha256sum -c - \
+    && unzip -q installer.zip \
+    && java -jar "verapdf-greenfield-${VERAPDF_VERSION}/verapdf-izpack-installer-${VERAPDF_VERSION}.jar" docker-install.xml
+
+FROM eclipse-temurin:21-jdk-alpine
+
+LABEL org.opencontainers.image.title="OpenADA veraPDF sidecar" \
+      org.opencontainers.image.description="Private PDF/UA-1 validation sidecar for OpenADA" \
+      org.opencontainers.image.source="https://github.com/techcto/openada" \
+      org.opencontainers.image.version="1.30.2"
+
+RUN apk add --no-cache python3 \
+    && addgroup -S verapdf \
+    && adduser -S -G verapdf -h /opt/verapdf verapdf
+
+COPY --from=installer --chown=verapdf:verapdf /opt/verapdf/ /opt/verapdf/
+COPY --chown=verapdf:verapdf devops/verapdf/server.py /opt/openada/server.py
+
+ENV PORT=8011 \
+    VERAPDF_TIMEOUT_SECONDS=30 \
+    VERAPDF_MAX_PDF_BYTES=10485760
+
+USER verapdf
+EXPOSE 8011
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8011/health', timeout=4)"
+
+ENTRYPOINT ["python3", "/opt/openada/server.py"]

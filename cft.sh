@@ -26,16 +26,19 @@ Deploy parameters:
   OPENADA_UI_IMAGE               UI ECR image URI
   OPENADA_API_IMAGE              API ECR image URI
   OPENADA_WORKER_IMAGE           Scan worker ECR image URI
-  OPENADA_LANGUAGETOOL_IMAGE     LanguageTool image (default: techcto/languagetool:latest)
+  OPENADA_LANGUAGETOOL_IMAGE     Versioned Marketplace ECR LanguageTool image
+  OPENADA_VERAPDF_IMAGE          OpenADA veraPDF sidecar image
   OPENADA_DESIRED_COUNT          Optional ECS desired count
   OPENADA_CERTIFICATE_ARN        Optional ACM certificate ARN
   OPENADA_API_KEYS               Optional comma-separated API keys
   OPENADA_CORS_ORIGINS            Optional CORS allowlist
   OPENADA_PUBLIC_SCANS_ENABLED    true or false (default: true)
+  OPENADA_PUBLIC_DIRECTORY_ENABLED true or false (default: false)
   OPENADA_SCAN_ALLOWED_HOSTS       Optional comma-separated scan host allowlist
   OPENADA_REDIS_AUTH_TOKEN         Optional Redis AUTH token for a new standalone stack
   OPENADA_OPENAI_APPS_CHALLENGE_TOKEN Optional OpenAI Apps domain verification token
   LANGUAGETOOL_UPSTREAM_URL       Optional external override; skips the private Fargate service
+  VERAPDF_UPSTREAM_URL            Optional external override; skips the task-local veraPDF sidecar
   OPENADA_CFT_BUCKET              S3 bucket for CFT uploads (default: openada-us)
   AWS_PROFILE                     Optional AWS CLI profile
 EOF
@@ -70,7 +73,8 @@ offline_test() {
     'UiImage' \
     'ApiImage' \
     'WorkerImage' \
-    'LanguageToolImage'; do
+    'LanguageToolImage' \
+    'VeraPdfImage'; do
     rg -q "$required" "$TEMPLATE" || die "Template check failed: missing $required"
   done
 
@@ -78,6 +82,7 @@ offline_test() {
     "$ROOT_DIR/devops/docker/Dockerfile.app" \
     "$ROOT_DIR/devops/docker/Dockerfile.api" \
     "$ROOT_DIR/devops/docker/Dockerfile.worker" \
+    "$ROOT_DIR/devops/docker/Dockerfile.verapdf" \
     "$ROOT_DIR/package-lock.json" \
     "$ROOT_DIR/api/package-lock.json"; do
     [[ -f "$required_file" ]] || die "Build input missing: $required_file"
@@ -147,12 +152,15 @@ deploy() {
 
   [[ -n "${OPENADA_DESIRED_COUNT:-}" ]] && parameters+=("DesiredCount=$OPENADA_DESIRED_COUNT")
   [[ -n "${OPENADA_LANGUAGETOOL_IMAGE:-}" ]] && parameters+=("LanguageToolImage=$OPENADA_LANGUAGETOOL_IMAGE")
+  [[ -n "${OPENADA_VERAPDF_IMAGE:-}" ]] && parameters+=("VeraPdfImage=$OPENADA_VERAPDF_IMAGE")
   [[ -n "${OPENADA_CERTIFICATE_ARN:-}" ]] && parameters+=("CertificateArn=$OPENADA_CERTIFICATE_ARN")
   [[ -n "${OPENADA_API_KEYS:-}" ]] && parameters+=("ApiKeys=$OPENADA_API_KEYS")
   [[ -n "${OPENADA_CORS_ORIGINS:-}" ]] && parameters+=("CorsAllowedOrigins=$OPENADA_CORS_ORIGINS")
   [[ -n "${OPENADA_PUBLIC_SCANS_ENABLED:-}" ]] && parameters+=("PublicScansEnabled=$OPENADA_PUBLIC_SCANS_ENABLED")
+  [[ -n "${OPENADA_PUBLIC_DIRECTORY_ENABLED:-}" ]] && parameters+=("PublicDirectoryEnabled=$OPENADA_PUBLIC_DIRECTORY_ENABLED")
   [[ -n "${OPENADA_SCAN_ALLOWED_HOSTS:-}" ]] && parameters+=("ScanAllowedHosts=$OPENADA_SCAN_ALLOWED_HOSTS")
   [[ -n "${LANGUAGETOOL_UPSTREAM_URL:-}" ]] && parameters+=("LanguageToolUpstreamUrl=$LANGUAGETOOL_UPSTREAM_URL")
+  [[ -n "${VERAPDF_UPSTREAM_URL:-}" ]] && parameters+=("VeraPdfUpstreamUrl=$VERAPDF_UPSTREAM_URL")
   [[ -n "${OPENADA_REDIS_AUTH_TOKEN:-}" ]] && parameters+=("RedisAuthToken=$OPENADA_REDIS_AUTH_TOKEN")
   [[ -n "${OPENADA_OPENAI_APPS_CHALLENGE_TOKEN:-}" ]] && parameters+=("OpenAiAppsChallengeToken=$OPENADA_OPENAI_APPS_CHALLENGE_TOKEN")
 

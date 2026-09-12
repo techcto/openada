@@ -1,7 +1,7 @@
 # OpenADA Quickstart
 
-OpenADA provides accessibility and language-quality checks for public web pages,
-websites, APIs, and AI-agent workflows.
+OpenADA provides web accessibility, PDF/UA-1, and language-quality checks for
+websites, publishing systems, APIs, and AI-agent workflows.
 
 ## Try The Hosted Service
 
@@ -29,7 +29,9 @@ Open the UI at `http://localhost:3000` and the API at
 The stack builds the pinned `docker-languagetool` submodule and routes API and
 worker language checks to it. Existing clones can initialize it with
 `git submodule update --init --recursive`. Set `LANGUAGETOOL_UPSTREAM_URL` only
-to override the local server with a separately managed provider.
+to override the local server with a separately managed provider. It also builds
+the veraPDF sidecar and routes PDF checks to it; set `VERAPDF_UPSTREAM_URL` to
+use a separately managed compatible wrapper.
 
 ## Prepare OpenADA Private
 
@@ -75,7 +77,8 @@ and post-launch checks.
 
 The standalone product includes the UI, API, asynchronous scan worker, Redis
 queue, DynamoDB directory archive, CloudWatch logs, and an Application Load
-Balancer. It also runs LanguageTool as private API and worker sidecars by default.
+Balancer. It runs LanguageTool as private API and worker sidecars and veraPDF as
+a private API sidecar by default. The public directory is disabled by default.
 Private deployments can require API keys and restrict crawl hosts.
 
 ## Connect AgentCore
@@ -140,7 +143,6 @@ returned job ID, and call `openada_get_scan_status` until the status is
 - [API reference](https://openada.us/api-reference)
 - [MCP connection guide](https://openada.us/docs/mcp)
 - [ADA guidance](https://openada.us/docs)
-- [Public directory](https://openada.us/directory)
 - [Source repository](https://github.com/techcto/openada)
 
 OpenADA results are engineering signals for remediation. They are not a legal

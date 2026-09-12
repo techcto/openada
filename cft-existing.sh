@@ -30,12 +30,15 @@ Required deployment values:
 
 Optional values:
   OPENADA_DESIRED_COUNT
-  OPENADA_LANGUAGETOOL_IMAGE      LanguageTool image (default: techcto/languagetool:latest)
+  OPENADA_LANGUAGETOOL_IMAGE      Versioned Marketplace ECR LanguageTool image
+  OPENADA_VERAPDF_IMAGE           OpenADA veraPDF sidecar image
   OPENADA_ASSIGN_PUBLIC_IP        ENABLED or DISABLED
   OPENADA_API_KEYS
   LANGUAGETOOL_UPSTREAM_URL       Optional external override; skips the private Fargate service
+  VERAPDF_UPSTREAM_URL            Optional external override; skips the task-local veraPDF sidecar
   OPENADA_CORS_ORIGINS
   OPENADA_PUBLIC_SCANS_ENABLED
+  OPENADA_PUBLIC_DIRECTORY_ENABLED
   OPENADA_SCAN_ALLOWED_HOSTS
   OPENADA_UI_LISTENER_PRIORITY
   OPENADA_API_LISTENER_PRIORITY
@@ -72,7 +75,8 @@ offline_test() {
     'UiImage' \
     'ApiImage' \
     'WorkerImage' \
-    'LanguageToolImage'; do
+    'LanguageToolImage' \
+    'VeraPdfImage'; do
     rg -q "$required" "$TEMPLATE" || die "Template check failed: missing $required"
   done
 
@@ -126,11 +130,14 @@ deploy() {
 
   [[ -n "${OPENADA_DESIRED_COUNT:-}" ]] && parameters+=("DesiredCount=$OPENADA_DESIRED_COUNT")
   [[ -n "${OPENADA_LANGUAGETOOL_IMAGE:-}" ]] && parameters+=("LanguageToolImage=$OPENADA_LANGUAGETOOL_IMAGE")
+  [[ -n "${OPENADA_VERAPDF_IMAGE:-}" ]] && parameters+=("VeraPdfImage=$OPENADA_VERAPDF_IMAGE")
   [[ -n "${OPENADA_ASSIGN_PUBLIC_IP:-}" ]] && parameters+=("AssignPublicIp=$OPENADA_ASSIGN_PUBLIC_IP")
   [[ -n "${OPENADA_API_KEYS:-}" ]] && parameters+=("ApiKeys=$OPENADA_API_KEYS")
   [[ -n "${LANGUAGETOOL_UPSTREAM_URL:-}" ]] && parameters+=("LanguageToolUpstreamUrl=$LANGUAGETOOL_UPSTREAM_URL")
+  [[ -n "${VERAPDF_UPSTREAM_URL:-}" ]] && parameters+=("VeraPdfUpstreamUrl=$VERAPDF_UPSTREAM_URL")
   [[ -n "${OPENADA_CORS_ORIGINS:-}" ]] && parameters+=("CorsAllowedOrigins=$OPENADA_CORS_ORIGINS")
   [[ -n "${OPENADA_PUBLIC_SCANS_ENABLED:-}" ]] && parameters+=("PublicScansEnabled=$OPENADA_PUBLIC_SCANS_ENABLED")
+  [[ -n "${OPENADA_PUBLIC_DIRECTORY_ENABLED:-}" ]] && parameters+=("PublicDirectoryEnabled=$OPENADA_PUBLIC_DIRECTORY_ENABLED")
   [[ -n "${OPENADA_OPENAI_APPS_CHALLENGE_TOKEN:-}" ]] && parameters+=("OpenAiAppsChallengeToken=$OPENADA_OPENAI_APPS_CHALLENGE_TOKEN")
   [[ -n "${OPENADA_SCAN_ALLOWED_HOSTS:-}" ]] && parameters+=("ScanAllowedHosts=$OPENADA_SCAN_ALLOWED_HOSTS")
   [[ -n "${OPENADA_UI_LISTENER_PRIORITY:-}" ]] && parameters+=("UiListenerPriority=$OPENADA_UI_LISTENER_PRIORITY")
