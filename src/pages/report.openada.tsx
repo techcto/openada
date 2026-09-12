@@ -94,7 +94,14 @@ const ReportPage: NextPage = () => {
 
   const report = job?.result
   const selectedPageIndex = typeof router.query.page === 'string' ? Number(router.query.page) : -1
-  const selectedPage = Number.isInteger(selectedPageIndex) && selectedPageIndex >= 0 ? report?.pages?.[selectedPageIndex] : undefined
+  const selectedPageSummary = Number.isInteger(selectedPageIndex) && selectedPageIndex >= 0 ? report?.pages?.[selectedPageIndex] : undefined
+  const selectedPage = selectedPageSummary && selectedPageIndex === 0
+    ? {
+        ...selectedPageSummary,
+        ada: { ...selectedPageSummary.ada, violations: selectedPageSummary.ada.violations || report?.ada?.violations },
+        language: { ...selectedPageSummary.language, issues: selectedPageSummary.language.issues || report?.language?.issues },
+      }
+    : selectedPageSummary
   const selectedHistory = history.find((item) => item.jobId === jobId)
   const selectedIndex = history.findIndex((item) => item.jobId === jobId)
   const previous = selectedIndex >= 0 ? history.slice(selectedIndex + 1).find((item) => item.status === 'completed' && item.score !== null) : undefined
