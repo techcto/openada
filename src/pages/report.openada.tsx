@@ -3,7 +3,7 @@ import type { NextPage } from 'next'
 import type { ReactNode } from 'react'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { ArrowLeft, CalendarDays, CheckCircle2, FileDown, LoaderCircle, Printer, ScanSearch, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, CalendarDays, CheckCircle2, ExternalLink, FileDown, LoaderCircle, Printer, ScanSearch, ShieldCheck } from 'lucide-react'
 import { OpenAdaShell } from '@components/OpenAdaShell'
 
 type HistoryItem = {
@@ -24,7 +24,12 @@ type Report = {
   ada?: { score: number; grade: string; violationsCount: number; violations?: Array<{ id?: string; impact?: string; help?: string }> } | null
   language?: { errors: number; issues?: Array<{ message?: string; word?: string; fix?: string | null }> }
   crawl?: { pagesScanned: number; maxPages: number; errors: Array<{ url: string; message: string }> }
-  pages?: Array<{ sourceUrl: string; title: string; ada: { score: number; grade: string; violationsCount: number }; language: { errors: number } }>
+  pages?: Array<{
+    sourceUrl: string
+    title: string
+    ada: { score: number; grade: string; violationsCount: number; violations?: Array<{ id?: string; impact?: string; help?: string; description?: string; failureSummary?: string }> }
+    language: { errors: number; issues?: Array<{ type?: string; ruleId?: string; message?: string; word?: string; fix?: string | null }> }
+  }>
 }
 
 type JobResponse = {
@@ -88,6 +93,8 @@ const ReportPage: NextPage = () => {
   }, [router, jobId])
 
   const report = job?.result
+  const selectedPageIndex = typeof router.query.page === 'string' ? Number(router.query.page) : -1
+  const selectedPage = Number.isInteger(selectedPageIndex) && selectedPageIndex >= 0 ? report?.pages?.[selectedPageIndex] : undefined
   const selectedHistory = history.find((item) => item.jobId === jobId)
   const selectedIndex = history.findIndex((item) => item.jobId === jobId)
   const previous = selectedIndex >= 0 ? history.slice(selectedIndex + 1).find((item) => item.status === 'completed' && item.score !== null) : undefined
@@ -109,7 +116,8 @@ const ReportPage: NextPage = () => {
               <header className="report-heading"><p className="eyebrow">OpenADA accessibility report</p><h1>{new URL(report.sourceUrl || job?.url || 'https://openada.local').hostname}</h1><p className="report-url">{report.sourceUrl || job?.url}</p><p className="report-date">Scanned {formatDate(selectedHistory?.completedAt || selectedHistory?.createdAt || '')}</p></header>
               <section className="scan-picker" aria-label="Scan history"><CalendarDays size={18} aria-hidden /><label htmlFor="scan-history">View scan</label><select id="scan-history" value={jobId} onChange={(event) => router.push(`/report?jobId=${encodeURIComponent(event.target.value)}`)}>{history.filter((item) => item.status === 'completed').map((item) => <option value={item.jobId} key={item.jobId}>{formatDate(item.completedAt || item.createdAt)} - {item.grade || '--'} ({item.score ?? '--'}/100)</option>)}</select>{scoreChange !== null && <span className={scoreChange >= 0 ? 'change-positive' : 'change-negative'}>{scoreChange >= 0 ? '+' : ''}{scoreChange} points since previous scan</span>}</section>
               <section className="report-metrics"><Metric label="ADA score" value={`${report.ada?.score ?? '--'}`} detail={report.ada?.grade || '--'} icon={<ShieldCheck size={18} aria-hidden />} /><Metric label="WCAG issues" value={`${report.ada?.violationsCount ?? 0}`} detail="accessibility findings" icon={<ScanSearch size={18} aria-hidden />} /><Metric label="Language issues" value={`${report.language?.errors ?? 0}`} detail="readability findings" icon={<CheckCircle2 size={18} aria-hidden />} /><Metric label="Pages scanned" value={`${report.crawl?.pagesScanned ?? report.pages?.length ?? 0}`} detail={`of ${report.crawl?.maxPages ?? report.pages?.length ?? 0} requested`} icon={<CalendarDays size={18} aria-hidden />} /></section>
-              <section className="report-section"><div className="section-title"><h2>Pages in this scan</h2><span>{report.pages?.length || 0} page summaries</span></div><div className="page-table">{(report.pages || []).map((page) => <a href={page.sourceUrl} target="_blank" rel="noreferrer" className="page-row" key={page.sourceUrl}><span><strong>{page.title || page.sourceUrl}</strong><small>{page.sourceUrl}</small></span><span><b>{page.ada.grade}</b><small>{page.ada.score}/100 · {page.ada.violationsCount} WCAG issues · {page.language.errors} language issues</small></span></a>)}</div></section>
+              <section className="report-section"><div className="section-title"><h2>Pages in this scan</h2><span>{report.pages?.length || 0} page summaries</span></div><div className="page-table">{(report.pages || []).map((page, index) => <a href={`/report?jobId=${encodeURIComponent(jobId)}&page=${index}`} className="page-row" key={`${page.sourceUrl}-${index}`}><span><strong>{page.title || page.sourceUrl}</strong><small>{page.sourceUrl}</small></span><span><b>{page.ada.grade}</b><small>{page.ada.score}/100 · {page.ada.violationsCount} WCAG issues · {page.language.errors} language issues</small></span></a>)}</div></section>
+              {selectedPage && <PageDetail page={selectedPage} />}
               <section className="report-section"><div className="section-title"><h2>Accessibility findings</h2><span>{report.ada?.violationsCount ?? 0} issues on the first page</span></div>{report.ada?.violations?.length ? <ul className="finding-list">{report.ada.violations.map((violation, index) => <li key={`${violation.id}-${index}`}><strong>{violation.help || violation.id || 'Accessibility issue'}</strong><span>{violation.impact || 'review'}</span></li>)}</ul> : <p className="empty-report">No WCAG violations found on the first page.</p>}</section>
             </>
           )}
@@ -135,11 +143,12 @@ const ReportPage: NextPage = () => {
         .metric-label { display: flex; align-items: center; gap: 7px; color: #64748b; font-size: .84rem; font-weight: 800; } .metric-value { display: block; margin-top: 12px; font-size: 2rem; } .metric-detail { color: #64748b; font-size: .78rem; }
         .report-section { margin-top: 34px; } .section-title { justify-content: space-between; gap: 15px; border-bottom: 1px solid #dce3ea; padding-bottom: 11px; } .section-title h2 { font-size: 1.2rem; } .section-title span { color: #64748b; font-size: .83rem; }
         .page-table { border-top: 1px solid #e7edf3; } .page-row { justify-content: space-between; gap: 20px; min-height: 72px; border-bottom: 1px solid #e7edf3; color: #172033; text-decoration: none; } .page-row:hover strong { color: #25635f; } .page-row > span { display: grid; gap: 5px; } .page-row > span:last-child { justify-items: end; text-align: right; } .page-row small { color: #64748b; font-size: .8rem; overflow-wrap: anywhere; } .page-row b { color: #b45309; font-size: 1.15rem; }
+        .page-detail { margin-top: 34px; border: 1px solid #dce3ea; border-radius: 8px; background: #fff; padding: 20px; } .page-detail-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; } .page-detail-heading h2 { margin: 5px 0; } .page-detail-heading p { color: #64748b; overflow-wrap: anywhere; } .page-detail-heading a { display: inline-flex; align-items: center; gap: 6px; color: #25635f; font-weight: 850; text-decoration: none; white-space: nowrap; } .page-preview { margin-top: 20px; border: 1px solid #dce3ea; border-radius: 7px; overflow: hidden; } .page-preview-label { border-bottom: 1px solid #e7edf3; padding: 10px 14px; color: #64748b; font-size: .78rem; font-weight: 850; text-transform: uppercase; } .page-preview-stage { position: relative; min-height: 480px; background: #f8fafc; } .page-preview-frame { display: block; width: 100%; height: 480px; border: 0; background: #fff; } .preview-status, .preview-unavailable { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 10px; padding: 24px; text-align: center; color: #526176; } .preview-unavailable strong { color: #172033; } .preview-unavailable p { max-width: 420px; line-height: 1.5; } .preview-unavailable a { display: inline-flex; align-items: center; gap: 6px; color: #25635f; font-weight: 850; text-decoration: none; } .page-findings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; margin-top: 22px; } .page-findings section { min-width: 0; } .page-findings h3 { margin: 0; font-size: 1rem; } .page-findings ul { list-style: none; margin: 10px 0 0; padding: 0; } .page-findings li { border-top: 1px solid #e7edf3; padding: 10px 0; } .page-findings li strong, .page-findings li small { display: block; } .page-findings li small { margin-top: 4px; color: #64748b; } .page-findings-empty { margin-top: 10px; color: #15803d; font-weight: 750; }
         .finding-list { list-style: none; margin: 0; padding: 0; } .finding-list li { display: flex; justify-content: space-between; gap: 15px; border-bottom: 1px solid #e7edf3; padding: 14px 0; } .finding-list span { color: #9f1239; font-size: .8rem; font-weight: 850; text-transform: uppercase; } .empty-report { color: #15803d; padding: 18px 0; font-weight: 800; }
         .report-loading, .report-error { margin: 80px auto; max-width: 700px; padding: 48px; border: 1px solid #dce3ea; border-radius: 8px; background: #fff; text-align: center; } .report-loading h1, .report-error h1 { font-size: 2rem; } .report-spin { color: #25635f; animation: openada-spin .9s linear infinite; } .report-error p { margin-top: 14px; color: #9f1239; }
         @keyframes openada-spin { to { transform: rotate(360deg); } }
         @media print { .global-header, .global-footer, .report-actions, .scan-picker { display: none !important; } .report-shell { width: 100%; padding: 0; } .report-heading { padding-top: 0; } .report-metrics > div, .report-section { break-inside: avoid; } }
-        @media (max-width: 720px) { .report-shell { width: min(100% - 36px, 1120px); } .report-actions { align-items: flex-start; flex-direction: column; } .report-actions > div { flex-wrap: wrap; } .report-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); } .change-positive, .change-negative { width: 100%; margin-left: 0; } .page-row { align-items: flex-start; flex-direction: column; padding: 14px 0; } .page-row > span:last-child { justify-items: start; text-align: left; } }
+        @media (max-width: 720px) { .report-shell { width: min(100% - 36px, 1120px); } .report-actions { align-items: flex-start; flex-direction: column; } .report-actions > div { flex-wrap: wrap; } .report-metrics, .page-findings { display: grid; grid-template-columns: 1fr; } .change-positive, .change-negative { width: 100%; margin-left: 0; } .page-row, .page-detail-heading { align-items: flex-start; flex-direction: column; padding: 14px 0; } .page-row > span:last-child { justify-items: start; text-align: left; } .page-preview-stage, .page-preview-frame { height: 380px; min-height: 380px; } }
       `}</style>
     </>
   )
@@ -147,6 +156,50 @@ const ReportPage: NextPage = () => {
 
 function Metric({ label, value, detail, icon }: { label: string; value: string; detail: string; icon: ReactNode }) {
   return <div><span className="metric-label">{icon}{label}</span><strong className="metric-value">{value}</strong><small className="metric-detail">{detail}</small></div>
+}
+
+function PageDetail({ page }: { page: NonNullable<Report['pages']>[number] }) {
+  const violations = page.ada.violations || []
+  const languageIssues = page.language.issues || []
+  return <section className="page-detail" aria-labelledby="page-detail-heading">
+    <div className="page-detail-heading"><div><p className="eyebrow">Page detail</p><h2 id="page-detail-heading">{page.title || page.sourceUrl}</h2><p>{page.sourceUrl}</p></div><a href={page.sourceUrl} target="_blank" rel="noreferrer">Open page <ExternalLink size={14} aria-hidden /></a></div>
+    <div className="page-preview"><div className="page-preview-label">Page preview</div><PagePreview url={page.sourceUrl} /></div>
+    <div className="page-findings">
+      <section><h3>ADA findings ({page.ada.violationsCount})</h3>{violations.length ? <ul>{violations.map((finding, index) => <li key={`${finding.id}-${index}`}><strong>{finding.help || finding.id || 'Accessibility issue'}</strong><small>{finding.impact || 'review'}{finding.description ? ` · ${finding.description}` : ''}</small></li>)}</ul> : <p className="page-findings-empty">Detailed findings were not retained for this older scan.</p>}</section>
+      <section><h3>Language findings ({page.language.errors})</h3>{languageIssues.length ? <ul>{languageIssues.map((issue, index) => <li key={`${issue.ruleId}-${index}`}><strong>{issue.message || 'Language issue'}</strong><small>{issue.word || ''}{issue.fix ? ` → ${issue.fix}` : ''}</small></li>)}</ul> : <p className="page-findings-empty">{page.language.errors ? 'Detailed findings were not retained for this older scan.' : 'No language issues found.'}</p>}</section>
+    </div>
+  </section>
+}
+
+function PagePreview({ url }: { url: string }) {
+  const [state, setState] = useState<'loading' | 'ready' | 'blocked'>('loading')
+  const [reason, setReason] = useState('')
+  useEffect(() => {
+    let cancelled = false
+    setState('loading')
+    fetch(`/api/v1/preview?url=${encodeURIComponent(url)}`)
+      .then(async (response) => {
+        const data = await response.json() as { frameable?: boolean; reason?: string | null }
+        if (!response.ok || !data.frameable) throw new Error(data.reason || 'This page does not allow embedded previews.')
+        if (!cancelled) setState('ready')
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setReason(error instanceof Error ? error.message : 'This page does not allow embedded previews.')
+          setState('blocked')
+        }
+      })
+    return () => { cancelled = true }
+  }, [url])
+  return <div className="page-preview-stage">
+    {state === 'ready' && <iframe className="page-preview-frame" src={url} title={`Preview of ${pageTitle(url)}`} loading="lazy" sandbox="allow-scripts allow-same-origin" />}
+    {state === 'loading' && <p className="preview-status" role="status">Checking preview availability…</p>}
+    {state === 'blocked' && <div className="preview-unavailable" role="status"><ShieldCheck size={24} aria-hidden /><strong>Preview unavailable</strong><p>{reason}</p><a href={url} target="_blank" rel="noreferrer">Open page in a new window <ExternalLink size={14} aria-hidden /></a></div>}
+  </div>
+}
+
+function pageTitle(url: string): string {
+  try { return new URL(url).hostname } catch { return 'scanned page' }
 }
 
 export default ReportPage

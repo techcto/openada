@@ -92,7 +92,6 @@ export async function listScanJobs(url: string): Promise<ScanJob[]> {
   }))
 
   return ((result.Items || []) as ScanJob[])
-    .filter((job) => job.isPrivate !== true)
     .sort((left, right) => right.createdAt.localeCompare(left.createdAt))
 }
 

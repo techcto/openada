@@ -38,8 +38,9 @@ function publicResult(result: Awaited<ReturnType<typeof runSiteScan>>): Record<s
         violationsCount: page.ada.violationsCount,
         passesCount: page.ada.passesCount,
         incompleteCount: page.ada.incompleteCount,
+        violations: page.ada.violations,
       },
-      language: { errors: page.language.errors },
+      language: { errors: page.language.errors, issues: page.language.issues },
       directory: page.directory,
     })),
   })
